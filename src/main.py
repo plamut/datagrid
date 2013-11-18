@@ -1,4 +1,4 @@
-from models import Node
+from models.node import Node
 
 
 def init_grid():
