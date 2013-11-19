@@ -7,7 +7,7 @@ class Node(object):
     def __init__(self, name='', capacity=50000, parent=None):
         self._name = name
         self._capacity = capacity  # XXX: check for > 0?
-        self._parent = parent
+        self._parent = parent  # XXX: check for is not self
         self._client_nodes = OrderedDict()
 
     @property
@@ -38,3 +38,8 @@ class Node(object):
         node.parent = self
 
     # add_replica ... and algorithm (if size ...)
+
+
+# TODO: Node2011 (strategy = EFS)
+#       Node2012 (strategy = ...)
+#       Node2013 (strategy = ...)
