@@ -1,10 +1,16 @@
 from models.node import Node
 from models.node import Strategy
 from models.replica import Replica
+from random import randint
+from random import seed
 
 
 class Simulation(object):
     """TODO: docstring"""
+
+    RND_SEED = 1  # XXX configurable?
+    REPLICA_MIN_SIZE = 100  # megabits   XXX: make configurable?
+    REPLICA_MAX_SIZE = 1000  # megabits   XXX: make configurable?
 
     def __init__(
         self, node_capacity=50000, strategy=Strategy.EFS,
@@ -32,16 +38,23 @@ class Simulation(object):
         self._replicas = []
         self._nodes = []
 
+        # TODO: later remove (we have it now for deterministic behavior)
+        seed(self.RND_SEED)
+
         # generate replicas
         for i in range(self._replica_count):
             replica = Replica(
                 name='replica_' + str(i),  # TODO: zero padding
-                size=100,  # TODO: random ... fixed seed optional
+                size=randint(self.REPLICA_MIN_SIZE, self.REPLICA_MAX_SIZE)
             )
             self._replicas.append(replica)
 
-        # TODO: set larger than replica amount
-        server = self._add_node("Server Node", capacity=99999999, parent=None)
+        server = self._add_node(
+            "Server Node",
+            # server's capacity must be big enough to hold all replicas
+            capacity=self._replica_count * self.REPLICA_MAX_SIZE,
+            parent=None
+        )
 
         node_3 = self._add_node(
             "node_3", capacity=self._node_capacity, parent=server)
