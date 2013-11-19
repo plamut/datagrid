@@ -1,28 +1,24 @@
-from enum import IntEnum
-from enum import unique
+from models.node import Node
+from models.node import Strategy
 from models.replica import Replica
-
-
-@unique
-class Strategy(IntEnum):
-    EFS = 1  # Enhanced Fast Spread, used in the 2012 paper
-    s2012 = 2  # TODO
-    s2013 = 3  # TODO
 
 
 class Simulation(object):
     """TODO: docstring"""
 
-    def __init__(node_capacity=50000, strategy=Strategy.EFS,
-        replica_count=1000):
+    def __init__(
+        self, node_capacity=50000, strategy=Strategy.EFS,
+        replica_count=1000
+    ):
         self._node_capacity = node_capacity
         self._strategy = strategy  # TODO: convert to "enum"
 
         self._replica_count = replica_count
+        self._replicas = []
 
         # TODO: replica count, replica sizes
 
-    def init_grid():
+    def init_grid(self):
         """TODO"""
         # XXX: why does the simulation say that the number of nodes is 50,
         # but in the picture there are only 14 (including the server)?
@@ -30,8 +26,8 @@ class Simulation(object):
         # generate replicas
         for i in range(self._replica_count):
             replica = Replica(
-                name = 'replica_' + str(i),  # TODO: zero padding
-                capacity = 100,  # TODO: random ... fixed seed optional
+                name='replica_' + str(i),  # TODO: zero padding
+                size=100,  # TODO: random ... fixed seed optional
             )
             self._replicas.append(replica)
 

@@ -1,4 +1,13 @@
+from collections import namedtuple
 from collections import OrderedDict
+
+
+Strategy = namedtuple('Strategy', [
+    'EFS',  # Enhanced Fast Spread, used in the 2011 paper
+    's2012',  # TODO
+    's2013',  # TODO
+])
+Strategy = Strategy(*range(1, 4))
 
 
 class Node(object):
