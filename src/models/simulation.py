@@ -81,3 +81,8 @@ class Simulation(object):
 
         # TODO: what to return? some Grid object? and Grid.get_server ...
         # or just store all replicas for later access?
+
+    def run():
+        """TODO:"""
+
+        # random node requests a random replica
