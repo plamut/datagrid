@@ -14,7 +14,13 @@ class _ReplicaStats(object):
 class Node(object):
     """A representation of a node (either client or server) in the grid."""
 
-    def __init__(self, name='', capacity=50000, parent=None, replicas=None):
+    def __init__(
+        self, name='', capacity=50000, parent=None, replicas=None, clock=None
+    ):
+        if clock is None:
+            raise ValueError("Clock instance expected, not None.")
+        self._clock = clock
+
         self._name = name
         self._capacity = capacity  # XXX: check for > 0?
         self._free_capacity = capacity
@@ -135,18 +141,18 @@ class Node(object):
         self._replicas.append(Replica(replica.name, replica.size))
         self._free_capacity -= replica.size
 
-        # XXX: NOR - is it 1? Is the time current simulation time?
-        # IDEA: have a global object issuing simulation time ... and
-        # have the method curr_time (in integers ... steps)
-        self._replica_stats.append(_ReplicaStats(0, 0, 0))
+        # XXX: NOR - is it 1?
+        self._replica_stats.append(
+            _ReplicaStats(0, 0, lrt=self._clock.time())
+        )
 
         # XXX: now use decorate-sort-undecorate?
 
     def del_replica_at(self, idx):
         """TODO"""
         replica = self._replicas.pop(idx)
-        self._free_capacity += replica.size
         self._replica_stats.pop(idx)
+        self._free_capacity += replica.size
 
 # Node: store NOR (# of requests) of each replica which resides on it
 # For a given node, the NOR of a replica is increased by one each
