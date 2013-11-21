@@ -1,8 +1,16 @@
+from collections import namedtuple
 from models.node import Node
-from models.node import Strategy
 from models.replica import Replica
 from random import randint
 from random import seed
+
+
+Strategy = namedtuple('Strategy', [
+    'EFS',  # Enhanced Fast Spread, used in the 2011 paper
+    's2012',  # TODO
+    's2013',  # TODO
+])
+Strategy = Strategy(*range(1, 4))
 
 
 class Simulation(object):

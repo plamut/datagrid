@@ -1,15 +1,5 @@
-from collections import namedtuple
 from collections import OrderedDict
 from models.replica import Replica
-
-# TODO: move to __init__.py? shouldn't be in node.py
-# perhaps move to simulation.py?
-Strategy = namedtuple('Strategy', [
-    'EFS',  # Enhanced Fast Spread, used in the 2011 paper
-    's2012',  # TODO
-    's2013',  # TODO
-])
-Strategy = Strategy(*range(1, 4))
 
 
 class _ReplicaStats(object):
@@ -78,6 +68,15 @@ class Node(object):
                 return i
         return -1
 
+    def get_replica(self, replica_name):
+        """Find a replica with a given name and return it. Return None
+        if not found.
+        """
+        for i in range(len(self._replicas)):
+            if self._replicas[i].name == replica_name:
+                return self._replicas[i]
+        return None
+
     def request_replica(self, replica_name):
         """TODO: trigger a request for particular replica"""
         # TODO: implement the algorithm from the paper here ...
@@ -99,18 +98,13 @@ class Node(object):
             node = node.parent
 
         # go up the hierarchy (parent to server)
-        for i in range(1, len(nsplist)):
-            node = nsplist[i]
-            r_idx = node.replica_idx(replica_name)
-            if r_idx < 0:  # RR does not exist on NSPList(i)
+        for i, node in enumerate(nsplist[1:]):
+            replica = node.get_replica(replica_name)
+            if replica is None:  # RR does not exist on NSPList(i)
                 continue
 
-            # RR exists on NSPList(i)
-            replica = self._replicas[r_idx]
-
             # from node where replica is found all the way back down to self
-            for j in range(i - 1, -1, -1):
-                cn_node = nsplist[j]  # "checked node"
+            for cn_node in nsplist[i - 1::-1]:  # "checked node"
                 if cn_node.capacity_free >= replica.size:
                     cn_node.copy_replica(replica)
                     continue
