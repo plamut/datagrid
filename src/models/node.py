@@ -22,10 +22,17 @@ class Node(object):
         self._clock = clock
 
         self._name = name
-        self._capacity = capacity  # XXX: check for > 0?
+
+        if capacity <= 0:
+            raise ValueError("Capacity must be a positive number.")
+        self._capacity = capacity
         self._free_capacity = capacity
-        self._parent = parent  # XXX: check for is not self
+
+        if parent is self:
+            raise ValueError("Node cannot be its own parent.")
+        self._parent = parent  # XXX: check all the way up the hierarchy?
         self._client_nodes = OrderedDict()
+        self._nsp_list = []
 
         self._replicas = []
         if replicas is not None:
@@ -80,23 +87,33 @@ class Node(object):
                 return self._replicas[i]
         return None
 
+    def path_to_server(self, rebuild=False):
+        """TODO: return a list of nodes on the shortest path to the server
+        including the node itself
+        If it does not yet exist or rebuild is forced, it is reconstructed
+        """
+        if rebuild or not self._nsp_list:
+            self._nsp_list = [self]
+            node = self.parent
+            while node is not None:
+                self._nsp_list.append(node)
+                node = node.parent
+
+        return self._nsp_list.copy()
+
     def request_replica(self, replica_name):
         """TODO: trigger a request for particular replica"""
         r_idx = self.replica_idx(replica_name)
         if r_idx >= 0:
             self._replica_stats[r_idx].nor += 1
-            self.lrt = 42  # TODO: current simulation time
-              # TODO: USE_REPLICA ... increase NOR count etc.
+            self.lrt = self._clock.time()
+            # TODO: USE_REPLICA ... increase NOR count etc.
             return
 
-        # build a list of node parents (XXX: don't compute every time)
-        nsplist = [self]  # nodes on the shortest path from here to server
-        node = self.parent
-        while node is not None:
-            nsplist.append(node)
-            node = node.parent
+        # nodes on the shortest path from here to server
+        nsplist = self.path_to_server()
 
-        # go up the hierarchy (parent to server)
+        # go up the hierarchy to the server
         for i, node in enumerate(nsplist[1:]):
             replica = node.get_replica(replica_name)
             if replica is None:  # RR does not exist on NSPList(i)
