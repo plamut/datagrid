@@ -21,12 +21,10 @@ class Node(object):
         self._parent = parent  # XXX: check for is not self
         self._client_nodes = OrderedDict()
 
-        # XXX: check for total replica capacity?
-        # TODO: update self._free capacity! (use copy replica)
-        self._replicas = replicas if replicas is not None else []
-
-        # we keep some stats for each replica
-        self._replica_stats = [_ReplicaStats() for r in self._replicas]
+        self._replicas = []
+        if replicas is not None:
+            for rep in replicas:
+                self.copy_replica(rep)
 
     @property
     def name(self):
@@ -46,7 +44,6 @@ class Node(object):
 
     @parent.setter
     def parent(self, value):
-        # TODO:
         self._parent = value
 
     @property
@@ -79,10 +76,6 @@ class Node(object):
 
     def request_replica(self, replica_name):
         """TODO: trigger a request for particular replica"""
-        # TODO: implement the algorithm from the paper here ...
-
-        sos = 0
-
         r_idx = self.replica_idx(replica_name)
         if r_idx >= 0:
             self._replica_stats[r_idx].nor += 1
@@ -112,7 +105,8 @@ class Node(object):
                 # not enough space to copy replica, perhaps need to replace
                 # some of the existing replicas
                 # XXX: _replicas should be sorted based on RV!
-                 # XXX: accessing "private" attribute
+                # XXX: accessing "private" attribute
+                sos = 0  # sum of sizes
                 for x, rep in enumerate(cn_node._replicas):
                     if sos + cn_node.capacity_free < replica.size:
                         sos += rep.size
@@ -131,8 +125,6 @@ class Node(object):
                     # no point in searching the replica further up the
                     # hierarchy once it has been found?
 
-        # if replica_name exists
-
     def copy_replica(self, replica):
         """Store a local copy of the given replica."""
         # XXX: raise error if not enough space available
@@ -141,6 +133,7 @@ class Node(object):
                 "Cannot store a copy of replica, not enough free capacity.")
 
         self._replicas.append(Replica(replica.name, replica.size))
+        self._free_capacity -= replica.size
 
         # XXX: NOR - is it 1? Is the time current simulation time?
         # IDEA: have a global object issuing simulation time ... and
