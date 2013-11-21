@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from models.replica import Replica
+from copy import deepcopy
 
 
 class _ReplicaStats(object):
@@ -34,7 +34,8 @@ class Node(object):
         self._client_nodes = OrderedDict()
         self._nsp_list = []
 
-        self._replicas = []
+        self._replicas = OrderedDict()
+        self._replica_stats = OrderedDict()
         if replicas is not None:
             for rep in replicas:
                 self.copy_replica(rep)
@@ -79,13 +80,10 @@ class Node(object):
         return -1
 
     def get_replica(self, replica_name):
-        """Find a replica with a given name and return it. Return None
-        if not found.
+        """Return replica with the given name or None if replica does not
+        exist on the node.
         """
-        for i in range(len(self._replicas)):
-            if self._replicas[i].name == replica_name:
-                return self._replicas[i]
-        return None
+        return self._replicas.get(replica_name)
 
     def path_to_server(self, rebuild=False):
         """TODO: return a list of nodes on the shortest path to the server
@@ -99,7 +97,7 @@ class Node(object):
                 self._nsp_list.append(node)
                 node = node.parent
 
-        return self._nsp_list.copy()
+        return self._nsp_list
 
     def request_replica(self, replica_name):
         """TODO: trigger a request for particular replica"""
@@ -111,28 +109,30 @@ class Node(object):
             return
 
         # nodes on the shortest path from here to server
-        nsplist = self.path_to_server()
+        nsp_list = self.path_to_server()
 
         # go up the hierarchy to the server
-        for i, node in enumerate(nsplist[1:]):
-            replica = node.get_replica(replica_name)
-            if replica is None:  # RR does not exist on NSPList(i)
+        for i, node in enumerate(nsp_list[1:]):
+            req_replica = node.get_replica(replica_name)  # requested replica
+            if req_replica is None:  # RR does not exist on NSPList(i)
                 continue
 
             # from node where replica is found all the way back down to self
-            for cn_node in nsplist[i - 1::-1]:  # "checked node"
-                if cn_node.capacity_free >= replica.size:
-                    cn_node.copy_replica(replica)
+            for cn_node in nsp_list[i - 1::-1]:  # "checked node"
+                if cn_node.capacity_free >= req_replica.size:
+                    cn_node.copy_replica(req_replica)
                     continue
 
-                # not enough space to copy replica, perhaps need to replace
-                # some of the existing replicas
+                # else: not enough space to copy replica, might replace some
+                # of the existing replicas
                 # XXX: _replicas should be sorted based on RV!
                 # XXX: accessing "private" attribute
                 sos = 0  # sum of sizes
+                marked_replicas = []  # visited and marked for deletion
                 for x, rep in enumerate(cn_node._replicas):
-                    if sos + cn_node.capacity_free < replica.size:
+                    if sos + cn_node.capacity_free < req_replica.size:
                         sos += rep.size
+                        marked_replicas.append(rep)
                     else:
                         break
 
@@ -141,9 +141,9 @@ class Node(object):
 
                 if GV < RV_rr:
                     # delete all replicas needed to free enough space
-                    for y in range(0, x):
-                        cn_node.del_replica_at(y)
-                    cn_node.copy_replica(replica)
+                    for mr in marked_replicas:
+                        cn_node.delete_replica(mr.name)
+                    cn_node.copy_replica(req_replica)
             break  # TODO: not in a paper but should be here
                     # no point in searching the replica further up the
                     # hierarchy once it has been found?
@@ -155,20 +155,19 @@ class Node(object):
             raise ValueError(
                 "Cannot store a copy of replica, not enough free capacity.")
 
-        self._replicas.append(Replica(replica.name, replica.size))
+        self._replicas[replica.name] = deepcopy(replica)
         self._free_capacity -= replica.size
 
         # XXX: NOR - is it 1?
-        self._replica_stats.append(
-            _ReplicaStats(0, 0, lrt=self._clock.time())
-        )
+        self._replica_stats[replica.name] = \
+            _ReplicaStats(nor=0, nor_fsti=0, lrt=self._clock.time())
 
-        # XXX: now use decorate-sort-undecorate?
+        # XXX: now use decorate-sort-undecorate? for sorting by replica value?
 
-    def del_replica_at(self, idx):
+    def delete_replica(self, replica_name):
         """TODO"""
-        replica = self._replicas.pop(idx)
-        self._replica_stats.pop(idx)
+        replica = self._replicas.pop(replica_name)
+        self._replica_stats.pop(replica_name)
         self._free_capacity += replica.size
 
 # Node: store NOR (# of requests) of each replica which resides on it
