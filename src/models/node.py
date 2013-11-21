@@ -144,7 +144,8 @@ class Node(object):
 
     def del_replica_at(self, idx):
         """TODO"""
-        self._replicas.pop(idx)
+        replica = self._replicas.pop(idx)
+        self._free_capacity += replica.size
         self._replica_stats.pop(idx)
 
 # Node: store NOR (# of requests) of each replica which resides on it
