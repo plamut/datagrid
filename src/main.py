@@ -1,4 +1,4 @@
-from models.node import Strategy
+from models.simulation import Strategy
 from models.simulation import Simulation
 
 

@@ -84,7 +84,7 @@ class Simulation(object):
             "Server Node",
             # server's capacity must be big enough to hold all replicas
             capacity=self._replica_count * self.REPLICA_MAX_SIZE,
-            parent=None
+            parent=None, clock=self._clock
         )
 
         node_3 = self._add_node(
