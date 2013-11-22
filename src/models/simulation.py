@@ -26,6 +26,7 @@ class Clock(object):
     def reset(self):
         self._time = 0
 
+    # XXX: add step parameter? for advancing for more than one unit?
     def tick(self):
         self._time += 1
 

@@ -99,14 +99,82 @@ class Node(object):
 
         return self._nsp_list
 
+    def _GV(self, replicas):
+        """Calculate group value of the given list of replicas."""
+        GV = (
+            "sum(marked_replicas' NORs) / sum(marked_replicas's sizes"
+            "+ sum(marked_replicas NORFSTI values) / FSTI"
+            "+ 1 / (CT - sum(marked_repl's LRT) / x)")
+
+        # sum(self._replica_stats[r.name].nor for r in marked_replicas) /
+        # sum()
+
+    def _RV_rr(replica):
+        """Calculate value of the given replica."""
+        # sum(c.A for c in c_list)
+        RV_rr = "NOR_RR/Size_RR + NOR_RR_FSTI/FSTI + 1/(CT-LRT_RR)"
+
+    def store_if_valuable(self, req_replica):
+        # TODO: rename req_replica --> replica
+        """Store a local copy of the given replica if valuable enough.
+
+        If the current free capacity is big enough, a local copy of `replica`
+        is stored. Otherwise its replica value is calculated and if it is
+        greater than the value of some group of replicas, that group of
+        replicas is deleted to make enough free space for the local copy of
+        `replica`.
+        """
+        # XXX: perhaps rename copy_replica (or retain the name for easier
+        # comparison with the pseudocode in the paper)
+
+        # TODO: notify simulation machinery about this? sim.increase_count
+        # actually wrap everything into a sim object ... e.g. sim.clock.time
+        # (or sim.time) - simulation should provide an API to the simulated
+        # entities
+
+        if self.capacity_free >= req_replica.size:
+            self.copy_replica(req_replica)
+            return  # nothing more to do
+
+        # else: not enough space to copy replica, might replace some
+        # of the existing replicas
+        # XXX: _replicas should be sorted based on RV!
+        # XXX: accessing "private" attribute
+
+        sos = 0  # sum of sizes
+        marked_replicas = []  # visited and marked for deletion
+        for x, rep in enumerate(self._replicas):
+            if sos + self.capacity_free < req_replica.size:
+                sos += rep.size
+                marked_replicas.append(rep)
+            else:
+                break
+
+        # x: index of the first replica *excluded* from the group of
+        # replicas that would make enough free space for req. replica
+        # in case this group is deleted. - TODO: needed? we have
+        # a list of "makred" replicas for that
+        GV = self._GV(marked_replicas)
+        RV_rr = self._RV_rr(marked_replicas)
+
+        if GV < RV_rr:
+            # delete all replicas needed to free enough space
+            for mr in marked_replicas:
+                self.delete_replica(mr.name)
+            self.copy_replica(req_replica)
+
     def request_replica(self, replica_name):
         """TODO: trigger a request for particular replica"""
-        r_idx = self.replica_idx(replica_name)
-        if r_idx >= 0:
-            self._replica_stats[r_idx].nor += 1
-            self.lrt = self._clock.time()
-            # TODO: USE_REPLICA ... increase NOR count etc.
+        replica = self.get_replica(replica_name)
+        if replica is not None:
+            # ... use RR ... ---> XXX: refactor to a method?
+            rep_stats = self._replica_stats[replica.name]
+            rep_stats.nor += 1
+            rep_stats.lrt = self._clock.time()
+            # TODO: NOR_FSTI update
             return
+
+        # else: replica does not exist on the node ..
 
         # nodes on the shortest path from here to server
         nsp_list = self.path_to_server()
@@ -114,39 +182,15 @@ class Node(object):
         # go up the hierarchy to the server
         for i, node in enumerate(nsp_list[1:]):
             req_replica = node.get_replica(replica_name)  # requested replica
-            if req_replica is None:  # RR does not exist on NSPList(i)
-                continue
+            if req_replica is not None:  # RR exists on NSPList(i)
+                # from node where replica is found all the way
+                # back down to self
+                for cn_node in nsp_list[i - 1::-1]:  # "checked node"
+                    cn_node.store_if_valuable(req_replica)
 
-            # from node where replica is found all the way back down to self
-            for cn_node in nsp_list[i - 1::-1]:  # "checked node"
-                if cn_node.capacity_free >= req_replica.size:
-                    cn_node.copy_replica(req_replica)
-                    continue
-
-                # else: not enough space to copy replica, might replace some
-                # of the existing replicas
-                # XXX: _replicas should be sorted based on RV!
-                # XXX: accessing "private" attribute
-                sos = 0  # sum of sizes
-                marked_replicas = []  # visited and marked for deletion
-                for x, rep in enumerate(cn_node._replicas):
-                    if sos + cn_node.capacity_free < req_replica.size:
-                        sos += rep.size
-                        marked_replicas.append(rep)
-                    else:
-                        break
-
-                GV = "TODO"
-                RV_rr = "TODO 2"
-
-                if GV < RV_rr:
-                    # delete all replicas needed to free enough space
-                    for mr in marked_replicas:
-                        cn_node.delete_replica(mr.name)
-                    cn_node.copy_replica(req_replica)
-            break  # TODO: not in a paper but should be here
-                    # no point in searching the replica further up the
-                    # hierarchy once it has been found?
+                break  # TODO: not in a paper but should be here
+                        # no point in searching the replica further up the
+                        # hierarchy once it has been found?
 
     def copy_replica(self, replica):
         """Store a local copy of the given replica."""
