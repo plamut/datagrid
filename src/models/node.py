@@ -106,8 +106,25 @@ class Node(object):
             "+ sum(marked_replicas NORFSTI values) / FSTI"
             "+ 1 / (CT - sum(marked_repl's LRT) / x)")
 
-        # sum(self._replica_stats[r.name].nor for r in marked_replicas) /
-        # sum()
+        s_nor = 0  # sum of NORs
+        s_size = 0  # sum of replica sizes
+        s_nor_fsti = 0  # sum of replicas' nor_fsti values
+        s_lrt = 0  # sum of replicas' LRT times
+
+        for r in replicas:
+            stats = self._replica_stats[r.name]
+            s_size += r.size
+            s_nor += stats.nor
+            s_nor_fsti += stats.nor_fsti
+            s_lrt += stats[r.name].lrt
+
+        fsti = 1234   # TODO: part of simulation object! self._sim.fsti
+        ct = self._sim.time  # current simulation time
+
+        gv = s_nor / s_size + s_nor_fsti / fsti +
+            1 / (ct - s_lrt / len(replicas))
+
+        return gv
 
     def _RV_rr(replica):
         """Calculate value of the given replica."""
@@ -139,8 +156,6 @@ class Node(object):
         # else: not enough space to copy replica, might replace some
         # of the existing replicas
         # XXX: _replicas should be sorted based on RV!
-        # XXX: accessing "private" attribute
-
         sos = 0  # sum of sizes
         marked_replicas = []  # visited and marked for deletion
         for x, rep in enumerate(self._replicas):
