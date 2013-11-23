@@ -15,11 +15,11 @@ class Node(object):
     """A representation of a node (either client or server) in the grid."""
 
     def __init__(
-        self, name='', capacity=50000, parent=None, replicas=None, clock=None
+        self, name='', capacity=50000, parent=None, replicas=None, sim=None
     ):
-        if clock is None:
-            raise ValueError("Clock instance expected, not None.")
-        self._clock = clock
+        if sim is None:
+            raise ValueError("Simulation object instance expected, not None.")
+        self._sim = sim
 
         self._name = name
 
@@ -101,11 +101,6 @@ class Node(object):
 
     def _GV(self, replicas):
         """Calculate group value of the given list of replicas."""
-        GV = (
-            "sum(marked_replicas' NORs) / sum(marked_replicas's sizes"
-            "+ sum(marked_replicas NORFSTI values) / FSTI"
-            "+ 1 / (CT - sum(marked_repl's LRT) / x)")
-
         s_nor = 0  # sum of NORs
         s_size = 0  # sum of replica sizes
         s_nor_fsti = 0  # sum of replicas' nor_fsti values
@@ -121,7 +116,7 @@ class Node(object):
         fsti = 1234   # TODO: part of simulation object! self._sim.fsti
         ct = self._sim.time  # current simulation time
 
-        gv = s_nor / s_size + s_nor_fsti / fsti +
+        gv = s_nor / s_size + s_nor_fsti / fsti + \
             1 / (ct - s_lrt / len(replicas))
 
         return gv
@@ -185,7 +180,7 @@ class Node(object):
             # ... use RR ... ---> XXX: refactor to a method?
             rep_stats = self._replica_stats[replica.name]
             rep_stats.nor += 1
-            rep_stats.lrt = self._clock.time()
+            rep_stats.lrt = self._sim.time
             # TODO: NOR_FSTI update
             return
 
@@ -219,7 +214,7 @@ class Node(object):
 
         # XXX: NOR - is it 1?
         self._replica_stats[replica.name] = \
-            _ReplicaStats(nor=0, nor_fsti=0, lrt=self._clock.time())
+            _ReplicaStats(nor=0, nor_fsti=0, lrt=self._sim.time)
 
         # XXX: now use decorate-sort-undecorate? for sorting by replica value?
 

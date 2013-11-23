@@ -13,7 +13,7 @@ Strategy = namedtuple('Strategy', [
 Strategy = Strategy(*range(1, 4))
 
 
-class Clock(object):
+class _Clock(object):
     """Representation of a simulation clock."""
 
     def __init__(self):
@@ -50,7 +50,7 @@ class Simulation(object):
         self._replicas = []
         self._nodes = []
 
-        self._clock = Clock()
+        self._clock = _Clock()
 
         # TODO: replica count, replica sizes
 
@@ -59,6 +59,10 @@ class Simulation(object):
         node = Node(*args, **kwargs)
         self._nodes.append(node)
         return node
+
+    @property
+    def time(self):
+        return self._clock.time
 
     def init_grid(self):
         """TODO"""
@@ -84,51 +88,51 @@ class Simulation(object):
             "Server Node",
             # server's capacity must be big enough to hold all replicas
             capacity=self._replica_count * self.REPLICA_MAX_SIZE,
-            parent=None, clock=self._clock
+            parent=None, sim=self
         )
 
         node_3 = self._add_node(
             "node_3", capacity=self._node_capacity, parent=server,
-            clock=self._clock)
+            sim=self)
         self._add_node(
             "node_1", capacity=self._node_capacity, parent=node_3,
-            clock=self._clock)
+            sim=self)
         self._add_node(
             "node_2", capacity=self._node_capacity, parent=node_3,
-            clock=self._clock)
+            sim=self)
 
         self._add_node(
             "node_5", capacity=self._node_capacity, parent=server,
-            clock=self._clock)
+            sim=self)
         node_4 = self._add_node(
             "node_4", capacity=self._node_capacity, parent=server,
-            clock=self._clock)
+            sim=self)
         self._add_node(
             "node_6", capacity=self._node_capacity, parent=node_4,
-            clock=self._clock)
+            sim=self)
 
         node_7 = self._add_node(
             "node_7", capacity=self._node_capacity, parent=server,
-            clock=self._clock)
+            sim=self)
         node_9 = self._add_node(
             "node_9", capacity=self._node_capacity, parent=node_7,
-            clock=self._clock)
+            sim=self)
         self._add_node(
             "node_12", capacity=self._node_capacity, parent=node_9,
-            clock=self._clock)
+            sim=self)
 
         node_8 = self._add_node(
             "node_8", capacity=self._node_capacity, parent=server,
-            clock=self._clock)
+            sim=self)
         self._add_node(
             "node_10", capacity=self._node_capacity, parent=node_8,
-            clock=self._clock)
+            sim=self)
         node_11 = self._add_node(
             "node_11", capacity=self._node_capacity, parent=node_8,
-            clock=self._clock)
+            sim=self)
         self._add_node(
             "node_13", capacity=self._node_capacity, parent=node_11,
-            clock=self._clock)
+            sim=self)
 
         # TODO: what to return? some Grid object? and Grid.get_server ...
         # or just store all replicas for later access?
