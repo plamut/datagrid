@@ -19,6 +19,9 @@ class Node(object):
     ):
         if sim is None:
             raise ValueError("Simulation object instance expected, not None.")
+        # XXX: instead of "full" simulation object pass an adapter with
+        # a limited interface? (it doesn't make sense for the Node to call,
+        # e.g, sim.init_grid())
         self._sim = sim
 
         self._name = name
@@ -123,8 +126,15 @@ class Node(object):
 
     def _RV_rr(replica):
         """Calculate value of the given replica."""
-        # sum(c.A for c in c_list)
-        RV_rr = "NOR_RR/Size_RR + NOR_RR_FSTI/FSTI + 1/(CT-LRT_RR)"
+        fsti = 1234   # TODO: part of simulation object! self._sim.fsti
+        ct = self._sim.time  # current simulation time
+
+        stats = self._replica_stats[replica.name]
+
+        rv = stats.nor / replica.size + stats.nor_fsti / fsti +
+            1 / (ct - stats.lrt)
+
+        return rv
 
     def store_if_valuable(self, req_replica):
         # TODO: rename req_replica --> replica
