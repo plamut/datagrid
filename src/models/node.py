@@ -68,19 +68,10 @@ class Node(object):
         return self._parent is None
 
     def add_client_node(self, node):
-        # TODO: implement as a collection? e.g. self[] = node?
+        # XXX: implement as a collection? e.g. self[] = node?
         # overrdie __setitem__ and __getitem__ and __delitem__
         self._client_nodes[node.name] = node
         node.parent = self
-
-    def replica_idx(self, replica_name):
-        """Find an index of replica_name in self._replicas list.
-           Return -1 if replica does not exist.
-        """
-        for i in range(len(self._replicas)):
-            if self._replicas[i].name == replica_name:
-                return i
-        return -1
 
     def get_replica(self, replica_name):
         """Return replica with the given name or None if replica does not
@@ -104,6 +95,10 @@ class Node(object):
 
     def _GV(self, replicas):
         """Calculate group value of the given list of replicas."""
+
+        if not replicas:
+            return 0.0  # empty gorup has a vaue of zero
+
         s_nor = 0  # sum of NORs
         s_size = 0  # sum of replica sizes
         s_nor_fsti = 0  # sum of replicas' nor_fsti values
@@ -124,7 +119,7 @@ class Node(object):
 
         return gv
 
-    def _RV_rr(replica):
+    def _RV(replica):
         """Calculate value of the given replica."""
         fsti = 1234   # TODO: part of simulation object! self._sim.fsti
         ct = self._sim.time  # current simulation time
@@ -136,8 +131,7 @@ class Node(object):
 
         return rv
 
-    def store_if_valuable(self, req_replica):
-        # TODO: rename req_replica --> replica
+    def store_if_valuable(self, replica):
         """Store a local copy of the given replica if valuable enough.
 
         If the current free capacity is big enough, a local copy of `replica`
@@ -154,8 +148,8 @@ class Node(object):
         # (or sim.time) - simulation should provide an API to the simulated
         # entities
 
-        if self.capacity_free >= req_replica.size:
-            self.copy_replica(req_replica)
+        if self.capacity_free >= replica.size:
+            self.copy_replica(replica)
             return  # nothing more to do
 
         # else: not enough space to copy replica, might replace some
@@ -164,7 +158,7 @@ class Node(object):
         sos = 0  # sum of sizes
         marked_replicas = []  # visited and marked for deletion
         for x, rep in enumerate(self._replicas):
-            if sos + self.capacity_free < req_replica.size:
+            if sos + self.capacity_free < replica.size:
                 sos += rep.size
                 marked_replicas.append(rep)
             else:
@@ -174,17 +168,17 @@ class Node(object):
         # replicas that would make enough free space for req. replica
         # in case this group is deleted. - TODO: needed? we have
         # a list of "makred" replicas for that
-        GV = self._GV(marked_replicas)
-        RV_rr = self._RV_rr(marked_replicas)
+        gv = self._GV(marked_replicas)
+        rv = self._RV(replica)
 
-        if GV < RV_rr:
+        if gv < rv:
             # delete all replicas needed to free enough space
             for mr in marked_replicas:
                 self.delete_replica(mr.name)
-            self.copy_replica(req_replica)
+            self.copy_replica(replica)
 
     def request_replica(self, replica_name):
-        """TODO: trigger a request for particular replica"""
+        """TODO: trigger a request for a particular replica"""
         replica = self.get_replica(replica_name)
         if replica is not None:
             # ... use RR ... ---> XXX: refactor to a method?
@@ -201,16 +195,18 @@ class Node(object):
 
         # go up the hierarchy to the server
         for i, node in enumerate(nsp_list[1:]):
-            req_replica = node.get_replica(replica_name)  # requested replica
-            if req_replica is not None:  # RR exists on NSPList(i)
+            replica = node.get_replica(replica_name)  # requested replica
+            if replica is not None:  # RR exists on NSPList(i)
                 # from node where replica is found all the way
                 # back down to self
                 for cn_node in nsp_list[i - 1::-1]:  # "checked node"
-                    cn_node.store_if_valuable(req_replica)
+                    cn_node.store_if_valuable(replica)
 
                 break  # TODO: not in a paper but should be here
                         # no point in searching the replica further up the
                         # hierarchy once it has been found?
+
+        # TODO: useReplica now that it has been copied here
 
     def copy_replica(self, replica):
         """Store a local copy of the given replica."""

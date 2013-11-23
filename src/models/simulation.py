@@ -141,5 +141,6 @@ class Simulation(object):
         """TODO:"""
 
         for i in range(self.TOTAL_REQUESTS):
-            # random node requests a random replica
             self._clock.tick()
+
+            # random node requests a random replica
