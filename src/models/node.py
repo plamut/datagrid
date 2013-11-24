@@ -37,7 +37,7 @@ class Node(object):
         self._client_nodes = OrderedDict()
         self._nsp_list = []
 
-        self._replicas = OrderedDict()
+        self._replicas = OrderedDict()  # replicas sorted by their value ASC
         self._replica_stats = OrderedDict()
         if replicas is not None:
             for rep in replicas:
@@ -119,14 +119,14 @@ class Node(object):
 
         return gv
 
-    def _RV(replica):
+    def _RV(self, replica):
         """Calculate value of the given replica."""
         fsti = 1234   # TODO: part of simulation object! self._sim.fsti
         ct = self._sim.time  # current simulation time
 
         stats = self._replica_stats[replica.name]
 
-        rv = stats.nor / replica.size + stats.nor_fsti / fsti +
+        rv = stats.nor / replica.size + stats.nor_fsti / fsti + \
             1 / (ct - stats.lrt)
 
         return rv
@@ -154,7 +154,7 @@ class Node(object):
 
         # else: not enough space to copy replica, might replace some
         # of the existing replicas
-        # XXX: _replicas should be sorted based on RV!
+
         sos = 0  # sum of sizes
         marked_replicas = []  # visited and marked for deletion
         for x, rep in enumerate(self._replicas):
@@ -206,7 +206,7 @@ class Node(object):
                         # no point in searching the replica further up the
                         # hierarchy once it has been found?
 
-        # TODO: useReplica now that it has been copied here
+        # TODO: useReplica now that it has been copied here ... to update stats
 
     def copy_replica(self, replica):
         """Store a local copy of the given replica."""
@@ -218,11 +218,14 @@ class Node(object):
         self._replicas[replica.name] = deepcopy(replica)
         self._free_capacity -= replica.size
 
-        # XXX: NOR - is it 1?
-        self._replica_stats[replica.name] = \
-            _ReplicaStats(nor=0, nor_fsti=0, lrt=self._sim.time)
+        # initialize with default stats - the latter need to be updated
+        # separately (in case this is needed)
+        self._replica_stats[replica.name] = _ReplicaStats()
 
-        # XXX: now use decorate-sort-undecorate? for sorting by replica value?
+        # re-create dictionary ordered by replica value (lowest first)
+        self._replicas = OrderedDict(
+            sorted(self._replicas.items(), key=lambda item: self._RV(item[1]))
+        )
 
     def delete_replica(self, replica_name):
         """TODO"""
