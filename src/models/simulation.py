@@ -4,6 +4,7 @@ from models.node import Node
 from models.replica import Replica
 from random import randint
 from random import seed
+from types import SimpleNamespace
 
 import itertools
 
@@ -34,6 +35,8 @@ class _Clock(object):
         self._time += 1
 
 
+# XXX: provide a SimulationView for Node objects? A "readonly view" of the
+# sim object for nodes to use
 class Simulation(object):
     """TODO: docstring"""
 
@@ -124,6 +127,42 @@ class Simulation(object):
             )
             self._replicas[replica.name] = replica
 
+    def _shortest_paths(self):
+        """Find shortest paths from server node to all other nodes."""
+        node_info = OrderedDict()
+
+        # initialize all distances to infinity, all nodes as not visited and
+        # all previous nodes on shortest paths as non-existing
+        for name in self._nodes:
+            node_info[name] = SimpleNamespace(
+                dist=float('inf'), visited=False, previous=None)
+
+        q = dict()  # a set of nodes still to examine
+        source = self.SERVER_NAME
+
+        node_info[source].dist = 0
+        q[source] = node_info[source].dist
+        # XXX: dict values redundant, we read dist. elsewehere
+
+        while q:
+            # find: node in q with smallest distance (and has not been
+            # visited) and remove it from the list
+            # XXX: use heap for efficiency? (just if it runs too slow)
+            u = min(q, key=lambda node: node_info[node].dist)
+            del q[u]
+            node_info[u].visited = True
+
+            for v, dist_u_v in self._edges[u].items():  # all neighbors of u
+                alt = node_info[u].dist + dist_u_v
+                if alt < node_info[v].dist and not node_info[v].visited:
+                    node_info[v].dist = alt
+                    node_info[v].previous = u
+                    # XXX: redundant value..just add v to q and that's it
+                    q[v] = node_info[v].dist
+
+        # TODO: now backtrace node.previous and construct shortest paths
+        # (for every node) .. then return this (as a list for every node)
+
     def initialize(self):
         """TODO"""
         # XXX: why does the simulation say that the number of nodes is 50,
@@ -141,7 +180,8 @@ class Simulation(object):
         # calculate shortest paths from server node to all other nodes
         # and update each the latter with a shortest path to server node
 
-        # TODO
+        result = self._shortest_paths()
+        print(result)  # TODO
 
     def run(self):
         """TODO:"""
