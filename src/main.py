@@ -15,7 +15,7 @@ def main():
     # XXX: have the main simulation code in a special class?
     sim = Simulation(**sim_settings)
 
-    sim.init_grid()
+    sim.initialize()
 
 
     # run simulation
