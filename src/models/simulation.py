@@ -137,11 +137,11 @@ class Simulation(object):
             node_info[name] = SimpleNamespace(
                 dist=float('inf'), visited=False, previous=None)
 
-        q = dict()  # a set of nodes still to examine
+        q = set()  # a set of nodes still to examine
         source = self.SERVER_NAME
 
         node_info[source].dist = 0
-        q[source] = node_info[source].dist
+        q.add(source)
         # XXX: dict values redundant, we read dist. elsewehere
 
         while q:
@@ -149,7 +149,7 @@ class Simulation(object):
             # visited) and remove it from the list
             # XXX: use heap for efficiency? (just if it runs too slow)
             u = min(q, key=lambda node: node_info[node].dist)
-            del q[u]
+            q.remove(u)
             node_info[u].visited = True
 
             for v, dist_u_v in self._edges[u].items():  # all neighbors of u
@@ -157,8 +157,7 @@ class Simulation(object):
                 if alt < node_info[v].dist and not node_info[v].visited:
                     node_info[v].dist = alt
                     node_info[v].previous = u
-                    # XXX: redundant value..just add v to q and that's it
-                    q[v] = node_info[v].dist
+                    q.add(v)
 
         # TODO: now backtrace node.previous and construct shortest paths
         # (for every node) .. then return this (as a list for every node)
