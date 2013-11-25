@@ -31,8 +31,10 @@ class _Clock(object):
         self._time = 0
 
     # XXX: add step parameter? for advancing for more than one unit?
-    def tick(self):
-        self._time += 1
+    def tick(self, step=1):
+        if step < 1:
+            raise ValueError("Clock step must be positive.")
+        self._time += int(step)
 
 
 # XXX: provide a SimulationView for Node objects? A "readonly view" of the
@@ -128,7 +130,10 @@ class Simulation(object):
             self._replicas[replica.name] = replica
 
     def _shortest_paths(self):
-        """Find shortest paths from server node to all other nodes."""
+        """Find shortest paths from server node to all other nodes.
+
+        TODO: describe return value
+        """
         node_info = OrderedDict()
 
         # initialize all distances to infinity, all nodes as not visited and
@@ -142,7 +147,6 @@ class Simulation(object):
 
         node_info[source].dist = 0
         q.add(source)
-        # XXX: dict values redundant, we read dist. elsewehere
 
         while q:
             # find: node in q with smallest distance (and has not been
@@ -159,8 +163,15 @@ class Simulation(object):
                     node_info[v].previous = u
                     q.add(v)
 
+        return node_info
         # TODO: now backtrace node.previous and construct shortest paths
         # (for every node) .. then return this (as a list for every node)
+
+    def nsp_path(self, node):
+        """Return a list of node names on the shortest path from 'node' to
+        server node.
+        """
+        return self._nsp_paths[node.name]
 
     def initialize(self):
         """TODO"""
@@ -176,16 +187,27 @@ class Simulation(object):
         self._generate_nodes()
         self._generate_edges()
 
-        # calculate shortest paths from server node to all other nodes
-        # and update each the latter with a shortest path to server node
+        # calculate shortest paths from server node to all the other nodes
+        # and update each of the latter with a relevant path
+        node_info = self._shortest_paths()
+        for name, info in node_info.items():
+            shortest_path = [name]
+            previous = info.previous
+            while previous is not None:
+                shortest_path.append(previous)
+                previous = node_info[previous].previous
+            self._nodes[name].update_nsp_path(shortest_path)
+            # print("Path for node {}:".format(name), shortest_path)
 
-        result = self._shortest_paths()
-        print(result)  # TODO
+        # print('EDGES:', self._edges, '\n')
+        # print('PATHS', node_info, '\n')
 
     def run(self):
         """TODO:"""
 
         for i in range(self.TOTAL_REQUESTS):
+            # random time from 0 to 99 (params), advance clock,
+            # generate event (node requests a replica)
             self._clock.tick()
 
             # random node requests a random replica

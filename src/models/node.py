@@ -35,7 +35,7 @@ class Node(object):
             raise ValueError("Node cannot be its own parent.")
         self._parent = parent  # XXX: check all the way up the hierarchy?
         self._client_nodes = OrderedDict()
-        self._nsp_list = []
+        self._nsp_list = []  # node shortest path list to the server
 
         self._replicas = OrderedDict()  # replicas sorted by their value ASC
         self._replica_stats = OrderedDict()
@@ -67,31 +67,19 @@ class Node(object):
     def is_server(self):
         return self._parent is None
 
-    def add_client_node(self, node):
-        # XXX: implement as a collection? e.g. self[] = node?
-        # overrdie __setitem__ and __getitem__ and __delitem__
-        self._client_nodes[node.name] = node
-        node.parent = self
+    def update_nsp_path(self, nsp_list):
+        """TODO: docstring"""
+        # XXX: make node to read the path from the _sim object?
+        # makes sense, since note will obtain nsp_path from the _sim,
+        # meaning less potential errors (e.g. providing an invalid list
+        # by some other object)
+        self._nsp_list = nsp_list
 
     def get_replica(self, replica_name):
         """Return replica with the given name or None if replica does not
         exist on the node.
         """
         return self._replicas.get(replica_name)
-
-    def path_to_server(self, rebuild=False):
-        """TODO: return a list of nodes on the shortest path to the server
-        including the node itself
-        If it does not yet exist or rebuild is forced, it is reconstructed
-        """
-        if rebuild or not self._nsp_list:
-            self._nsp_list = [self]
-            node = self.parent
-            while node is not None:
-                self._nsp_list.append(node)
-                node = node.parent
-
-        return self._nsp_list
 
     def _GV(self, replicas):
         """Calculate group value of the given list of replicas."""
@@ -188,18 +176,15 @@ class Node(object):
             # TODO: NOR_FSTI update
             return
 
-        # else: replica does not exist on the node ..
-
-        # nodes on the shortest path from here to server
-        nsp_list = self.path_to_server()
+        # else: replica does not exist on the node
 
         # go up the hierarchy to the server
-        for i, node in enumerate(nsp_list[1:]):
+        for i, node in enumerate(self._nsp_list[1:]):
             replica = node.get_replica(replica_name)  # requested replica
             if replica is not None:  # RR exists on NSPList(i)
                 # from node where replica is found all the way
                 # back down to self
-                for cn_node in nsp_list[i - 1::-1]:  # "checked node"
+                for cn_node in self._nsp_list[i - 1::-1]:  # "checked node"
                     cn_node.store_if_valuable(replica)
 
                 break  # TODO: not in a paper but should be here
