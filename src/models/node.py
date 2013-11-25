@@ -40,8 +40,8 @@ class Node(object):
         self._replicas = OrderedDict()  # replicas sorted by their value ASC
         self._replica_stats = OrderedDict()
         if replicas is not None:
-            for rep in replicas:
-                self.copy_replica(rep)
+            for repl in replicas.values():
+                self._copy_replica(repl, run_sort=False)
 
     @property
     def name(self):
@@ -149,7 +149,7 @@ class Node(object):
         # entities
 
         if self.capacity_free >= replica.size:
-            self.copy_replica(replica)
+            self._copy_replica(replica)
             return  # nothing more to do
 
         # else: not enough space to copy replica, might replace some
@@ -175,7 +175,7 @@ class Node(object):
             # delete all replicas needed to free enough space
             for mr in marked_replicas:
                 self.delete_replica(mr.name)
-            self.copy_replica(replica)
+            self._copy_replica(replica)
 
     def request_replica(self, replica_name):
         """TODO: trigger a request for a particular replica"""
@@ -208,8 +208,11 @@ class Node(object):
 
         # TODO: useReplica now that it has been copied here ... to update stats
 
-    def copy_replica(self, replica):
-        """Store a local copy of the given replica."""
+    def _copy_replica(self, replica, run_sort=True):
+        """Store a local copy of the given replica.
+
+        TODO: run_sort description and usage (when init, don't use)
+        """
         # XXX: raise error if not enough space available
         if replica.size > self._free_capacity:
             raise ValueError(
@@ -222,10 +225,11 @@ class Node(object):
         # separately (in case this is needed)
         self._replica_stats[replica.name] = _ReplicaStats()
 
-        # re-create dictionary ordered by replica value (lowest first)
-        self._replicas = OrderedDict(
-            sorted(self._replicas.items(), key=lambda item: self._RV(item[1]))
-        )
+        if run_sort:
+            # re-create dictionary ordered by replica value (lowest first)
+            self._replicas = OrderedDict(
+                sorted(self._replicas.items(), key=lambda x: self._RV(x[1]))
+            )
 
     def delete_replica(self, replica_name):
         """TODO"""

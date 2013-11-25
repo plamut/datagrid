@@ -41,6 +41,7 @@ class Simulation(object):
     REPLICA_MIN_SIZE = 100  # megabits   XXX: make configurable?
     REPLICA_MAX_SIZE = 1000  # megabits   XXX: make configurable?
     TOTAL_REQUESTS = 100000  # simmulation steps   XXX: make configurable?
+    SERVER_NAME = 'server'
 
     def __init__(
         self, node_capacity=50000, strategy=Strategy.EFS,
@@ -54,7 +55,7 @@ class Simulation(object):
         self._replica_count = replica_count
         self._fste = fste
 
-        self._replicas = []
+        self._replicas = OrderedDict()
         self._nodes = OrderedDict()
         self._edges = OrderedDict()  # nodes' outbound edges
 
@@ -80,25 +81,18 @@ class Simulation(object):
     # digits = int(math.log10(1000)) + 1
     # str = '0{}d'.format(digits)
 
-    def initialize(self):
-        """TODO"""
-        # XXX: why does the simulation say that the number of nodes is 50,
-        # but in the picture there are only 14 (including the server)?
-        self._clock.reset()
-
-        self._replicas = []
+    def _generate_nodes(self):
+        """ TODO """
         self._nodes = OrderedDict()
 
-        # TODO: later remove (we have it now for deterministic behavior)
-        seed(self.RND_SEED)
-
-        # generate nodes
         self._new_node(
-            "Server Node",
+            self.SERVER_NAME,
             # server's capacity must be big enough to hold all replicas
             capacity=self._replica_count * self.REPLICA_MAX_SIZE,
+            replicas=self._replicas,
             sim=self,
         )
+
         for i in range(1, self._node_count):
             self._new_node(
                 'node_{}'.format(i),  # XXX zero padding?
@@ -106,7 +100,11 @@ class Simulation(object):
                 sim=self
             )
 
+    def _generate_edges(self):
+        """TODO"""
         # generate edges - full graph with random edge distances
+        self._edges = OrderedDict()
+
         for node_name in self._nodes:
             self._edges[node_name] = OrderedDict()
 
@@ -115,18 +113,35 @@ class Simulation(object):
             self._edges[node_1][node_2] = dist
             self._edges[node_2][node_1] = dist
 
-        # calculate shortest paths from server node to all other nodes
-        # and update each the latter with a shortest path to server node
+    def _generate_replicas(self):
+        """TODO:docstring"""
+        self._replicas = OrderedDict()
 
-        # TODO
-
-        # generate replicas
         for i in range(self._replica_count):
             replica = Replica(
                 name='replica_{}'.format(i),  # XXX: zero padding e.g. {03d}
                 size=randint(self.REPLICA_MIN_SIZE, self.REPLICA_MAX_SIZE)
             )
-            self._replicas.append(replica)
+            self._replicas[replica.name] = replica
+
+    def initialize(self):
+        """TODO"""
+        # XXX: why does the simulation say that the number of nodes is 50,
+        # but in the picture there are only 14 (including the server)?
+        self._clock.reset()
+
+        # TODO: make configurable (if None, then use random seed)
+        seed(self.RND_SEED)
+
+        # generate nodes
+        self._generate_replicas()
+        self._generate_nodes()
+        self._generate_edges()
+
+        # calculate shortest paths from server node to all other nodes
+        # and update each the latter with a shortest path to server node
+
+        # TODO
 
     def run(self):
         """TODO:"""
