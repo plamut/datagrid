@@ -13,7 +13,7 @@ sim_settings = dict(
     replica_max_size=1000,  # megabits
     rnd_seed=1,
     total_reqs=100000,
-    fste=1000,  # frequency specific time interval
+    fsti=1000,  # frequency specific time interval
 )
 
 
@@ -23,10 +23,10 @@ def main():
     # XXX: have the main simulation code in a special class?
     sim = Simulation(**sim_settings)
 
+    # XXX: move settings to here? as a parameter to initialize?
     sim.initialize()
 
-
-    # run simulation
+    sim.run()
 
     # print results
 

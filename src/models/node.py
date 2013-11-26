@@ -3,9 +3,23 @@ from copy import deepcopy
 
 
 class _ReplicaStats(object):
-    """A helper class for the Node class."""
+    """A helper class for the Node class, representing stats of a single
+    replica.
+    """
 
     def __init__(self, nor=0, nor_fsti=0, lrt=0):
+        """Initialize replica stat values.
+
+        :param nor: number of requests of the replica
+            (optional, default: 0)
+        :type nor: int
+        :param nor_fsti: number of requests of the replica in FSTI interval
+            (optional, default: 0)
+        :type nor_fsti: int
+        :param lrt: the time of the last request of the replica
+            (optional, default: 0)
+        :type lrt: int
+        """
         self.nor = nor
         self.nor_fsti = nor_fsti
         self.lrt = lrt
@@ -14,11 +28,19 @@ class _ReplicaStats(object):
 class Node(object):
     """A representation of a node (either client or server) in the grid."""
 
-    def __init__(
-        self, name='', capacity=50000, parent=None, replicas=None, sim=None
-    ):
-        if sim is None:
-            raise ValueError("Simulation object instance expected, not None.")
+    def __init__(self, name, capacity, sim, replicas=None):
+        """Initialize node instance.
+
+        :param name: name of the node
+        :type name: string
+        :param capacity: node capacity in megabits
+        :type capacity: int
+        :param sim: simulation which the node is a part of
+        :type sim: :py:class:`~models.simulation.Simulation`
+        :param replicas: initial replicas the node contans copies of
+        :type replicas: list of `~models.replica.Replica` instances
+            (optional, default: None)
+        """
         # XXX: instead of "full" simulation object pass an adapter with
         # a limited interface? (it doesn't make sense for the Node to call,
         # e.g, sim.init_grid())
@@ -31,9 +53,6 @@ class Node(object):
         self._capacity = capacity
         self._free_capacity = capacity
 
-        if parent is self:
-            raise ValueError("Node cannot be its own parent.")
-        self._parent = parent  # XXX: check all the way up the hierarchy?
         self._client_nodes = OrderedDict()
         self._nsp_list = []  # node shortest path list to the server
 
@@ -45,45 +64,49 @@ class Node(object):
 
     @property
     def name(self):
+        """Name of the node."""
         return self._name
 
     @property
     def capacity(self):
+        """Node's total capacity in megabits."""
         return self._capacity
 
     @property
     def capacity_free(self):
+        """Node's current available capacity in megabits."""
         return self._capacity_free
 
-    @property
-    def parent(self):
-        return self._parent
-
-    @parent.setter
-    def parent(self, value):
-        self._parent = value
-
-    @property
-    def is_server(self):
-        return self._parent is None
-
     def update_nsp_path(self, nsp_list):
-        """TODO: docstring"""
-        # XXX: make node to read the path from the _sim object?
-        # makes sense, since note will obtain nsp_path from the _sim,
-        # meaning less potential errors (e.g. providing an invalid list
-        # by some other object)
+        """Update the list of node names on the shortest path to server node.
+
+        :param nsp_list: shortest path from node to server node, including
+            the node itself.
+        :type nsp_list: list of strings
+        """
         self._nsp_list = nsp_list
 
     def get_replica(self, replica_name):
-        """Return replica with the given name or None if replica does not
-        exist on the node.
+        """Return replica with the given name or None if local copy of
+        replica does not exist on the node.
+
+        :param replica_name: name of the replica to retrieve
+        :type replica_name: string
+
+        :returns: replica instance or None if it doesn't exist
+        :rtype: `~models.replica.Replica` or None
         """
         return self._replicas.get(replica_name)
 
     def _GV(self, replicas):
-        """Calculate group value of the given list of replicas."""
+        """Calculate value of a group of replicas.
 
+        :param replicas: list representing a replica group
+        :type replicas: list of `~models.replica.Replica` instances
+
+        :returns: value of the replica group
+        :rtype: float
+        """
         if not replicas:
             return 0.0  # empty gorup has a vaue of zero
 
@@ -99,7 +122,7 @@ class Node(object):
             s_nor_fsti += stats.nor_fsti
             s_lrt += stats[r.name].lrt
 
-        fsti = 1234   # TODO: part of simulation object! self._sim.fsti
+        fsti = self._sim.fsti
         ct = self._sim.time  # current simulation time
 
         gv = s_nor / s_size + s_nor_fsti / fsti + \
@@ -108,8 +131,15 @@ class Node(object):
         return gv
 
     def _RV(self, replica):
-        """Calculate value of the given replica."""
-        fsti = 1234   # TODO: part of simulation object! self._sim.fsti
+        """Calculate value of a replica.
+
+        :param replica: replica to calclulate the value of
+        :type replica: `~models.replica.Replica`
+
+        :returns: value of the `replica`
+        :rtype: float
+        """
+        fsti = self._sim.fsti
         ct = self._sim.time  # current simulation time
 
         stats = self._replica_stats[replica.name]
@@ -127,6 +157,9 @@ class Node(object):
         greater than the value of some group of replicas, that group of
         replicas is deleted to make enough free space for the local copy of
         `replica`.
+
+        :param replica: replica to consider storing locally
+        :type replica: `~models.replica.Replica`
         """
         # XXX: perhaps rename copy_replica (or retain the name for easier
         # comparison with the pseudocode in the paper)
@@ -166,7 +199,11 @@ class Node(object):
             self._copy_replica(replica)
 
     def request_replica(self, replica_name):
-        """TODO: trigger a request for a particular replica"""
+        """Trigger new request of a replica by the node.
+
+        :param replica_name: name of the replica to request
+        :type replica_name: string
+        """
         replica = self.get_replica(replica_name)
         if replica is not None:
             # ... use RR ... ---> XXX: refactor to a method?
@@ -196,9 +233,13 @@ class Node(object):
     def _copy_replica(self, replica, run_sort=True):
         """Store a local copy of the given replica.
 
-        TODO: run_sort description and usage (when init, don't use)
+        :param replica: replica to copy
+        :type replica: `~models.replica.Replica`
+        :param run_sort: whether or not to sort the internal replica list by
+            replica value after storing a copy of the new replica
+            (optional, default: True)
+        :type run_sort: bool
         """
-        # XXX: raise error if not enough space available
         if replica.size > self._free_capacity:
             raise ValueError(
                 "Cannot store a copy of replica, not enough free capacity.")
@@ -217,7 +258,12 @@ class Node(object):
             )
 
     def delete_replica(self, replica_name):
-        """TODO"""
+        """Remove a local copy of a replica. If replica does not exist
+        on the node, an error is raised.
+
+        :param replica_name: name of the replica to delete
+        :type replica_name: string
+        """
         replica = self._replicas.pop(replica_name)
         self._replica_stats.pop(replica_name)
         self._free_capacity += replica.size

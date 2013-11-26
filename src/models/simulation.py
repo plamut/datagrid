@@ -60,7 +60,7 @@ class Simulation(object):
 
     def __init__(
         self, node_capacity=50000, strategy=Strategy.EFS,
-        replica_count=1000, node_count=20, fste=10000,
+        replica_count=1000, node_count=20, fsti=10000,
         min_dist_km=1, max_dist_km=1000,
         replica_min_size=100, replica_max_size=1000,
         rnd_seed=None, total_reqs=100000,
@@ -96,9 +96,9 @@ class Simulation(object):
             simulation
             (optional, default: 100000)
         :type total_reqs: int
-        :param fste: frequency specific time interval as defined in the paper
+        :param fsti: frequency specific time interval as defined in the paper
             (optional, default: 1000)
-        :type fste: int
+        :type fsti: int
         :param rnd_seed: seed for the random number generator
             (optional, default: current system time)
         :type rnd_seed: int
@@ -114,9 +114,9 @@ class Simulation(object):
             raise ValueError("Number of replicas must be positive.")
         self._replica_count = replica_count
 
-        if fste < 1:
+        if fsti < 1:
             raise ValueError("FSTE must be positive.")
-        self._fste = fste
+        self._fsti = fsti
 
         self._replicas = OrderedDict()
         self._nodes = OrderedDict()
@@ -168,6 +168,11 @@ class Simulation(object):
         """Current simulation time."""
         return self._clock.time
 
+    @property
+    def fsti(self):
+        """Frequency specific time interval."""
+        return self._fsti
+
     # later of zero padding
     # TODO: > 0
     # digits = int(math.log10(1000)) + 1
@@ -181,15 +186,15 @@ class Simulation(object):
             self.SERVER_NAME,
             # server's capacity must be big enough to hold all replicas
             capacity=self._replica_count * self._replica_max_size,
-            replicas=self._replicas,
             sim=self,
+            replicas=self._replicas,
         )
 
         for i in range(1, self._node_count):
             self._new_node(
-                'node_{}'.format(i),  # XXX zero padding?
+                name='node_{}'.format(i),  # XXX zero padding?
                 capacity=self._node_capacity,
-                sim=self
+                sim=self,
             )
 
     def _generate_edges(self):
@@ -267,17 +272,17 @@ class Simulation(object):
 
         return node_info
 
-    def nsp_path(self, node):
-        """For a given node, return a list of node names on the shortest path
-        from `node` to server node (including `node` itself).
+    # def nsp_path(self, node):
+    #     """For a given node, return a list of node names on the shortest path
+    #     from `node` to server node (including `node` itself).
 
-        :param node: the node for which we need its shortest path
-        :type node: :py:class:`~models.node.Node`
+    #     :param node: the node for which we need its shortest path
+    #     :type node: :py:class:`~models.node.Node`
 
-        :returns: list of node names on the shortest path to server
-        :rtype: list of strings
-        """
-        return self._nsp_paths[node.name]
+    #     :returns: list of node names on the shortest path to server
+    #     :rtype: list of strings
+    #     """
+    #     return self._nsp_paths[node.name]
 
     def initialize(self):
         """Initialize (reset) a simulation."""
