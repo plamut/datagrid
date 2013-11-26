@@ -7,6 +7,24 @@ from random import seed
 from types import SimpleNamespace
 
 import itertools
+import math
+
+
+def _digits(number):
+    """Caclulate the number of digits in an integer.
+
+    :param number: number in question
+    :type number: int
+
+    :returns: number of digits
+    :rtype: int
+    """
+    if number == 0:
+        return 1
+
+    if number < 0:
+        number = -number
+    return int(math.log10(number)) + 1
 
 
 Strategy = namedtuple('Strategy', [
@@ -190,9 +208,10 @@ class Simulation(object):
             replicas=self._replicas,
         )
 
+        name_tpl = 'node_{{0:0{}d}}'.format(_digits(self._node_count - 1))
         for i in range(1, self._node_count):
             self._new_node(
-                name='node_{}'.format(i),  # XXX zero padding?
+                name=name_tpl.format(i),
                 capacity=self._node_capacity,
                 sim=self,
             )
@@ -218,11 +237,13 @@ class Simulation(object):
 
         Sizes lie in the interval [`replica_min_size`, `replica_max_size`].
         """
+        name_tpl = 'replica_{{0:0{}d}}'.format(_digits(self._replica_count))
+
         self._replicas = OrderedDict()
 
-        for i in range(self._replica_count):
+        for i in range(1, self._replica_count + 1):
             replica = Replica(
-                name='replica_{}'.format(i),  # XXX: zero padding e.g. {03d}
+                name=name_tpl.format(i),
                 size=randint(self._replica_min_size, self._replica_max_size)
             )
             self._replicas[replica.name] = replica
