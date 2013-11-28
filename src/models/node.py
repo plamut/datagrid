@@ -8,19 +8,31 @@ class _ReplicaStats(object):
     replica.
     """
 
-    def __init__(self, fsti=0):
+    def __init__(self, nor=0, fsti=0, lrt=0):
         """Initialize replica stat values.
 
+        :param nor: number of requests of the replica
+            (optional, default: 0)
+        :type nor: int
         :param fsti: width of the FSTI interval
             (optional, default: 0)
         :type fsti: int
+        :param lrt: the time of the last request of the replica
+            (optional, default: 0)
+        :type lrt: int
         """
         if fsti < 0:
             raise ValueError("FSTI must be a non-negative number.")
         self._fsti = fsti
 
-        self._nor = 0
-        self._lrt = 0
+        if nor < 0:
+            raise ValueError("NOR must be a non-negative number.")
+        self._nor = nor
+
+        if lrt < 0:
+            raise ValueError("LRT must be a non-negative number.")
+        self._lrt = lrt
+
         self._req_hist = deque()  # request history (we store request times)
 
         @property
@@ -189,14 +201,16 @@ class Node(object):
         fsti = self._sim.fsti
         ct = self._sim.time  # current simulation time
 
-        stats = self._replica_stats[replica.name]
+        stats = self._replica_stats.get(replica.name)
+        if stats is None:
+            stats = _ReplicaStats()
 
         rv = stats.nor / replica.size + stats.nor_fsti / fsti + \
             1 / (ct - stats.lrt)
 
         return rv
 
-    def store_if_valuable(self, replica, requested_by):
+    def store_if_valuable(self, replica):
         """Store a local copy of the given replica if valuable enough.
 
         If the current free capacity is big enough, a local copy of `replica`
@@ -207,8 +221,6 @@ class Node(object):
 
         :param replica: replica to consider storing locally
         :type replica: :py:class:`~models.replica.Replica`
-        :param requested_by: node that initiated request for the `replica`
-        :type requested_by: :py:class:`~models.node.Node`
         """
         # XXX: perhaps rename copy_replica (or retain the name for easier
         # comparison with the pseudocode in the paper)
@@ -223,6 +235,7 @@ class Node(object):
 
         if self.capacity_free >= replica.size:
             self._copy_replica(replica)
+            self._replica_stats[replica.name].new_request_made()
         else:
             # not enough space to copy replica, might replace some
             # of the existing replicas
@@ -240,6 +253,9 @@ class Node(object):
             # in case this group is deleted. - XXX: needed? we have
             # a list of "makred" replicas for that
             gv = self._GV(marked_replicas)
+
+            # TODO: what stats to use for a replica, which does not yet exist
+            # on the node? Stick with NOR=0 etc.?
             rv = self._RV(replica)
 
             if gv < rv:
@@ -247,11 +263,7 @@ class Node(object):
                 for mr in marked_replicas:
                     self.delete_replica(mr.name)
                 self._copy_replica(replica)
-
-        # update replica stats if it was this node that initiated the
-        # original requested of a replica
-        if requested_by is self:
-            self._replica_stats[self.name].new_request_made()
+                self._replica_stats[replica.name].new_request_made()
 
     def request_replica(self, replica_name):
         """Trigger new request of a replica by the node.
@@ -265,17 +277,9 @@ class Node(object):
         # what to do)
         replica = self.get_replica(replica_name)
         if replica is not None:
-            # self.use_replica(replica)
-            # ... use RR ... ---> XXX: refactor to a method?
-            # self._replica_stats[replica.name].new_request_made(
-            #    self._sim.time())
-
-            rep_stats = self._replica_stats[replica.name]
-            rep_stats.nor += 1
-            rep_stats.lrt = self._sim.time
-            # TODO: NOR_FSTI update
-
-            # XXX: what does UseReplica does? nothing actually?
+            # "UseReplica()" - update its stats
+            self._replica_stats[replica_name].new_request_made(
+                self._sim.time())
             return
 
         # else: replica does not exist on the node
@@ -287,11 +291,21 @@ class Node(object):
                 # from node where replica is found all the way
                 # back down to self
                 for cn_node in self._nsp_list[i - 1::-1]:  # "checked node"
-                    cn_node.store_if_valuable(replica, self)
+                    cn_node.store_if_valuable(replica)
 
-                break  # XXX: not in a paper but should be here
+                break  # XXX: not in the paper but should be here
                         # no point in searching the replica further up the
                         # hierarchy once it has been found?
+
+        # XXX: not in the paper, but we obviously need to use replica here,
+        # now that we got it (= increase replica stats). Also remove
+        # increasing the replica stats from store_if_valuable() and
+        # refactor request_replica so that the node requests replica from
+        # parent, avoiding the upper for loop (each node should be an
+        # independent entity, only able to request replica from a parent and
+        # that's it.)
+        # request_replica should probably return a replica and docstring should
+        # say "request a replica from node"
 
     def _copy_replica(self, replica, run_sort=True):
         """Store a local copy of the given replica.
