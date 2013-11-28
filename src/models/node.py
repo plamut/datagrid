@@ -145,18 +145,6 @@ class Node(object):
         """
         self._nsp_list = nsp_list
 
-    def get_replica(self, replica_name):
-        """Return replica with the given name or None if local copy of
-        replica does not exist on the node.
-
-        :param replica_name: name of the replica to retrieve
-        :type replica_name: string
-
-        :returns: replica instance or None if it doesn't exist
-        :rtype: `~models.replica.Replica` or None
-        """
-        return self._replicas.get(replica_name)
-
     def _GV(self, replicas):
         """Calculate value of a group of replicas.
 
@@ -210,7 +198,7 @@ class Node(object):
 
         return rv
 
-    def store_if_valuable(self, replica):
+    def _store_if_valuable(self, replica):
         """Store a local copy of the given replica if valuable enough.
 
         If the current free capacity is big enough, a local copy of `replica`
@@ -229,9 +217,9 @@ class Node(object):
         # actually wrap everything into a sim object ... e.g. sim.clock.time
         # (or sim.time) - simulation should provide an API to the simulated
         # entities
-        # UPDATE: after refactoring, store_if_valuable will be probably
+        # UPDATE: after refactoring, _store_if_valuable will be probably
         # called by Simulation itself which will then know how to calculate
-        # grid load stats
+        # grid load stats (or maybe not ...)
 
         if self.capacity_free >= replica.size:
             self._copy_replica(replica)
@@ -266,46 +254,43 @@ class Node(object):
                 self._replica_stats[replica.name].new_request_made()
 
     def request_replica(self, replica_name):
-        """Trigger new request of a replica by the node.
+        """Request a replica from the node.
+
+        If a local copy of replica is currently available, it is immediately
+        returned, otherwise the node requests a replica from its parent (on
+        the shortest path to server) and then return it.
+
+        If replica has been obtained from the parent, the node also decides
+        whether to keep a local copy of it or not (a copy is kept if it is
+        determined more important than a group of existing local replicas).
 
         :param replica_name: name of the replica to request
         :type replica_name: string
+
+        :returns: requested replica
+        :rtype: :py:class:`~models.replica.Replica`
         """
-        # XXX: this method should be moved to simulation object,
-        # which only calls node.use_replica() when needed
-        # (b/c it's nod the node who should be telling other nodes
-        # what to do)
-        replica = self.get_replica(replica_name)
+        replica = self._replicas.get(replica_name)
         if replica is not None:
             # "UseReplica()" - update its stats
             self._replica_stats[replica_name].new_request_made(
                 self._sim.time())
-            return
+        else:
+            # replica not available locally, request it from parent
+            replica = self._nsp_list[1].request_replica(replica_name)
 
-        # else: replica does not exist on the node
+            # XXX get rid of nsp list and only have info about parent?
+            # would make sense now, nsp list not needed anymore
 
-        # go up the hierarchy to the server
-        for i, node in enumerate(self._nsp_list[1:]):
-            replica = node.get_replica(replica_name)  # requested replica
-            if replica is not None:  # RR exists on NSPList(i)
-                # from node where replica is found all the way
-                # back down to self
-                for cn_node in self._nsp_list[i - 1::-1]:  # "checked node"
-                    cn_node.store_if_valuable(replica)
+            # XXX: notify simulation machinery that replica has been obtained
+            # from parent? So that it can calculate the bandwidth consumed
+            # and response time
 
-                break  # XXX: not in the paper but should be here
-                        # no point in searching the replica further up the
-                        # hierarchy once it has been found?
+            # NOTE: stats are automatically updated when a replica is stored
+            # in the _store_if_valuable() method
+            self._store_if_valuable(replica)
 
-        # XXX: not in the paper, but we obviously need to use replica here,
-        # now that we got it (= increase replica stats). Also remove
-        # increasing the replica stats from store_if_valuable() and
-        # refactor request_replica so that the node requests replica from
-        # parent, avoiding the upper for loop (each node should be an
-        # independent entity, only able to request replica from a parent and
-        # that's it.)
-        # request_replica should probably return a replica and docstring should
-        # say "request a replica from node"
+        return replica
 
     def _copy_replica(self, replica, run_sort=True):
         """Store a local copy of the given replica.
