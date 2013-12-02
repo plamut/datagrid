@@ -2,12 +2,11 @@ from collections import namedtuple
 from collections import OrderedDict
 from models.node import Node
 from models.replica import Replica
-from random import randint
-from random import seed
 from types import SimpleNamespace
 
 import itertools
 import math
+import random
 
 
 def _digits(number):
@@ -62,8 +61,8 @@ class _Clock(object):
         :returns: new simulation time
         :rtype: int
         """
-        if step < 1:
-            raise ValueError("Clock step must be positive.")
+        if step < 0:
+            raise ValueError("Clock step must be non-negative.")
         self._time += int(step)
         return self._time
 
@@ -191,10 +190,15 @@ class Simulation(object):
         """Frequency specific time interval."""
         return self._fsti
 
-    # later of zero padding
-    # TODO: > 0
-    # digits = int(math.log10(1000)) + 1
-    # str = '0{}d'.format(digits)
+    @property
+    def nodes(self):
+        """List of nodes in the grid."""
+        return self._nodes
+
+    @property
+    def replicas(self):
+        """List of all replicas."""
+        return self._replicas
 
     def _generate_nodes(self):
         """Generate a new set of grid nodes."""
@@ -228,7 +232,7 @@ class Simulation(object):
             self._edges[node_name] = OrderedDict()
 
         for node_1, node_2 in itertools.combinations(self._nodes, 2):
-            dist = randint(self._min_dist_km, self._max_dist_km)
+            dist = random.randint(self._min_dist_km, self._max_dist_km)
             self._edges[node_1][node_2] = dist
             self._edges[node_2][node_1] = dist
 
@@ -244,7 +248,8 @@ class Simulation(object):
         for i in range(1, self._replica_count + 1):
             replica = Replica(
                 name=name_tpl.format(i),
-                size=randint(self._replica_min_size, self._replica_max_size)
+                size=random.randint(
+                    self._replica_min_size, self._replica_max_size)
             )
             self._replicas[replica.name] = replica
 
@@ -311,7 +316,7 @@ class Simulation(object):
         # but in the picture there are only 14 (including the server)?
 
         self._clock.reset()
-        seed(self._rnd_seed)
+        random.seed(self._rnd_seed)
 
         # generate nodes
         self._generate_replicas()
@@ -328,20 +333,73 @@ class Simulation(object):
                 shortest_path.append(previous)
                 previous = node_info[previous].previous
             self._nodes[name].update_nsp_path(shortest_path)
-            # print("Path for node {}:".format(name), shortest_path)
-
-        # print('EDGES:', self._edges, '\n')
-        # print('PATHS', node_info, '\n')
 
     def run(self):
         """Run simulation.
 
         NOTE: simulation must have already been initialized with initialize()
         """
+        ef = _EventFactory(self)
+        self._clock.reset()
 
         for i in range(self._total_reqs):
-            # random time from 0 to 99 (params), advance clock,
-            # generate event (node requests a replica)
-            self._clock.tick()
+            event = ef.get_random()
 
-            # random node requests a random replica
+            # fast-forward time to event occurence
+            self._clock.tick(step=event.time - self.now)
+
+            # execute an event (issue replica request)
+            event.node.request_replica(event.replica.name)
+            # XXX: simulation object has to be notified somehow about
+            # where replica was found (to calculate total request time and
+            # bandwidth consumption)
+
+        # TODO: print results
+
+
+class _EventFactory(object):
+    """Simulation events factory."""
+
+    def __init__(self, sim):
+        self._sim = sim
+
+    def get_random(self):
+        """Create a new random event (some node requests a replica).
+
+        :returns: new random instance of node request event
+        :rtype: :py:class:`~models.simulation.NodeRequest`
+        """
+        # XXX: is there a better way to select a random element from a dict?
+        # (without converting to list, which is slow) - BTW, does random.choice
+        # do exactly that? converting to a list first?
+        node = random.sample(self._sim.nodes.keys(), 1)[0]
+        node = self._sim.nodes[node]
+
+        # XXX: in other scenarios, replica request distribution is not
+        # uniform - change when needed
+        replica = random.sample(self._sim.replicas.keys(), 1)[0]
+        replica = self._sim.replicas[replica]
+
+        # XXX: don't hardcode the limits, read them from the simulation
+        # object (and the same for time?)
+        time_from_now = random.randint(0, 99)
+
+        return NodeRequest(node, replica, self._sim.now + time_from_now)
+
+
+class NodeRequest(object):
+    """An event when node requests a replica."""
+
+    def __init__(self, node, replica, time):
+        """Initialize newly created instance.
+
+        :param node: node that requests a replica
+        :type node: string
+        :param replica: requested replica
+        :type replica: string
+        :param time: time when request is issued
+        :type time: int
+        """
+        self.node = node
+        self.replica = replica
+        self.time = time

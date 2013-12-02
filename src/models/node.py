@@ -274,7 +274,7 @@ class Node(object):
         if replica is not None:
             # "UseReplica()" - update its stats
             self._replica_stats[replica_name].new_request_made(
-                self._sim.now
+                self._sim.now)
         else:
             # replica not available locally, request it from parent
             replica = self._nsp_list[1].request_replica(replica_name)
