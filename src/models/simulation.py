@@ -298,6 +298,19 @@ class Simulation(object):
 
         return node_info
 
+    def notify_repl_req(self, node, parent, replica):
+        """Notify simulation that `node` had to request `replica` from its
+        `parent` (on the shortest path to server).
+
+        :param node: node that issued a request for `replica`
+        :type node: :py:class:`~models.node.Node`
+        :param parent: `node`'s parent that received replica request
+        :type parent: :py:class:`~models.node.Node`
+        :param replica: replica requested
+        :type replica: :py:class:`~models.replica.Replica`
+        """
+        # TODO: implement
+
     def initialize(self):
         """Initialize (reset) a simulation."""
         self._clock.reset()
@@ -323,8 +336,9 @@ class Simulation(object):
         self._clock.reset()
 
         for i in range(1, self._total_reqs + 1):
-            if i % 100 == 0:
-                print("request ", i)
+            if i % 1000 == 0:
+                print("request {}/{} ({:.2f} %)".format(
+                    i, self._total_reqs, 100 * i / self._total_reqs))
 
             event = ef.get_random()
 
@@ -333,9 +347,6 @@ class Simulation(object):
 
             # execute an event (issue replica request)
             event.node.request_replica(event.replica.name)
-            # XXX: simulation object has to be notified somehow about
-            # where replica was found (to calculate total request time and
-            # bandwidth consumption)
 
         # TODO: print results
 

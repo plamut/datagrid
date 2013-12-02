@@ -278,9 +278,8 @@ class Node(object):
             # replica not available locally, request it from parent
             replica = self._parent.request_replica(replica_name)
 
-            # XXX: notify simulation machinery that replica has been obtained
-            # from parent? So that it can calculate the bandwidth consumed
-            # and response time
+            # notify simulation that replica had to be requested from parent
+            self._sim.notify_repl_req(self, self._parent, replica)
 
             # NOTE: stats are automatically updated when a replica is stored
             # in the _store_if_valuable() method
