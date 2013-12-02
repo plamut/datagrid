@@ -1,5 +1,6 @@
 import unittest
 
+
 class TestReplica(unittest.TestCase):
     """Tests for Replica model."""
 

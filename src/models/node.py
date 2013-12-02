@@ -111,7 +111,7 @@ class Node(object):
         self._free_capacity = capacity
 
         self._client_nodes = OrderedDict()
-        self._nsp_list = []  # node shortest path list to the server
+        self._parent = None  # direct parent on the shortest path to server
 
         self._replicas = OrderedDict()  # replicas sorted by their value ASC
         self._replica_stats = OrderedDict()
@@ -136,14 +136,13 @@ class Node(object):
         """Node's current available capacity in megabits."""
         return self._capacity_free
 
-    def update_nsp_path(self, nsp_list):
-        """Update the list of node names on the shortest path to server node.
+    def set_parent(self, node):
+        """Set node's direct parent on the shortest path to server node.
 
-        :param nsp_list: shortest path from node to server node, including
-            the node itself.
-        :type nsp_list: list of strings
+        :param node: direct parent on the shortest path in grid to server node
+        :type node: :py:class:`~models.node.Node`
         """
-        self._nsp_list = nsp_list
+        self._parent = node
 
     def _GV(self, replicas):
         """Calculate value of a group of replicas.
@@ -277,10 +276,7 @@ class Node(object):
                 self._sim.now)
         else:
             # replica not available locally, request it from parent
-            replica = self._nsp_list[1].request_replica(replica_name)
-
-            # XXX get rid of nsp list and only have info about parent?
-            # would make sense now, nsp list not needed anymore
+            replica = self._parent.request_replica(replica_name)
 
             # XXX: notify simulation machinery that replica has been obtained
             # from parent? So that it can calculate the bandwidth consumed

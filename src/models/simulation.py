@@ -298,23 +298,8 @@ class Simulation(object):
 
         return node_info
 
-    # def nsp_path(self, node):
-    #     """For a given node, return a list of node names on the shortest path
-    #     from `node` to server node (including `node` itself).
-
-    #     :param node: the node for which we need its shortest path
-    #     :type node: :py:class:`~models.node.Node`
-
-    #     :returns: list of node names on the shortest path to server
-    #     :rtype: list of strings
-    #     """
-    #     return self._nsp_paths[node.name]
-
     def initialize(self):
         """Initialize (reset) a simulation."""
-        # XXX: why does the paper say that the number of nodes is 50,
-        # but in the picture there are only 14 (including the server)?
-
         self._clock.reset()
         random.seed(self._rnd_seed)
 
@@ -327,12 +312,7 @@ class Simulation(object):
         # and update each of the latter with a relevant path
         node_info = self._dijkstra()
         for name, info in node_info.items():
-            shortest_path = [name]
-            previous = info.previous
-            while previous is not None:
-                shortest_path.append(previous)
-                previous = node_info[previous].previous
-            self._nodes[name].update_nsp_path(shortest_path)
+            self._nodes[name].set_parent(self._nodes.get(info.previous))
 
     def run(self):
         """Run simulation.
