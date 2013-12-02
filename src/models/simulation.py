@@ -45,7 +45,7 @@ class _Clock(object):
 
     @property
     def time(self):
-        """Current simulation time."""
+        """Current time."""
         return self._time
 
     def reset(self):
@@ -182,7 +182,7 @@ class Simulation(object):
         return node
 
     @property
-    def time(self):
+    def now(self):
         """Current simulation time."""
         return self._clock.time
 

@@ -170,7 +170,7 @@ class Node(object):
             s_lrt += stats[r.name].lrt
 
         fsti = self._sim.fsti
-        ct = self._sim.time  # current simulation time
+        ct = self._sim.now  # current simulation time
 
         gv = s_nor / s_size + s_nor_fsti / fsti + \
             1 / (ct - s_lrt / len(replicas))
@@ -187,7 +187,7 @@ class Node(object):
         :rtype: float
         """
         fsti = self._sim.fsti
-        ct = self._sim.time  # current simulation time
+        ct = self._sim.now  # current simulation time
 
         stats = self._replica_stats.get(replica.name)
         if stats is None:
@@ -215,7 +215,7 @@ class Node(object):
 
         # TODO: notify simulation machinery about this? sim.increase_count
         # actually wrap everything into a sim object ... e.g. sim.clock.time
-        # (or sim.time) - simulation should provide an API to the simulated
+        # (or sim.now) - simulation should provide an API to the simulated
         # entities
         # UPDATE: after refactoring, _store_if_valuable will be probably
         # called by Simulation itself which will then know how to calculate
@@ -274,7 +274,7 @@ class Node(object):
         if replica is not None:
             # "UseReplica()" - update its stats
             self._replica_stats[replica_name].new_request_made(
-                self._sim.time())
+                self._sim.now
         else:
             # replica not available locally, request it from parent
             replica = self._nsp_list[1].request_replica(replica_name)
