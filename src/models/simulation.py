@@ -152,6 +152,10 @@ class Simulation(object):
             raise ValueError("Maximum distance must be positive.")
         self._max_dist_km = max_dist_km
 
+        # XXX: don't hard-code?
+        self._network_bw_mbps = 10e6  # network bandwidth (Mbits/s)
+        self._pspeed_kmps = 6e3  # propagation speed (km/s)
+
         if replica_min_size >= replica_max_size:
             raise ValueError(
                 "Min replica size must be smaller than max replica size.")
@@ -169,6 +173,13 @@ class Simulation(object):
         if total_reqs <= 0:
             raise ValueError("Total number of requests must me be positive.")
         self._total_reqs = total_reqs
+
+        self._total_bw = 0.0  # total bandwidth used (in megabits)
+        self._total_rt_s = 0.0  # total response time (in seconds)
+
+        # two constants used in metrics calculations
+        self._c1 = 0.001
+        self._c2 = 0.001
 
     def _new_node(self, *args, **kwargs):
         """Create a new grid node and store it in the list of nodes.
@@ -309,12 +320,21 @@ class Simulation(object):
         :param replica: replica requested
         :type replica: :py:class:`~models.replica.Replica`
         """
-        # TODO: implement
+        # total BW consumpion
+        self._total_bw += replica.size  # XXX: correct interpretation?
+
+        # total response time
+        dist_km = self._edges[node.name][parent.name]
+        self._total_rt_s += replica.size / self._network_bw_mbps + \
+            dist_km / self._pspeed_kmps
 
     def initialize(self):
         """Initialize (reset) a simulation."""
         self._clock.reset()
         random.seed(self._rnd_seed)
+
+        self._total_bw = 0.0
+        self._total_rt_s = 0.0
 
         # generate nodes
         self._generate_replicas()
@@ -348,7 +368,8 @@ class Simulation(object):
             # execute an event (issue replica request)
             event.node.request_replica(event.replica.name)
 
-        # TODO: print results
+        print("Total resp. time (s):", self._total_rt_s * self._c1)
+        print("Total bandwidth:", self._total_bw * self._c2)
 
 
 class _EventFactory(object):
