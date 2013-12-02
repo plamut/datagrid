@@ -35,51 +35,51 @@ class _ReplicaStats(object):
 
         self._req_hist = deque()  # request history (we store request times)
 
-        @property
-        def lrt(self):
-            """Time when replica was last requested."""
-            return self._lrt
+    @property
+    def lrt(self):
+        """Time when replica was last requested."""
+        return self._lrt
 
-        @property
-        def nor(self):
-            """Number of requests of the replica."""
-            return self._nor
+    @property
+    def nor(self):
+        """Number of requests of the replica."""
+        return self._nor
 
-        def nor_fsti(self, time):
-            """Return the number of requests of the replica in FSTI interval.
+    def nor_fsti(self, time):
+        """Return the number of requests of the replica in FSTI interval.
 
-            NOTE: as a side effect, the requests older than (`time` - FSTE)
-            are removed from the internal requests history so make sure you
-            indeed provide current time, or else subsequent calls to nor_fsti
-            might return invalid results.
+        NOTE: as a side effect, the requests older than (`time` - FSTE)
+        are removed from the internal requests history so make sure you
+        indeed provide current time, or else subsequent calls to nor_fsti
+        might return invalid results.
 
-            :param time: current time
-            :type time: int
+        :param time: current time
+        :type time: int
 
-            :returns: number of requests in the last FSTI interval
-            :rtype: int
-            """
-            while (
-                len(self._req_hist) > 0 and
-                (time - self._req_hist[0]) > self._fsti
-            ):
-                self._req_history.popleft()
+        :returns: number of requests in the last FSTI interval
+        :rtype: int
+        """
+        while (
+            len(self._req_hist) > 0 and
+            (time - self._req_hist[0]) > self._fsti
+        ):
+            self._req_hist.popleft()
 
-            return len(self._req_history)
+        return len(self._req_hist)
 
-        def new_request_made(self, time):
-            """Update stats with a new request that has arrived at `time`.
+    def new_request_made(self, time):
+        """Update stats with a new request that has arrived at `time`.
 
-            NOTE: time of the request is appended to the internal requests
-            history, so make sure you always call this method in order (i.e.
-            for older requests first).
+        NOTE: time of the request is appended to the internal requests
+        history, so make sure you always call this method in order (i.e.
+        for older requests first).
 
-            :param time: time when the request was made
-            :type time: int
-            """
-            self._requests_history.append(time)
-            self._lrt = time
-            self._nor += 1
+        :param time: time when the request was made
+        :type time: int
+        """
+        self._req_hist.append(time)
+        self._lrt = time
+        self._nor += 1
 
 
 class Node(object):
@@ -132,9 +132,9 @@ class Node(object):
         return self._capacity
 
     @property
-    def capacity_free(self):
+    def free_capacity(self):
         """Node's current available capacity in megabits."""
-        return self._capacity_free
+        return self._free_capacity
 
     def set_parent(self, node):
         """Set node's direct parent on the shortest path to server node.
@@ -165,8 +165,8 @@ class Node(object):
             stats = self._replica_stats[r.name]
             s_size += r.size
             s_nor += stats.nor
-            s_nor_fsti += stats.nor_fsti
-            s_lrt += stats[r.name].lrt
+            s_nor_fsti += stats.nor_fsti(self._sim.now)
+            s_lrt += stats.lrt
 
         fsti = self._sim.fsti
         ct = self._sim.now  # current simulation time
@@ -192,7 +192,7 @@ class Node(object):
         if stats is None:
             stats = _ReplicaStats()
 
-        rv = stats.nor / replica.size + stats.nor_fsti / fsti + \
+        rv = stats.nor / replica.size + stats.nor_fsti(ct) / fsti + \
             1 / (ct - stats.lrt)
 
         return rv
@@ -220,18 +220,18 @@ class Node(object):
         # called by Simulation itself which will then know how to calculate
         # grid load stats (or maybe not ...)
 
-        if self.capacity_free >= replica.size:
+        if self.free_capacity >= replica.size:
             self._copy_replica(replica)
-            self._replica_stats[replica.name].new_request_made()
+            self._replica_stats[replica.name].new_request_made(self._sim.now)
         else:
             # not enough space to copy replica, might replace some
             # of the existing replicas
             sos = 0  # sum of sizes
             marked_replicas = []  # replicas visited and marked for deletion
-            for x, rep in enumerate(self._replicas):
-                if sos + self.capacity_free < replica.size:
-                    sos += rep.size
-                    marked_replicas.append(rep)
+            for x, repl in enumerate(self._replicas.values()):
+                if sos + self.free_capacity < replica.size:
+                    sos += repl.size
+                    marked_replicas.append(repl)
                 else:
                     break
 

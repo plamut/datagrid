@@ -322,7 +322,10 @@ class Simulation(object):
         ef = _EventFactory(self)
         self._clock.reset()
 
-        for i in range(self._total_reqs):
+        for i in range(1, self._total_reqs + 1):
+            if i % 100 == 0:
+                print("request ", i)
+
             event = ef.get_random()
 
             # fast-forward time to event occurence
