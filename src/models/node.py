@@ -23,7 +23,7 @@ class _ReplicaStats(object):
         """
         if fsti < 0:
             raise ValueError("FSTI must be a non-negative number.")
-        self._fsti = fsti
+        self.fsti = fsti
 
         if nor < 0:
             raise ValueError("NOR must be a non-negative number.")
@@ -61,7 +61,7 @@ class _ReplicaStats(object):
         """
         while (
             len(self._req_hist) > 0 and
-            (time - self._req_hist[0]) > self._fsti
+            (time - self._req_hist[0]) > self.fsti
         ):
             self._req_hist.popleft()
 
