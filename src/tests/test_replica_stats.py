@@ -4,16 +4,16 @@ import unittest
 class TestReplicaStats(unittest.TestCase):
     """Tests for :py:class:`~models.node._ReplicaStats` helper class."""
 
-    def _getTargetClass(self):
+    def _get_target_class(self):
         from models.node import _ReplicaStats
         return _ReplicaStats
 
-    def _makeInstance(self, *args, **kw):
-        return self._getTargetClass()(*args, **kw)
+    def _make_instance(self, *args, **kw):
+        return self._get_target_class()(*args, **kw)
 
     def test_init(self):
         """Test than new _ReplicaStats instances are correctly initialized."""
-        stats = self._makeInstance(nor=5, fsti=2, lrt=100)
+        stats = self._make_instance(nor=5, fsti=2, lrt=100)
         self.assertEqual(stats.nor, 5)
         self.assertEqual(stats.lrt, 100)
         self.assertEqual(stats.fsti, 2)
@@ -23,11 +23,11 @@ class TestReplicaStats(unittest.TestCase):
         negative NOR.
         """
         try:
-            self._makeInstance(nor=0, fsti=10, lrt=10)
+            self._make_instance(nor=0, fsti=10, lrt=10)
         except ValueError:
             self.fail('Init should not fail if NOR is zero (0)')
 
-        self.assertRaises(ValueError, self._makeInstance,
+        self.assertRaises(ValueError, self._make_instance,
                           nor=-1, fsti=10, lrt=10)
 
     def test_init_checks_fsti_to_be_non_negative(self):
@@ -35,11 +35,11 @@ class TestReplicaStats(unittest.TestCase):
         negative FSTI.
         """
         try:
-            self._makeInstance(nor=10, fsti=0, lrt=10)
+            self._make_instance(nor=10, fsti=0, lrt=10)
         except ValueError:
             self.fail('Init should not fail if FSTI is zero (0)')
 
-        self.assertRaises(ValueError, self._makeInstance,
+        self.assertRaises(ValueError, self._make_instance,
                           nor=10, fsti=-1, lrt=10)
 
     def test_init_checks_lrt_to_be_non_negative(self):
@@ -47,16 +47,16 @@ class TestReplicaStats(unittest.TestCase):
         negative LRT.
         """
         try:
-            self._makeInstance(nor=10, fsti=10, lrt=0)
+            self._make_instance(nor=10, fsti=10, lrt=0)
         except ValueError:
             self.fail('Init should not fail if LRT is zero (0)')
 
-        self.assertRaises(ValueError, self._makeInstance,
+        self.assertRaises(ValueError, self._make_instance,
                           nor=10, fsti=10, lrt=-1)
 
     def test_lrt_readonly(self):
         """Test that instance's `lrt` property is read-only."""
-        stats = self._makeInstance(nor=10, fsti=100, lrt=5)
+        stats = self._make_instance(nor=10, fsti=100, lrt=5)
         try:
             stats.lrt = 25
         except AttributeError:
@@ -66,7 +66,7 @@ class TestReplicaStats(unittest.TestCase):
 
     def test_nor_readonly(self):
         """Test that instance's `nor` property is read-only."""
-        stats = self._makeInstance(nor=10, fsti=100, lrt=5)
+        stats = self._make_instance(nor=10, fsti=100, lrt=5)
         try:
             stats.nor = 15
         except AttributeError:
@@ -76,7 +76,7 @@ class TestReplicaStats(unittest.TestCase):
 
     def test_nor_fsti(self):
         """Test nor_fsti() method."""
-        stats = self._makeInstance(nor=0, fsti=10, lrt=0)
+        stats = self._make_instance(nor=0, fsti=10, lrt=0)
         stats.new_request_made(time=2)
         stats.new_request_made(time=4)
         stats.new_request_made(time=8)
@@ -93,7 +93,7 @@ class TestReplicaStats(unittest.TestCase):
 
     def test_new_request_made(self):
         """Test new_request_made() method."""
-        stats = self._makeInstance(nor=0, fsti=10, lrt=0)
+        stats = self._make_instance(nor=0, fsti=10, lrt=0)
         stats.new_request_made(time=7)
         stats.new_request_made(time=16)
 
