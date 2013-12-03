@@ -18,7 +18,7 @@ class TestReplica(unittest.TestCase):
         self.assertEqual(replica.size, 1234)
 
     def test_init_checks_size_to_be_positive(self):
-        """Test that new Replica instance cannot be initialized with a
+        """Test that new Replica instances cannot be initialized with a
         non-positive size.
         """
         self.assertRaises(ValueError, self._makeInstance, 'replica_1', 0)
