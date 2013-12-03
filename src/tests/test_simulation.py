@@ -57,4 +57,70 @@ class TestStrategy(unittest.TestCase):
         self.assertEqual(strategy.s2013, 3)
 
 
-# TODO: _Clock
+class TestClock(unittest.TestCase):
+    """Tests for :py:class:`models.simulation._Clock`."""
+
+    def _get_target_class(self):
+        from models.simulation import _Clock
+        return _Clock
+
+    def _make_instance(self, *args, **kw):
+        return self._get_target_class()(*args, **kw)
+
+    def test_init(self):
+        """Test than new _Clock instances are correctly initialized."""
+        clock = self._make_instance()
+        self.assertEqual(clock.time, 0)
+
+    def test_time_readonly(self):
+        """Test that instance's `time` property is read-only."""
+        clock = self._make_instance()
+        try:
+            clock.time = 123
+        except AttributeError:
+            pass
+        else:
+            self.fail("Time attribute is not read-only.")
+
+    def test_reset(self):
+        """Test that `reset` method resets time to zero (0)."""
+        clock = self._make_instance()
+        clock._time = 50  # cheating for easier testing
+
+        self.assertEqual(clock.time, 50)
+        clock.reset()
+        self.assertEqual(clock.time, 0)
+
+    def test_tick_default_step(self):
+        """Test that `tick` method increases time by 1 unit by default."""
+        clock = self._make_instance()
+        self.assertEqual(clock.time, 0)
+
+        clock.tick()
+        self.assertEqual(clock.time, 1)
+        clock.tick()
+        self.assertEqual(clock.time, 2)
+        clock.tick()
+        self.assertEqual(clock.time, 3)
+
+    def test_tick_non_default_step(self):
+        """Test that `tick` method correctly increases time by given step."""
+        clock = self._make_instance()
+        self.assertEqual(clock.time, 0)
+
+        clock.tick(step=4)
+        self.assertEqual(clock.time, 4)
+        clock.tick(step=0)
+        self.assertEqual(clock.time, 4)
+
+    def test_tick_checks_step_to_be_positive(self):
+        """Test that `tick` method rejects negative steps."""
+        clock = self._make_instance()
+        try:
+            clock.tick(step=-1)
+        except ValueError:
+            pass
+        except:
+            self.fail("Invalid exception type raised, ValueError expected.")
+        else:
+            self.fail("Tick (incorrectly) accepts negative steps.")
