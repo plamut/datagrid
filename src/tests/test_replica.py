@@ -12,13 +12,13 @@ class TestReplica(unittest.TestCase):
         return self._getTargetClass()(*args, **kw)
 
     def test_init(self):
-        """Test than new instances are correctly initialized."""
+        """Test than new Replica instances are correctly initialized."""
         replica = self._makeInstance('replica_1', 1234)
         self.assertEqual(replica.name, 'replica_1')
         self.assertEqual(replica.size, 1234)
 
     def test_init_checks_size_to_be_positive(self):
-        """Test that new replica instance cannot be initialized with a
+        """Test that new Replica instance cannot be initialized with a
         non-positive size.
         """
         self.assertRaises(ValueError, self._makeInstance, 'replica_1', 0)
