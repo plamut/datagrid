@@ -2,7 +2,7 @@ import unittest
 
 
 class TestReplica(unittest.TestCase):
-    """Tests for Replica model."""
+    """Tests for :py:class:`~models.replica.Replica` model."""
 
     def _getTargetClass(self):
         from models.replica import Replica
