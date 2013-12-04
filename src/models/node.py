@@ -110,7 +110,6 @@ class Node(object):
         self._capacity = capacity
         self._free_capacity = capacity
 
-        self._client_nodes = OrderedDict()
         self._parent = None  # direct parent on the shortest path to server
 
         self._replicas = OrderedDict()  # replicas sorted by their value ASC
