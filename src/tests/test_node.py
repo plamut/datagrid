@@ -1,5 +1,7 @@
 """Tests for :py:mod:`models.node` module."""
 
+from collections import OrderedDict
+
 import unittest
 
 
@@ -102,3 +104,90 @@ class TestReplicaStats(unittest.TestCase):
         self.assertEqual(stats.lrt, 16)
         self.assertEqual(stats.nor, 2)
         self.assertEqual(stats.nor_fsti(20), 1)
+
+
+class TestNode(unittest.TestCase):
+    """Tests for :py:class:`~models.node.Node` class."""
+
+    def _get_target_class(self):
+        from models.node import Node
+        return Node
+
+    def _make_instance(self, *args, **kw):
+        return self._get_target_class()(*args, **kw)
+
+    def _make_sim(self, *args, **kwargs):
+        """Make an instance of Simulation."""
+        from models.simulation import Simulation
+        return Simulation(*args, **kwargs)
+
+    def _make_replica(self, *args, **kwargs):
+        """Make an instance of Replica."""
+        from models.replica import Replica
+        return Replica(*args, **kwargs)
+
+    def test_init(self):
+        """Test than new instances are correctly initialized."""
+        sim = self._make_sim()
+        replicas = OrderedDict(
+            replica_1=self._make_replica('replica_1', 3000),
+            replica_2=self._make_replica('replica_2', 7500),
+            replica_3=self._make_replica('replica_3', 12000),
+        )
+        node = self._make_instance('node_1', 30000, sim, replicas=replicas)
+
+        self.assertEqual(node.name, 'node_1')
+        self.assertEqual(node.capacity, 30000)
+        self.assertEqual(node.free_capacity, 7500)
+
+        self.assertIsNone(node._parent)
+        self.assertIs(node._sim, sim)
+        self.assertEqual(node._replicas.keys(), replicas.keys())
+
+    def test_init_checks_capacity_to_be_positive(self):
+        """Test than new instances are correctly initialized."""
+        sim = self._make_sim()
+
+        with self.assertRaises(ValueError):
+            self._make_instance('node_1', -1000, sim)
+
+        with self.assertRaises(ValueError):
+            self._make_instance('node_1', 0, sim)
+
+    def test_name_readonly(self):
+        """Test that instance's `name` property is read-only."""
+        sim = self._make_sim()
+        node = self._make_instance('node_1', 1000, sim)
+
+        try:
+            node.name = 'new_name'
+        except AttributeError:
+            pass
+        else:
+            self.fail("Attribute 'name' is not read-only.")
+
+    def test_capacity_readonly(self):
+        """Test that instance's `capacity` property is read-only."""
+        sim = self._make_sim()
+        node = self._make_instance('node_1', 1000, sim)
+
+        try:
+            node.capacity = 5000
+        except AttributeError:
+            pass
+        else:
+            self.fail("Attribute 'capacity' is not read-only.")
+
+    def test_free_capacity_readonly(self):
+        """Test that instance's `free_capacity` property is read-only."""
+        sim = self._make_sim()
+        node = self._make_instance('node_1', 1000, sim)
+
+        try:
+            node.free_capacity = 200
+        except AttributeError:
+            pass
+        else:
+            self.fail("Attribute 'free_capacity' is not read-only.")
+
+    # TODO: add the rest of the tests (set_parent etc ...)
