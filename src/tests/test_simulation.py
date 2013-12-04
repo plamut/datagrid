@@ -1,11 +1,7 @@
-"""Tests for `simulation` module."""
+"""Tests for :py:mod:`models.simulation` module."""
 
 import unittest
 
-
-# XXX: perhaps combine tests into a test suite (i.e. for testing the
-# simulation module)
-# might not be that necessary if autodiscover works just fine ...
 
 class TestDigits(unittest.TestCase):
     """Tests for :py:func:`models.simulation._digits` helper function."""
@@ -116,11 +112,5 @@ class TestClock(unittest.TestCase):
     def test_tick_checks_step_to_be_positive(self):
         """Test that `tick` method rejects negative steps."""
         clock = self._make_instance()
-        try:
+        with self.assertRaises(ValueError):
             clock.tick(step=-1)
-        except ValueError:
-            pass
-        except:
-            self.fail("Invalid exception type raised, ValueError expected.")
-        else:
-            self.fail("Tick (incorrectly) accepts negative steps.")
