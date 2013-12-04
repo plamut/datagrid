@@ -1,6 +1,7 @@
 """Tests for :py:mod:`models.node` module."""
 
 from collections import OrderedDict
+from unittest.mock import Mock
 
 import unittest
 
@@ -190,4 +191,57 @@ class TestNode(unittest.TestCase):
         else:
             self.fail("Attribute 'free_capacity' is not read-only.")
 
-    # TODO: add the rest of the tests (set_parent etc ...)
+    def test_set_parent(self):
+        """Test that set_parent() correctly sets node's parent."""
+        sim = self._make_sim()
+        node = self._make_instance('node_1', 1000, sim)
+        parent_node = self._make_instance('parent', 10000, sim)
+
+        self.assertIsNone(node._parent)
+        node.set_parent(parent_node)
+        self.assertIs(node._parent, parent_node)
+
+    # TODO: GV_
+
+    def test_replica_value(self):
+        """Test that the value of a replica is calculated correctly.
+
+        Replica value is calculated by the following formula (from the paper):
+
+        NOR / replica.size + NOR_FSTI / FSTI + 1 / (now - repl_last_req_time)
+        """
+        sim = Mock(spec=self._make_sim())
+        sim.fsti = 10
+        sim.now = 4
+
+        replica = self._make_replica('replica_1', size=200)
+        node = self._make_instance('node_1', 1000, sim)
+
+        repl_stats = Mock(nor=0, lrt=0)
+        repl_stats.nor_fsti.return_value = 0
+        node._replica_stats['replica_1'] = repl_stats
+
+        self.assertAlmostEqual(node._RV(replica), 0.25)
+
+        repl_stats.nor = 20
+        self.assertAlmostEqual(node._RV(replica), 0.35)
+
+        replica._size = 50
+        self.assertAlmostEqual(node._RV(replica), 0.65)
+
+        repl_stats.nor_fsti.return_value = 15
+        self.assertAlmostEqual(node._RV(replica), 2.15)
+
+        repl_stats.lrt = 3
+        self.assertAlmostEqual(node._RV(replica), 2.90)
+
+        sim.now = 8
+        self.assertAlmostEqual(node._RV(replica), 2.10)
+
+    # TODO: _store_if_valuable
+
+    # TODO: request_replica
+
+    # TODO: _copy_replica
+
+    # TODO: delete_replica
