@@ -1,3 +1,5 @@
+"""Tests for :py:mod:`models.node` module."""
+
 import unittest
 
 
