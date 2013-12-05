@@ -201,14 +201,74 @@ class TestNode(unittest.TestCase):
         node.set_parent(parent_node)
         self.assertIs(node._parent, parent_node)
 
-    # TODO: GV_
+    def test_group_value(self):
+        """Test that the value of a replica group is calculated correctly.
+
+        Group value is calculated by the following formula (from the paper):
+
+            sum(NOR) / sum(sizes) + sum(NOR_FSTI) / FSTI +
+            1 / (now - avg(last_req_time))
+        """
+        sim = Mock(spec=self._make_sim())
+        sim.fsti = 10
+        sim.now = 4
+
+        node = self._make_instance('node_1', 1000, sim)
+
+        replica_group = [
+            self._make_replica('replica_1', size=200),
+            self._make_replica('replica_2', size=400),
+            self._make_replica('replica_3', size=900),
+        ]
+
+        stats_1 = Mock(nor=0, lrt=0)
+        stats_1.nor_fsti.return_value = 0
+        node._replica_stats['replica_1'] = stats_1
+
+        stats_2 = Mock(nor=0, lrt=0)
+        stats_2.nor_fsti.return_value = 0
+        node._replica_stats['replica_2'] = stats_2
+
+        stats_3 = Mock(nor=0, lrt=0)
+        stats_3.nor_fsti.return_value = 0
+        node._replica_stats['replica_3'] = stats_3
+
+        self.assertAlmostEqual(node._GV(replica_group), 0.25)
+
+        stats_1.nor = 15
+        self.assertAlmostEqual(node._GV(replica_group), 0.26)
+        stats_2.nor = 45
+        self.assertAlmostEqual(node._GV(replica_group), 0.29)
+
+        replica_group[2]._size = 2400
+        self.assertAlmostEqual(node._GV(replica_group), 0.27)
+
+        stats_1.nor_fsti.return_value = 5
+        self.assertAlmostEqual(node._GV(replica_group), 0.77)
+        stats_2.nor_fsti.return_value = 20
+        self.assertAlmostEqual(node._GV(replica_group), 2.77)
+
+        stats_1.lrt = 1
+        stats_2.lrt = 2
+        stats_3.lrt = 3
+        self.assertAlmostEqual(node._GV(replica_group), 3.02)
+
+        sim.now = 7
+        self.assertAlmostEqual(node._GV(replica_group), 2.72)
+
+    def test_group_value_when_empty(self):
+        """Test that the calculated value of an empty replica group is zero."""
+        sim = Mock()
+        node = self._make_instance('node_1', 1000, sim)
+        self.assertAlmostEqual(node._GV([]), 0.0)
 
     def test_replica_value(self):
         """Test that the value of a replica is calculated correctly.
 
         Replica value is calculated by the following formula (from the paper):
 
-        NOR / replica.size + NOR_FSTI / FSTI + 1 / (now - repl_last_req_time)
+            NOR / replica.size + NOR_FSTI / FSTI +
+            1 / (now - repl_last_req_time)
         """
         sim = Mock(spec=self._make_sim())
         sim.fsti = 10
