@@ -247,7 +247,7 @@ class Node(object):
             if gv < rv:
                 # delete all replicas needed to free enough space
                 for mr in marked_replicas:
-                    self.delete_replica(mr.name)
+                    self._delete_replica(mr.name)
                 self._copy_replica(replica)
                 self._replica_stats[replica.name].new_request_made()
 
@@ -316,7 +316,7 @@ class Node(object):
                 sorted(self._replicas.items(), key=lambda x: self._RV(x[1]))
             )
 
-    def delete_replica(self, replica_name):
+    def _delete_replica(self, replica_name):
         """Remove a local copy of a replica. If replica does not exist
         on the node, an error is raised.
 
