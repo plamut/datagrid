@@ -250,7 +250,8 @@ class Node(object):
                 for mr in marked_replicas:
                     self._delete_replica(mr.name)
                 self._copy_replica(replica)
-                self._replica_stats[replica.name].new_request_made()
+                self._replica_stats[replica.name].new_request_made(
+                    self._sim.now)
 
     def request_replica(self, replica_name):
         """Request a replica from the node.
