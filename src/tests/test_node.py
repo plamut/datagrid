@@ -298,7 +298,82 @@ class TestNode(unittest.TestCase):
         sim.now = 8
         self.assertAlmostEqual(node._RV(replica), 2.10)
 
-    # TODO: _store_if_valuable
+    def test_store_if_valuable_enough_free_space(self):
+        """Test that _store_if_valuable method stores a new replica when there
+        is enough free space.
+        """
+        sim = Mock()
+        sim.fsti = 10
+        sim.now = 4
+
+        replicas = [
+            self._make_replica('replica_1', size=200),
+            self._make_replica('replica_2', size=300),
+        ]
+        replicas = OrderedDict((r.name, r) for r in replicas)
+        node = self._make_instance('node_1', 1000, sim, replicas)
+
+        # make sure replica is considered less valuable than the group, so that
+        # if it gets stored, it is because of enough free space on the node
+        node._RV = Mock(return_value=7)
+        node._GV = Mock(return_value=10)
+
+        new_replica = self._make_replica('new_replica', size=500)
+
+        node._store_if_valuable(new_replica)
+        self.assertEqual(len(node._replicas), 3)
+        self.assertIn('new_replica', node._replicas)
+
+    def test_store_if_valuable_limited_space_replica_more_important(self):
+        """Test that _store_if_valuable method stores a new replica when there
+        is not enough free space, but this replica is valued high enough.
+        """
+        sim = Mock()
+        sim.fsti = 10
+        sim.now = 4
+
+        replicas = [
+            self._make_replica('replica_1', size=200),
+            self._make_replica('replica_2', size=300),
+            self._make_replica('replica_3', size=400),
+        ]
+        replicas = OrderedDict((r.name, r) for r in replicas)
+        node = self._make_instance('node_1', 1000, sim, replicas)
+
+        node._RV = Mock(return_value=15)
+        node._GV = Mock(return_value=8)
+
+        new_replica = self._make_replica('new_replica', size=501)
+        node._store_if_valuable(new_replica)
+        self.assertEqual(len(node._replicas), 2)
+        self.assertIn('new_replica', node._replicas)
+        self.assertNotIn('replica_1', node._replicas)
+        self.assertNotIn('replica_2', node._replicas)
+
+    def test_store_if_valuable_limited_space_replica_less_important(self):
+        """Test that _store_if_valuable method does not store a new replica
+        when there is *not* enough free space and this replica is not valued
+        high enough.
+        """
+        sim = Mock()
+        sim.fsti = 10
+        sim.now = 4
+
+        replicas = [
+            self._make_replica('replica_1', size=200),
+            self._make_replica('replica_2', size=300),
+            self._make_replica('replica_3', size=400),
+        ]
+        replicas = OrderedDict((r.name, r) for r in replicas)
+        node = self._make_instance('node_1', 1000, sim, replicas)
+
+        node._RV = Mock(return_value=2)
+        node._GV = Mock(return_value=14)
+
+        new_replica = self._make_replica('new_replica', size=501)
+        node._store_if_valuable(new_replica)
+        self.assertEqual(len(node._replicas), 3)
+        self.assertNotIn('new_replica', node._replicas)
 
     # TODO: request_replica
 
