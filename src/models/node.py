@@ -95,7 +95,8 @@ class Node(object):
         :param sim: simulation which the node is a part of
         :type sim: :py:class:`~models.simulation.Simulation`
         :param replicas: initial replicas the node contans copies of
-        :type replicas: list of :py:class:`~models.replica.Replica` instances
+        :type replicas: OrderedDict containing
+            :py:class:`~models.replica.Replica` instances
             (optional, default: None)
         """
         # XXX: instead of "full" simulation object pass an adapter with
