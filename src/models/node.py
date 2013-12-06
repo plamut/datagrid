@@ -279,8 +279,35 @@ class Node(object):
             self._replica_stats[replica_name].new_request_made(
                 self._sim.now)
         else:
+            msg = "[{}] Requesting {} from {}".format(
+                self.name, replica_name, self._parent.name)
+            print(msg)
+
             # replica not available locally, request it from parent
-            replica = self._parent.request_replica(replica_name)
+            gen = self._parent.request_replica(replica_name)
+            # import pdb; pdb.set_trace()
+            replica = next(gen)
+
+            msg = "[{}] Got {} from {}".format(
+                self.name, replica_name, self._parent.name)
+            print(msg)
+
+            # here sim should be notified ... and place new event (replica
+            # received) and run send(new_time)
+
+            # and before ^^: replica request should be an event, and then
+            # *simulation machinery* should call parent.request_replica!
+
+            msg = "[{}] Returning {}".format(self.name, replica_name)
+            print(msg)
+            now = (yield replica)
+
+            print("[{}] received new time from sim: {}".format(self.name, now))
+
+            try:
+                gen.send(msg)
+            except StopIteration:
+                print('')
 
             # notify simulation that replica had to be requested from parent
             self._sim.notify_repl_req(self, self._parent, replica)
@@ -289,7 +316,9 @@ class Node(object):
             # in the _store_if_valuable() method
             self._store_if_valuable(replica)
 
-        return replica
+        msg = "[{}] Returning {} (last yield)".format(self.name, replica_name)
+        print(msg)
+        yield replica
 
     def _copy_replica(self, replica, run_sort=True):
         """Store a local copy of the given replica.

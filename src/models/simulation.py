@@ -356,9 +356,11 @@ class Simulation(object):
         self._clock.reset()
 
         for i in range(1, self._total_reqs + 1):
-            if i % 1000 == 0:
-                print("request {}/{} ({:.2f} %)".format(
-                    i, self._total_reqs, 100 * i / self._total_reqs))
+            #if i % 1000 == 0:
+            print('\033[1m', "request {}/{} ({:.2f} %)".format(
+                    i, self._total_reqs, 100 * i / self._total_reqs),
+                '\033[0m',
+                sep='')
 
             event = ef.get_random()
 
@@ -366,7 +368,15 @@ class Simulation(object):
             self._clock.tick(step=event.time - self.now)
 
             # execute an event (issue replica request)
-            event.node.request_replica(event.replica.name)
+            gen = event.node.request_replica(event.replica.name)
+            replica = next(gen)
+            print("[SIM] Got replica from {}: {}".format(
+                event.node.name, replica.name))
+
+            try:
+                gen.send("NEW_TIME="+str(i))
+            except StopIteration:
+                print('')
 
         print("Total resp. time (s):", self._total_rt_s * self._c1)
         print("Total bandwidth:", self._total_bw * self._c2)
@@ -387,6 +397,8 @@ class _EventFactory(object):
         # XXX: is there a better way to select a random element from a dict?
         # (without converting to list, which is slow) - BTW, does random.choice
         # do exactly that? converting to a list first?
+
+        # XXX: exclude server node from this!
         node = random.sample(self._sim.nodes.keys(), 1)[0]
         node = self._sim.nodes[node]
 
