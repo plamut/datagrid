@@ -252,6 +252,9 @@ class Node(object):
                 self._copy_replica(replica)
                 self._replica_stats[replica.name].new_request_made(
                     self._sim.now)
+                # TODO: it's not sim.now, there was some delay from the time
+                # request was issued to the time replica was received!
+                # (currently we have a frozen time) - fix this!
 
     def request_replica(self, replica_name):
         """Request a replica from the node.
@@ -325,7 +328,10 @@ class Node(object):
         :param replica_name: name of the replica to delete
         :type replica_name: string
         """
-        replica = self._replicas.pop(replica_name)
+        try:
+            replica = self._replicas.pop(replica_name)
+        except KeyError:
+            raise ValueError("Replica {} does not exist.".format(replica_name))
         self._replica_stats.pop(replica_name)
         self._free_capacity += replica.size
 
