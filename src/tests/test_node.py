@@ -377,6 +377,121 @@ class TestNode(unittest.TestCase):
 
     # TODO: request_replica
 
-    # TODO: _copy_replica
+    def test_copy_replica_not_enough_space(self):
+        """Test that _copy_replica raises ValueError if there is not enough
+        free space.
+        """
+        sim = Mock()
+        sim.fsti = 10
+        sim.now = 4
 
-    # TODO: delete_replica
+        replicas = [
+            self._make_replica('replica_1', size=100),
+            self._make_replica('replica_2', size=350),
+        ]
+        replicas = OrderedDict((r.name, r) for r in replicas)
+        node = self._make_instance('node_1', 500, sim, replicas)
+
+        new_replica = self._make_replica('new_replica', size=51)
+        with self.assertRaises(ValueError):
+            node._copy_replica(new_replica)
+
+    def test_copy_replica_enough_space(self):
+        """Test that _copy_replica correctly stores a replica when there is
+        enough free space.
+        """
+        sim = Mock()
+        sim.fsti = 10
+        sim.now = 4
+
+        replicas = [
+            self._make_replica('replica_1', size=100),
+            self._make_replica('replica_2', size=800),
+            self._make_replica('replica_3', size=500),
+        ]
+        replicas = OrderedDict((r.name, r) for r in replicas)
+        node = self._make_instance('node_1', 2000, sim, replicas)
+
+        # make smaller replicas more valuable
+        node._RV = Mock(side_effect=lambda r: 1000 - r.size)
+
+        new_replica = self._make_replica('new_replica', size=400)
+        node._copy_replica(new_replica)
+
+        self.assertEqual(len(node._replicas), 4)
+        self.assertIn('new_replica', node._replicas)
+        self.assertIn('new_replica', node._replica_stats)
+        self.assertEqual(node.free_capacity, 200)
+
+        # check that replicas are also correctly ordered by their value
+        self.assertEqual(
+            list(node._replicas.keys()),
+            ['replica_2', 'replica_3', 'new_replica', 'replica_1']
+        )
+
+    def test_copy_replica_enough_space_no_sort(self):
+        """Test that _copy_replica does not sort replicas if run_sort is False.
+        """
+        sim = Mock()
+        sim.fsti = 10
+        sim.now = 4
+
+        replicas = [
+            self._make_replica('replica_1', size=100),
+            self._make_replica('replica_2', size=800),
+            self._make_replica('replica_3', size=500),
+        ]
+        replicas = OrderedDict((r.name, r) for r in replicas)
+        node = self._make_instance('node_1', 2000, sim, replicas)
+
+        # make smaller replicas more valuable
+        node._RV = Mock(side_effect=lambda r: 1000 - r.size)
+
+        new_replica = self._make_replica('new_replica', size=400)
+        node._copy_replica(new_replica, run_sort=False)
+
+        # replicas must still be ordered by their insertion order
+        self.assertEqual(
+            list(node._replicas.keys()),
+            ['replica_1', 'replica_2', 'replica_3', 'new_replica']
+        )
+
+    def test_delete_replica_replica_exists(self):
+        """Test that _delete_replica correctly deletes an existing replica.
+        """
+        sim = Mock()
+        sim.fsti = 10
+        sim.now = 4
+
+        replicas = [
+            self._make_replica('replica_1', size=200),
+            self._make_replica('replica_2', size=300),
+            self._make_replica('replica_3', size=400),
+        ]
+        replicas = OrderedDict((r.name, r) for r in replicas)
+        node = self._make_instance('node_1', 1000, sim, replicas)
+
+        node._delete_replica('replica_3')
+        self.assertEqual(len(node._replicas), 2)
+        self.assertNotIn('replica_3', node._replicas)
+        self.assertNotIn('replica_3', node._replica_stats)
+        self.assertEqual(node.free_capacity, 500)
+
+    def test_delete_replica_non_existent(self):
+        """Test that _delete_replica raises ValueError for non-existent
+        replicas.
+        """
+        sim = Mock()
+        sim.fsti = 10
+        sim.now = 4
+
+        replicas = [
+            self._make_replica('replica_1', size=200),
+            self._make_replica('replica_2', size=300),
+            self._make_replica('replica_3', size=400),
+        ]
+        replicas = OrderedDict((r.name, r) for r in replicas)
+        node = self._make_instance('node_1', 1000, sim, replicas)
+
+        with self.assertRaises(ValueError):
+            node._delete_replica('non-existent')
