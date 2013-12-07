@@ -18,7 +18,7 @@ sim_settings = dict(
 
 
 debug_sim = dict(
-    node_count=7,
+    node_count=6,
     node_capacity=50000,
     strategy=Strategy.EFS,
     min_dist_km=1,  # min distance between two adjacent nodes

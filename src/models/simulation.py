@@ -1,9 +1,12 @@
 from collections import namedtuple
 from collections import OrderedDict
+from models.event import ReplicaRequest
+from models.event import ReplicaSend
 from models.node import Node
 from models.replica import Replica
 from types import SimpleNamespace
 
+import heapq
 import itertools
 import math
 import random
@@ -355,31 +358,78 @@ class Simulation(object):
         ef = _EventFactory(self)
         self._clock.reset()
 
-        for i in range(1, self._total_reqs + 1):
-            #if i % 1000 == 0:
-            print('\033[1m', "request {}/{} ({:.2f} %)".format(
-                    i, self._total_reqs, 100 * i / self._total_reqs),
-                '\033[0m',
-                sep='')
+        self.event_queue = []
 
-            event = ef.get_random()
+        event = ef.get_random()
+
+        heapq.heappush(self.event_queue, event)
+
+        # while evenet queue not empty: process next event
+        while len(self.event_queue) > 0:
+            # print("[SIM @ {}] Events in queue:".format(self.now), len(self.event_queue))
+            event = heapq.heappop(self.event_queue)
+
+            msg = "[SIM @ {}] Next event at {}: {}".format(
+                self.now, event.time, event)
+            print(msg)
 
             # fast-forward time to event occurence
             self._clock.tick(step=event.time - self.now)
+            msg = "[SIM @ {0}] Time changed to {0}".format(self.now)
+            print(msg)
 
-            # execute an event (issue replica request)
-            gen = event.node.request_replica(event.replica.name)
-            replica = next(gen)
-            print("[SIM] Got replica from {}: {}".format(
-                event.node.name, replica.name))
+            # execute event
+            self._exec_event(event)
 
-            try:
-                gen.send("NEW_TIME="+str(i))
-            except StopIteration:
-                print('')
+        # for i in range(1, self._total_reqs + 1):
+        #     #if i % 1000 == 0:
+        #     print('\033[1m', "request {}/{} ({:.2f} %)".format(
+        #             i, self._total_reqs, 100 * i / self._total_reqs),
+        #         '\033[0m',
+        #         sep='')
 
+        #     event = ef.get_random()
+
+        #     # fast-forward time to event occurence
+        #     self._clock.tick(step=event.time - self.now)
+
+        #     # execute an event (issue replica request)
+        #     gen = event.node.request_replica(event.replica.name)
+        #     replica = next(gen)
+        #     print("[SIM] Got replica from {}: {}".format(
+        #         event.node.name, replica.name))
+
+        #     try:
+        #         gen.send("NEW_TIME="+str(i))
+        #     except StopIteration:
+        #         print('')
+
+        print("-" * 10, "END", "-" * 10)
         print("Total resp. time (s):", self._total_rt_s * self._c1)
         print("Total bandwidth:", self._total_bw * self._c2)
+
+    def _exec_event(self, event):
+        """TODO: docstring (executing an event)"""
+        if type(event) == ReplicaRequest:
+
+            print("[SIM @ {}] processing REPL_REQ event".format(self.now))
+            g = event.target.request_replica(event.replica_name)
+
+            new_event = next(g)
+            # parent, replica_name, event_type = next(g)
+
+            msg = "[SIM @ {}] {} returned event {})".format(
+                self.now, new_event.source.name, new_event)
+            print(msg)
+
+            new_event.time += 1  # XXX: have a fixed delay of 1 for now
+            heapq.heappush(self.event_queue, new_event)
+
+        elif type(event) == ReplicaSend:
+            print("[SIM @ {}] processing REPL_RECEIVED event".format(self.now))
+
+        else:
+            raise ValueError("Unknown event", type(event))
 
 
 class _EventFactory(object):
@@ -410,8 +460,10 @@ class _EventFactory(object):
         # XXX: don't hardcode the limits, read them from the simulation
         # object (and the same for time?)
         time_from_now = random.randint(0, 99)
+        event_time = time_from_now + self._sim.now
 
-        return NodeRequest(node, replica, self._sim.now + time_from_now)
+        # return NodeRequest(node, replica, self._sim.now + time_from_now)
+        return ReplicaRequest(node, node, replica.name, event_time)
 
 
 class NodeRequest(object):
@@ -430,3 +482,8 @@ class NodeRequest(object):
         self.node = node
         self.replica = replica
         self.time = time
+
+    def __str__(self):
+        node_name = self.node.name if self.node else "None"
+        return "NodeReqest ({} req. {} @ {})".format(
+            node_name, self.replica.name, self.time)
