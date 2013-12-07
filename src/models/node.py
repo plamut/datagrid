@@ -2,7 +2,7 @@ from collections import deque
 from collections import OrderedDict
 from copy import deepcopy
 from models.event import ReplicaRequest
-from models.event import ReplicaSend
+from models.event import ReplicaSendBack
 
 
 class _ReplicaStats(object):
@@ -258,7 +258,7 @@ class Node(object):
                 # request was issued to the time replica was received!
                 # (currently we have a frozen time) - fix this!
 
-    def request_replica(self, replica_name):
+    def request_replica(self, replica_name, requested_by):
         """Request a replica from the node.
 
         If a local copy of replica is currently available, it is immediately
@@ -269,8 +269,9 @@ class Node(object):
         whether to keep a local copy of it or not (a copy is kept if it is
         determined more important than a group of existing local replicas).
 
-        :param replica_name: name of the replica to request
-        :type replica_name: string
+        :param str replica_name: name of the replica to request
+        :param requested_by: node that requested the replica
+        :type requested_by: :py:class:`~models.node.Node`
 
         :returns: requested replica
         :rtype: :py:class:`~models.replica.Replica`
@@ -291,7 +292,7 @@ class Node(object):
             replica, time_received = (yield e)
 
             msg = "[{} @ {}] Got {} from {} after {}".format(
-                self.name, self._sim.now, replica_name, self._parent.name, time)
+                self.name, self._sim.now, replica_name, self._parent.name, time_received)
             print(msg)
 
             # now that we have retrieved replica, store it if it is valuable
@@ -302,7 +303,7 @@ class Node(object):
             self.name, self._sim.now, replica_name)
         print(msg)
 
-        e = ReplicaSend(self, replica, self._sim.now)
+        e = ReplicaSendBack(self, requested_by, replica, self._sim.now)
         yield e
 
     def _copy_replica(self, replica, run_sort=True):

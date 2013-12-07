@@ -16,7 +16,6 @@ sim_settings = dict(
     fsti=1000,  # frequency specific time interval
 )
 
-
 debug_sim = dict(
     node_count=6,
     node_capacity=50000,
@@ -30,6 +29,7 @@ debug_sim = dict(
     total_reqs=5,
     fsti=1000,  # frequency specific time interval
 )
+
 
 def main():
     print("Main function")

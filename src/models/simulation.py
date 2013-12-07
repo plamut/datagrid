@@ -1,7 +1,7 @@
 from collections import namedtuple
 from collections import OrderedDict
 from models.event import ReplicaRequest
-from models.event import ReplicaSend
+from models.event import ReplicaSendBack
 from models.node import Node
 from models.replica import Replica
 from types import SimpleNamespace
@@ -43,7 +43,7 @@ class _Clock(object):
     """Representation of a simulation clock."""
 
     def __init__(self):
-        self._time = 0
+        self._time = 0.0
 
     @property
     def time(self):
@@ -52,9 +52,9 @@ class _Clock(object):
 
     def reset(self):
         """Reset current simulation time to zero (0)."""
-        self._time = 0
+        self._time = 0.0
 
-    def tick(self, step=1):
+    def tick(self, step=1.0):
         """Increase current simulation time by `step`.
 
         :param step: by how much to increase the time
@@ -66,7 +66,8 @@ class _Clock(object):
         """
         if step < 0:
             raise ValueError("Clock step must be non-negative.")
-        self._time += int(step)
+        # self._time += int(step)
+        self._time += step
         return self._time
 
 
@@ -413,7 +414,7 @@ class Simulation(object):
         if type(event) == ReplicaRequest:
 
             print("[SIM @ {}] processing REPL_REQ event".format(self.now))
-            g = event.target.request_replica(event.replica_name)
+            g = event.target.request_replica(event.replica_name, event.source)
 
             new_event = next(g)
             # parent, replica_name, event_type = next(g)
@@ -422,14 +423,35 @@ class Simulation(object):
                 self.now, new_event.source.name, new_event)
             print(msg)
 
-            new_event.time += 1  # XXX: have a fixed delay of 1 for now
-            heapq.heappush(self.event_queue, new_event)
+            self._schedule_event(new_event)
 
-        elif type(event) == ReplicaSend:
+        elif type(event) == ReplicaSendBack:
+            print("[SIM @ {}] processing REPL_SEND_BACK event".format(self.now))
+
+        else:
+            raise ValueError("Unknown event", type(event))
+
+    def _schedule_event(self, event):
+        """TODO: schedules event based on its type and places it into event
+        queue
+        """
+        if type(event) == ReplicaRequest:
+            src_name = event.source.name
+            target_name = event.target.name
+
+            dist_km = self._edges[src_name][target_name]
+            cl = dist_km / self._pspeed_kmps  # communication latency
+
+            # it takes some time for the parent node to receive the request
+            event.time += cl
+
+        elif type(event) == ReplicaSendBack:
             print("[SIM @ {}] processing REPL_RECEIVED event".format(self.now))
 
         else:
             raise ValueError("Unknown event", type(event))
+
+        heapq.heappush(self.event_queue, event)
 
 
 class _EventFactory(object):
