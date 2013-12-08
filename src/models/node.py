@@ -256,7 +256,7 @@ class Node(object):
                 # request was issued to the time replica was received!
                 # (currently we have a frozen time) - fix this!
 
-    def request_replica(self, replica_name, requester):
+    def request_replica(self, replica_name, requester, generator=None):
         """Request a replica from the node.
 
         If a local copy of replica is currently available, it is immediately
@@ -289,7 +289,7 @@ class Node(object):
             e = self._sim.send_replica_request(self, self._parent, replica_name)
             replica = (yield e)
 
-            msg = "[{} @ {}] Got {} from {}".format(
+            msg = "[{} @ {}] Received {} from {}".format(
                 self.name, self._sim.now, replica_name, self._parent.name)
             print(msg)
 
@@ -301,7 +301,8 @@ class Node(object):
             self.name, self._sim.now, replica_name)
         print(msg)
 
-        e = self._sim.send_replica(self, requester, replica)
+        # here you somehow have to pass a generator!
+        e = self._sim.send_replica(self, requester, replica, generator)
         yield e
 
     def _copy_replica(self, replica, run_sort=True):

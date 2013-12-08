@@ -339,9 +339,11 @@ class Simulation(object):
         event = SendReplicaRequest(source, target, replica_name, self.now)
         return event
 
-    def send_replica(self, sender, receiver, replica):
+    def send_replica(self, sender, receiver, replica, generator):
         """TODO: create new SendReplica event"""
         event = SendReplica(sender, receiver, replica, self.now)
+        event._generator = generator  # from previous event
+        # TODO: systematically pass this!
         return event
 
     def initialize(self):
@@ -382,9 +384,9 @@ class Simulation(object):
             # print("[SIM @ {}] Events in queue:".format(self.now), len(self.event_queue))
             event = heapq.heappop(self.event_queue)
 
-            msg = "[SIM @ {}] Next event at {}: {}".format(
-                self.now, event.time, event)
-            print(msg)
+            # msg = "[SIM @ {}] Next event at {}: {}".format(
+            #     self.now, event.time, event)
+            # print(msg)
 
             # fast-forward time to event occurence
             self._clock.tick(step=event.time - self.now)
@@ -424,23 +426,32 @@ class Simulation(object):
     def _process_event(self, event):
         """TODO: docstring (processing an event)"""
 
-        print("[SIM @ {}] processing event {}".format(self.now, event))
+        print("[SIM    @ {}] processing event {}".format(self.now, event))
 
         if type(event) == ReceiveReplicaRequest:
-            g = event.target.request_replica(event.replica_name, event.source)
+            gen = event._generator if hasattr(event, "_generator") else None
+            g = event.target.request_replica(event.replica_name, event.source, gen)
+
+            # print("Calling Next(g) on", event.target.name)
             new_event = next(g)
 
-            msg = "[SIM @ {}] {} returned event {})".format(
-                self.now, new_event.source.name, new_event)
-            print(msg)
+            # msg = "[SIM @ {}] {} returned event {})".format(
+            #     self.now, new_event.source.name, new_event)
+            # print(msg)
 
-            dist_km = self._edges[new_event.source.name][new_event.target.name]
-            cl = dist_km / self._pspeed_kmps  # communication latency
+            # node returns either SendReplicaRequest event (if it doesn't have)
+            # a replica or SendReplica (if it fnds replica and sends it back)
+            if type(new_event) == SendReplicaRequest:
 
-            # it takes some time for the parent node to receive the request
-            new_event.time += cl
+                new_event._generator = g  # XXX: temporary for SendReplicaRequest
+                self._schedule_event(new_event)
 
-            self._schedule_event(new_event)
+            elif type(new_event) == SendReplica:
+                # node does not have a replica and issud SendReplica request
+                self._schedule_event(new_event)
+
+            else:
+                raise Exception("Node returned unknown event: ", event)
 
         elif type(event) == SendReplicaRequest:
             # some node sends a replica request, schedule ReceiveReplicaRequest
@@ -455,6 +466,9 @@ class Simulation(object):
             new_event = ReceiveReplicaRequest(
                 event.source, event.target, event.replica_name, event_time)
 
+            # ReceiveReplicaRequest - pass generator
+            new_event._generator = event._generator
+
             self._schedule_event(new_event)
 
         elif type(event) == SendReplica:
@@ -468,11 +482,16 @@ class Simulation(object):
             new_event = ReceiveReplica(
                 event.source, event.target, event.replica, event_time)
 
+            # ReceiveReplica - pass generator so that we can call it
+            new_event._generator = event._generator
+
             self._schedule_event(new_event)
 
         elif type(event) == ReceiveReplica:
-            # XXX: call generator here ... continue node
-            pass
+            # node's request for replica has completed, proceed node from
+            # where it stopped
+            g = event._generator
+            g.send(event.replica)
         else:
             raise ValueError("Unknown event", type(event))
 
