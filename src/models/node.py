@@ -1,8 +1,6 @@
 from collections import deque
 from collections import OrderedDict
 from copy import deepcopy
-from models.event import ReplicaRequest
-from models.event import ReplicaSendBack
 
 
 class _ReplicaStats(object):
@@ -258,7 +256,7 @@ class Node(object):
                 # request was issued to the time replica was received!
                 # (currently we have a frozen time) - fix this!
 
-    def request_replica(self, replica_name, requested_by):
+    def request_replica(self, replica_name, requester):
         """Request a replica from the node.
 
         If a local copy of replica is currently available, it is immediately
@@ -270,8 +268,8 @@ class Node(object):
         determined more important than a group of existing local replicas).
 
         :param str replica_name: name of the replica to request
-        :param requested_by: node that requested the replica
-        :type requested_by: :py:class:`~models.node.Node`
+        :param requester: node that requested the replica
+        :type requester: :py:class:`~models.node.Node`
 
         :returns: requested replica
         :rtype: :py:class:`~models.replica.Replica`
@@ -287,23 +285,23 @@ class Node(object):
             print(msg)
 
             # replica not available locally, request it from parent and
-            # wait until we receive it
-            e = ReplicaRequest(self, self._parent, replica_name, self._sim.now)
-            replica, time_received = (yield e)
+            # wait until we receive it - generate new event
+            e = self._sim.send_replica_request(self, self._parent, replica_name)
+            replica = (yield e)
 
-            msg = "[{} @ {}] Got {} from {} after {}".format(
-                self.name, self._sim.now, replica_name, self._parent.name, time_received)
+            msg = "[{} @ {}] Got {} from {}".format(
+                self.name, self._sim.now, replica_name, self._parent.name)
             print(msg)
 
             # now that we have retrieved replica, store it if it is valuable
             # enough
             self._store_if_valuable(replica)
 
-        msg = "[{} @ {}] Returning (yielding) {}".format(
+        msg = "[{} @ {}] Found {}, returning (yielding) it".format(
             self.name, self._sim.now, replica_name)
         print(msg)
 
-        e = ReplicaSendBack(self, requested_by, replica, self._sim.now)
+        e = self._sim.send_replica(self, requester, replica)
         yield e
 
     def _copy_replica(self, replica, run_sort=True):

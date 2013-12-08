@@ -1,7 +1,9 @@
 from collections import namedtuple
 from collections import OrderedDict
-from models.event import ReplicaRequest
-from models.event import ReplicaSendBack
+from models.event import ReceiveReplica
+from models.event import ReceiveReplicaRequest
+from models.event import SendReplica
+from models.event import SendReplicaRequest
 from models.node import Node
 from models.replica import Replica
 from types import SimpleNamespace
@@ -332,6 +334,16 @@ class Simulation(object):
         self._total_rt_s += replica.size / self._network_bw_mbps + \
             dist_km / self._pspeed_kmps
 
+    def send_replica_request(self, source, target, replica_name):
+        """TODO: Generate new SendReplicaRequest event"""
+        event = SendReplicaRequest(source, target, replica_name, self.now)
+        return event
+
+    def send_replica(self, sender, receiver, replica):
+        """TODO: create new SendReplica event"""
+        event = SendReplica(sender, receiver, replica, self.now)
+        return event
+
     def initialize(self):
         """Initialize (reset) a simulation."""
         self._clock.reset()
@@ -376,11 +388,11 @@ class Simulation(object):
 
             # fast-forward time to event occurence
             self._clock.tick(step=event.time - self.now)
-            msg = "[SIM @ {0}] Time changed to {0}".format(self.now)
-            print(msg)
+            # msg = "[SIM @ {0}] Time changed to {0}".format(self.now)
+            # print(msg)
 
             # execute event
-            self._exec_event(event)
+            self._process_event(event)
 
         # for i in range(1, self._total_reqs + 1):
         #     #if i % 1000 == 0:
@@ -409,48 +421,63 @@ class Simulation(object):
         print("Total resp. time (s):", self._total_rt_s * self._c1)
         print("Total bandwidth:", self._total_bw * self._c2)
 
-    def _exec_event(self, event):
-        """TODO: docstring (executing an event)"""
-        if type(event) == ReplicaRequest:
+    def _process_event(self, event):
+        """TODO: docstring (processing an event)"""
 
-            print("[SIM @ {}] processing REPL_REQ event".format(self.now))
+        print("[SIM @ {}] processing event {}".format(self.now, event))
+
+        if type(event) == ReceiveReplicaRequest:
             g = event.target.request_replica(event.replica_name, event.source)
-
             new_event = next(g)
-            # parent, replica_name, event_type = next(g)
 
             msg = "[SIM @ {}] {} returned event {})".format(
                 self.now, new_event.source.name, new_event)
             print(msg)
 
+            dist_km = self._edges[new_event.source.name][new_event.target.name]
+            cl = dist_km / self._pspeed_kmps  # communication latency
+
+            # it takes some time for the parent node to receive the request
+            new_event.time += cl
+
             self._schedule_event(new_event)
 
-        elif type(event) == ReplicaSendBack:
-            print("[SIM @ {}] processing REPL_SEND_BACK event".format(self.now))
+        elif type(event) == SendReplicaRequest:
+            # some node sends a replica request, schedule ReceiveReplicaRequest
+            # event for the parent
 
+            # it takes some time for the parent node to receive the request,
+            # so calculate the latency first and schedule the event accordingly
+            dist_km = self._edges[event.source.name][event.target.name]
+            cl = dist_km / self._pspeed_kmps  # communication latency
+            event_time = self.now + cl
+
+            new_event = ReceiveReplicaRequest(
+                event.source, event.target, event.replica_name, event_time)
+
+            self._schedule_event(new_event)
+
+        elif type(event) == SendReplica:
+            # schedule replica receive for the receiver - after a delay
+
+            # calculate the time needed for the replica to reach target
+            dist_km = self._edges[event.source.name][event.target.name]
+            delay_s = event.replica.size / self._network_bw_mbps
+
+            event_time = self.now + delay_s
+            new_event = ReceiveReplica(
+                event.source, event.target, event.replica, event_time)
+
+            self._schedule_event(new_event)
+
+        elif type(event) == ReceiveReplica:
+            # XXX: call generator here ... continue node
+            pass
         else:
             raise ValueError("Unknown event", type(event))
 
     def _schedule_event(self, event):
-        """TODO: schedules event based on its type and places it into event
-        queue
-        """
-        if type(event) == ReplicaRequest:
-            src_name = event.source.name
-            target_name = event.target.name
-
-            dist_km = self._edges[src_name][target_name]
-            cl = dist_km / self._pspeed_kmps  # communication latency
-
-            # it takes some time for the parent node to receive the request
-            event.time += cl
-
-        elif type(event) == ReplicaSendBack:
-            print("[SIM @ {}] processing REPL_RECEIVED event".format(self.now))
-
-        else:
-            raise ValueError("Unknown event", type(event))
-
+        """TODO: add new event to even schedule."""
         heapq.heappush(self.event_queue, event)
 
 
@@ -461,18 +488,18 @@ class _EventFactory(object):
         self._sim = sim
 
     def get_random(self):
-        """Create a new random event (some node requests a replica).
+        """Create a new random event (some node receives a request for replica).
 
-        :returns: new random instance of node request event
-        :rtype: :py:class:`~models.simulation.NodeRequest`
+        :returns: new random instance of receive replica request
+        :rtype: :py:class:`~models.simulation.ReceiveReplicaRequest`
         """
         # XXX: is there a better way to select a random element from a dict?
         # (without converting to list, which is slow) - BTW, does random.choice
         # do exactly that? converting to a list first?
 
         # XXX: exclude server node from this!
-        node = random.sample(self._sim.nodes.keys(), 1)[0]
-        node = self._sim.nodes[node]
+        receiver = random.sample(self._sim.nodes.keys(), 1)[0]
+        receiver = self._sim.nodes[receiver]
 
         # XXX: in other scenarios, replica request distribution is not
         # uniform - change when needed
@@ -485,7 +512,7 @@ class _EventFactory(object):
         event_time = time_from_now + self._sim.now
 
         # return NodeRequest(node, replica, self._sim.now + time_from_now)
-        return ReplicaRequest(node, node, replica.name, event_time)
+        return ReceiveReplicaRequest(None, receiver, replica.name, event_time)
 
 
 class NodeRequest(object):
