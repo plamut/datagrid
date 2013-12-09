@@ -192,6 +192,8 @@ class Node(object):
         if stats is None:
             stats = _ReplicaStats()
 
+        # TODO: possible division by zero (ct - stats.lrt) - if replica
+        # was last requested at the same time when it was last used
         rv = stats.nor / replica.size + stats.nor_fsti(ct) / fsti + \
             1 / (ct - stats.lrt)
 

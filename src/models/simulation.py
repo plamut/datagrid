@@ -375,17 +375,29 @@ class Simulation(object):
 
         print("[SIM    @ {:.8f}] SIMULATION STARTED".format(self.now))
 
-        t1, event = ef.get_random()
-        t2, event2 = ef.get_random()
-        t2 = t1  # test "concurrency"
+        t, event = ef.get_random()
+        self._schedule_event(event, t)
 
-        heapq.heappush(self.event_queue, (t1, event))
-        heapq.heappush(self.event_queue, (t2, event2))
+        total_reqs_gen = 1  # total requests generated
 
         # while evenet queue not empty: process next event
         while len(self.event_queue) > 0:
+
             # print("[SIM @ {}] Events in queue:".format(
             #     self.now), len(self.event_queue))
+
+            if total_reqs_gen < self._total_reqs:
+                new_t, new_e = ef.get_random()
+                self._schedule_event(new_e, new_t)
+                total_reqs_gen += 1
+
+                if total_reqs_gen % 1000 == 0:
+                    print('\033[1;36m', "generated request {}/{}"
+                          "({:.2f} %)".format(total_reqs_gen, self._total_reqs,
+                          100 * total_reqs_gen / self._total_reqs),
+                          '\033[0m', sep='')
+
+            # XXX: have something like self._pop_next_event() ?
             time, event = heapq.heappop(self.event_queue)
 
             # msg = "[SIM @ {}] Next event at {}: {}".format(
