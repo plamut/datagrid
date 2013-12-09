@@ -256,7 +256,7 @@ class Node(object):
                 # request was issued to the time replica was received!
                 # (currently we have a frozen time) - fix this!
 
-    def request_replica(self, replica_name, requester, generator=None):
+    def request_replica(self, replica_name, requester):
         """Request a replica from the node.
 
         If a local copy of replica is currently available, it is immediately
@@ -274,23 +274,31 @@ class Node(object):
         :returns: requested replica
         :rtype: :py:class:`~models.replica.Replica`
         """
+        requester_name = requester.name if requester else "None"
+        msg = ("[{} @ {:.8f}] Received request for \033[1m{}\033[0m "
+               "from \033[1m{}\033[0m".format(
+                   self.name, self._sim.now, replica_name, requester_name))
+        print(msg)
+
         replica = self._replicas.get(replica_name)
         if replica is not None:
             # "UseReplica()" - update its stats
             self._replica_stats[replica_name].new_request_made(
                 self._sim.now)
         else:
-            msg = ("[{} @ {}] \033[1m{}\033[0m not found, need to request "
-                "it from \033[1m{}\033[0m").format(
-                self.name, self._sim.now, replica_name, self._parent.name)
+            msg = ("[{} @ {:.8f}] \033[1m{}\033[0m not here, need to request "
+                   "it from \033[1m{}\033[0m".format(
+                       self.name, self._sim.now, replica_name,
+                       self._parent.name))
             print(msg)
 
             # replica not available locally, request it from parent and
             # wait until we receive it - generate new event
-            e = self._sim.send_replica_request(self, self._parent, replica_name)
+            e = self._sim.send_replica_request(
+                self, self._parent, replica_name)
             replica = (yield e)
 
-            msg = "[{} @ {}] Received \033[1m{}\033[0m from {}".format(
+            msg = "[{} @ {:.8f}] Received \033[1m{}\033[0m from {}".format(
                 self.name, self._sim.now, replica_name, self._parent.name)
             print(msg)
 
@@ -298,8 +306,8 @@ class Node(object):
             # enough
             self._store_if_valuable(replica)
 
-        msg = "[{} @ {}] Found \033[1m{}\033[0m, returning (yielding) it".format(
-            self.name, self._sim.now, replica_name)
+        msg = "[{} @ {:.8f}] I have \033[1m{}\033[0m, sending it to {}".format(
+            self.name, self._sim.now, replica_name, requester_name)
         print(msg)
 
         e = self._sim.send_replica(self, requester, replica)

@@ -159,7 +159,7 @@ class Simulation(object):
         self._max_dist_km = max_dist_km
 
         # XXX: don't hard-code?
-        self._network_bw_mbps = 10e6  # network bandwidth (Mbits/s)
+        self._network_bw_mbps = 10  # network bandwidth (Mbits/s)
         self._pspeed_kmps = 6e3  # propagation speed (km/s)
 
         if replica_min_size >= replica_max_size:
@@ -373,6 +373,8 @@ class Simulation(object):
 
         self.event_queue = []
 
+        print("[SIM    @ {:.8f}] SIMULATION STARTED".format(self.now))
+
         event = ef.get_random()
         event2 = ef.get_random()
         event2.time = event.time  # test "concurrency"
@@ -382,7 +384,8 @@ class Simulation(object):
 
         # while evenet queue not empty: process next event
         while len(self.event_queue) > 0:
-            # print("[SIM @ {}] Events in queue:".format(self.now), len(self.event_queue))
+            # print("[SIM @ {}] Events in queue:".format(
+            #     self.now), len(self.event_queue))
             event = heapq.heappop(self.event_queue)
 
             # msg = "[SIM @ {}] Next event at {}: {}".format(
@@ -427,7 +430,7 @@ class Simulation(object):
     def _process_event(self, event):
         """TODO: docstring (processing an event)"""
 
-        print("[SIM    @ {}] processing event {}".format(self.now, event))
+        # print("[SIM    @ {}] processing event {}".format(self.now, event))
 
         if type(event) == ReceiveReplicaRequest:
             g = event.target.request_replica(event.replica_name, event.source)
@@ -484,7 +487,7 @@ class Simulation(object):
             # schedule replica receive for the receiver - after a delay
 
             # calculate the time needed for the replica to reach target
-            dist_km = self._edges[event.source.name][event.target.name]
+            # XXX: add CL here, too?
             delay_s = event.replica.size / self._network_bw_mbps
 
             event_time = self.now + delay_s
@@ -507,8 +510,10 @@ class Simulation(object):
                     new_event._generators = event._generators.copy()
                     self._schedule_event(new_event)
                 else:
-                    print("Target is None, {} won't be sent anywhere "
-                        "anymore".format(event.replica.name))
+                    print("[SIM    @ {:.8f}] Target is None, {} won't be sent "
+                          "anywhere anymore".format(
+                              self.now, event.replica.name)
+                          )
             else:
                 print("No more generators to receive replicas")
         else:
@@ -526,7 +531,7 @@ class _EventFactory(object):
         self._sim = sim
 
     def get_random(self):
-        """Create a new random event (some node receives a request for replica).
+        """Create new random event (some node receives a request for replica).
 
         :returns: new random instance of receive replica request
         :rtype: :py:class:`~models.simulation.ReceiveReplicaRequest`
