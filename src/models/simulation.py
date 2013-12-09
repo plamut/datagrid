@@ -339,11 +339,9 @@ class Simulation(object):
         event = SendReplicaRequest(source, target, replica_name, self.now)
         return event
 
-    def send_replica(self, sender, receiver, replica, generator):
+    def send_replica(self, sender, receiver, replica):
         """TODO: create new SendReplica event"""
         event = SendReplica(sender, receiver, replica, self.now)
-        event._generator = generator  # from previous event
-        # TODO: systematically pass this!
         return event
 
     def initialize(self):
@@ -430,7 +428,7 @@ class Simulation(object):
 
         if type(event) == ReceiveReplicaRequest:
             gen = event._generator if hasattr(event, "_generator") else None
-            g = event.target.request_replica(event.replica_name, event.source, gen)
+            g = event.target.request_replica(event.replica_name, event.source)
 
             # print("Calling Next(g) on", event.target.name)
             new_event = next(g)
@@ -447,7 +445,8 @@ class Simulation(object):
                 self._schedule_event(new_event)
 
             elif type(new_event) == SendReplica:
-                # node does not have a replica and issud SendReplica request
+                # node does not have a replica and issued SendReplica request
+                new_event._generator = gen  # from previous event
                 self._schedule_event(new_event)
 
             else:

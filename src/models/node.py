@@ -280,7 +280,8 @@ class Node(object):
             self._replica_stats[replica_name].new_request_made(
                 self._sim.now)
         else:
-            msg = "[{} @ {}] Need to request {} from {}".format(
+            msg = ("[{} @ {}] \033[1m{}\033[0m not found, need to request "
+                "it from \033[1m{}\033[0m").format(
                 self.name, self._sim.now, replica_name, self._parent.name)
             print(msg)
 
@@ -289,7 +290,7 @@ class Node(object):
             e = self._sim.send_replica_request(self, self._parent, replica_name)
             replica = (yield e)
 
-            msg = "[{} @ {}] Received {} from {}".format(
+            msg = "[{} @ {}] Received \033[1m{}\033[0m from {}".format(
                 self.name, self._sim.now, replica_name, self._parent.name)
             print(msg)
 
@@ -297,12 +298,11 @@ class Node(object):
             # enough
             self._store_if_valuable(replica)
 
-        msg = "[{} @ {}] Found {}, returning (yielding) it".format(
+        msg = "[{} @ {}] Found \033[1m{}\033[0m, returning (yielding) it".format(
             self.name, self._sim.now, replica_name)
         print(msg)
 
-        # here you somehow have to pass a generator!
-        e = self._sim.send_replica(self, requester, replica, generator)
+        e = self._sim.send_replica(self, requester, replica)
         yield e
 
     def _copy_replica(self, replica, run_sort=True):
