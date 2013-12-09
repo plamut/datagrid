@@ -374,8 +374,11 @@ class Simulation(object):
         self.event_queue = []
 
         event = ef.get_random()
+        event2 = ef.get_random()
+        event2.time = event.time  # test "concurrency"
 
         heapq.heappush(self.event_queue, event)
+        heapq.heappush(self.event_queue, event2)
 
         # while evenet queue not empty: process next event
         while len(self.event_queue) > 0:
@@ -427,7 +430,6 @@ class Simulation(object):
         print("[SIM    @ {}] processing event {}".format(self.now, event))
 
         if type(event) == ReceiveReplicaRequest:
-            gen = event._generator if hasattr(event, "_generator") else None
             g = event.target.request_replica(event.replica_name, event.source)
 
             # print("Calling Next(g) on", event.target.name)
@@ -441,12 +443,20 @@ class Simulation(object):
             # a replica or SendReplica (if it fnds replica and sends it back)
             if type(new_event) == SendReplicaRequest:
 
-                new_event._generator = g  # XXX: temporary for SendReplicaRequest
+                # XXX: really need to copy or is it fine if some events share
+                # a single generator list? probably better, because when a
+                # generator is axhausted (and removed), it is no longer needed
+                # *anywhere*
+                new_gens = event._generators.copy()
+                new_gens.append(g)
+                new_event._generators = new_gens
                 self._schedule_event(new_event)
 
             elif type(new_event) == SendReplica:
-                # node does not have a replica and issued SendReplica request
-                new_event._generator = gen  # from previous event
+                # node does have a replica and thus issued SendReplica request
+
+                # pass generators from preceding ReceiveReplicaRequest event
+                new_event._generators = event._generators.copy()
                 self._schedule_event(new_event)
 
             else:
@@ -466,7 +476,7 @@ class Simulation(object):
                 event.source, event.target, event.replica_name, event_time)
 
             # ReceiveReplicaRequest - pass generator
-            new_event._generator = event._generator
+            new_event._generators = event._generators.copy()
 
             self._schedule_event(new_event)
 
@@ -482,15 +492,25 @@ class Simulation(object):
                 event.source, event.target, event.replica, event_time)
 
             # ReceiveReplica - pass generator so that we can call it
-            new_event._generator = event._generator
+            new_event._generators = event._generators.copy()
 
             self._schedule_event(new_event)
 
         elif type(event) == ReceiveReplica:
             # node's request for replica has completed, proceed node from
             # where it stopped
-            g = event._generator
-            g.send(event.replica)
+            if event._generators:
+                g = event._generators.pop()
+                new_event = g.send(event.replica)  # we get a SendReplica event
+
+                if new_event.target is not None:
+                    new_event._generators = event._generators.copy()
+                    self._schedule_event(new_event)
+                else:
+                    print("Target is None, {} won't be sent anywhere "
+                        "anymore".format(event.replica.name))
+            else:
+                print("No more generators to receive replicas")
         else:
             raise ValueError("Unknown event", type(event))
 

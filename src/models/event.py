@@ -3,6 +3,13 @@
 
 class _Event(object):
     """Base class for all simulation events."""
+    def __init__(self):
+        self._generators = []  # a stack of callbacks (generators)
+
+    def __lt__(self, other):
+        if not isinstance(other, _Event):
+            raise TypeError("Cannot compare event to a non-event")
+        return self.time < other.time
 
 
 class ReceiveReplicaRequest(_Event):
@@ -18,6 +25,7 @@ class ReceiveReplicaRequest(_Event):
         :param str replica_name: requested replica's name
         :param int time: time when request was received
         """
+        super().__init__()
         self.source = source
         self.target = target
         self.replica_name = replica_name
@@ -42,6 +50,7 @@ class SendReplicaRequest(_Event):
         :param str replica_name: requested replica's name
         :param int time: time when request was received
         """
+        super().__init__()
         self.source = source
         self.target = target
         self.replica_name = replica_name
@@ -66,6 +75,7 @@ class SendReplica(_Event):
         :type replica: :py:class:`~models.replica.Replica`
         :param int time: time of occurence (sending back a replica)
         """
+        super().__init__()
         self.source = source
         self.target = target
         self.replica = replica
@@ -91,6 +101,7 @@ class ReceiveReplica(_Event):
         :type replica: :py:class:`~models.replica.Replica`
         :param int time: time of occurence (sending back a replica)
         """
+        super().__init__()
         self.source = source
         self.target = target
         self.replica = replica
