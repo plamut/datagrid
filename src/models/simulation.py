@@ -483,6 +483,8 @@ class Simulation(object):
 
             self._schedule_event(new_event, event_time)
 
+            self._total_rt_s += cl  # update stats
+
         elif type(event) == SendReplica:
             # schedule replica receive for the receiver - after a delay
 
@@ -498,6 +500,9 @@ class Simulation(object):
             new_event._generators = event._generators.copy()
 
             self._schedule_event(new_event, event_time)
+
+            self._total_rt_s += delay_s  # update stats
+            self._total_bw += event.replica.size  # XXX: correct interpretat.?
 
         elif type(event) == ReceiveReplica:
             # node's request for replica has completed, proceed node from
