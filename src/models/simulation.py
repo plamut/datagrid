@@ -336,12 +336,12 @@ class Simulation(object):
 
     def send_replica_request(self, source, target, replica_name):
         """TODO: Generate new SendReplicaRequest event"""
-        event = SendReplicaRequest(source, target, replica_name, self.now)
+        event = SendReplicaRequest(source, target, replica_name)
         return event
 
     def send_replica(self, sender, receiver, replica):
         """TODO: create new SendReplica event"""
-        event = SendReplica(sender, receiver, replica, self.now)
+        event = SendReplica(sender, receiver, replica)
         return event
 
     def initialize(self):
@@ -375,25 +375,25 @@ class Simulation(object):
 
         print("[SIM    @ {:.8f}] SIMULATION STARTED".format(self.now))
 
-        event = ef.get_random()
-        event2 = ef.get_random()
-        event2.time = event.time  # test "concurrency"
+        t1, event = ef.get_random()
+        t2, event2 = ef.get_random()
+        t2 = t1  # test "concurrency"
 
-        heapq.heappush(self.event_queue, event)
-        heapq.heappush(self.event_queue, event2)
+        heapq.heappush(self.event_queue, (t1, event))
+        heapq.heappush(self.event_queue, (t2, event2))
 
         # while evenet queue not empty: process next event
         while len(self.event_queue) > 0:
             # print("[SIM @ {}] Events in queue:".format(
             #     self.now), len(self.event_queue))
-            event = heapq.heappop(self.event_queue)
+            time, event = heapq.heappop(self.event_queue)
 
             # msg = "[SIM @ {}] Next event at {}: {}".format(
             #     self.now, event.time, event)
             # print(msg)
 
             # fast-forward time to event occurence
-            self._clock.tick(step=event.time - self.now)
+            self._clock.tick(step=time - self.now)
             # msg = "[SIM @ {0}] Time changed to {0}".format(self.now)
             # print(msg)
 
@@ -453,14 +453,14 @@ class Simulation(object):
                 new_gens = event._generators.copy()
                 new_gens.append(g)
                 new_event._generators = new_gens
-                self._schedule_event(new_event)
+                self._schedule_event(new_event, self.now)
 
             elif type(new_event) == SendReplica:
                 # node does have a replica and thus issued SendReplica request
 
                 # pass generators from preceding ReceiveReplicaRequest event
                 new_event._generators = event._generators.copy()
-                self._schedule_event(new_event)
+                self._schedule_event(new_event, self.now)
 
             else:
                 raise Exception("Node returned unknown event: ", event)
@@ -476,12 +476,12 @@ class Simulation(object):
             event_time = self.now + cl
 
             new_event = ReceiveReplicaRequest(
-                event.source, event.target, event.replica_name, event_time)
+                event.source, event.target, event.replica_name)
 
             # ReceiveReplicaRequest - pass generator
             new_event._generators = event._generators.copy()
 
-            self._schedule_event(new_event)
+            self._schedule_event(new_event, event_time)
 
         elif type(event) == SendReplica:
             # schedule replica receive for the receiver - after a delay
@@ -492,12 +492,12 @@ class Simulation(object):
 
             event_time = self.now + delay_s
             new_event = ReceiveReplica(
-                event.source, event.target, event.replica, event_time)
+                event.source, event.target, event.replica)
 
             # ReceiveReplica - pass generator so that we can call it
             new_event._generators = event._generators.copy()
 
-            self._schedule_event(new_event)
+            self._schedule_event(new_event, event_time)
 
         elif type(event) == ReceiveReplica:
             # node's request for replica has completed, proceed node from
@@ -508,7 +508,7 @@ class Simulation(object):
 
                 if new_event.target is not None:
                     new_event._generators = event._generators.copy()
-                    self._schedule_event(new_event)
+                    self._schedule_event(new_event, self.now)
                 else:
                     print("[SIM    @ {:.8f}] Target is None, {} won't be sent "
                           "anywhere anymore".format(
@@ -519,9 +519,9 @@ class Simulation(object):
         else:
             raise ValueError("Unknown event", type(event))
 
-    def _schedule_event(self, event):
+    def _schedule_event(self, event, event_time):
         """TODO: add new event to even schedule."""
-        heapq.heappush(self.event_queue, event)
+        heapq.heappush(self.event_queue, (event_time, event))
 
 
 class _EventFactory(object):
@@ -555,7 +555,7 @@ class _EventFactory(object):
         event_time = time_from_now + self._sim.now
 
         # return NodeRequest(node, replica, self._sim.now + time_from_now)
-        return ReceiveReplicaRequest(None, receiver, replica.name, event_time)
+        return event_time, ReceiveReplicaRequest(None, receiver, replica.name)
 
 
 class NodeRequest(object):

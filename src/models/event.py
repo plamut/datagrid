@@ -3,19 +3,21 @@
 
 class _Event(object):
     """Base class for all simulation events."""
+    event_id = 0
+
     def __init__(self):
         self._generators = []  # a stack of callbacks (generators)
+        _Event.event_id += 1
+        self.event_id = _Event.event_id
 
     def __lt__(self, other):
-        if not isinstance(other, _Event):
-            raise TypeError("Cannot compare event to a non-event")
-        return self.time < other.time
+        return self.event_id < other.event_id
 
 
 class ReceiveReplicaRequest(_Event):
     """An event when node receives a requests for a replica."""
 
-    def __init__(self, source, target, replica_name, time):
+    def __init__(self, source, target, replica_name):
         """Initialize new instance.
 
         :param source: node that requests a replica
@@ -23,24 +25,22 @@ class ReceiveReplicaRequest(_Event):
         :param target: node that receives replica request
         :type target: :py:class:`~models.node.Node`
         :param str replica_name: requested replica's name
-        :param int time: time when request was received
         """
         super().__init__()
         self.source = source
         self.target = target
         self.replica_name = replica_name
-        self.time = time
 
     def __str__(self):
         source_name = self.source.name if self.source else "None"
-        return "<ReceiveReplicaRequest event @ {}> ({} --> {}, {})".format(
-            self.time, source_name, self.target.name, self.replica_name)
+        return "<ReceiveReplicaRequest event> ({} --> {}, {})".format(
+            source_name, self.target.name, self.replica_name)
 
 
 class SendReplicaRequest(_Event):
     """An event when node sends a requests for a replica."""
 
-    def __init__(self, source, target, replica_name, time):
+    def __init__(self, source, target, replica_name):
         """Initialize new instance.
 
         :param source: node that issues a request
@@ -48,23 +48,21 @@ class SendReplicaRequest(_Event):
         :param target: target node from which `replica` is requested
         :type target: :py:class:`~models.node.Node`
         :param str replica_name: requested replica's name
-        :param int time: time when request was received
         """
         super().__init__()
         self.source = source
         self.target = target
         self.replica_name = replica_name
-        self.time = time
 
     def __str__(self):
-        return "<SendReplicaRequest event @ {}> ({} --> {}, {})".format(
-            self.time, self.source.name, self.target.name, self.replica_name)
+        return "<SendReplicaRequest event> ({} --> {}, {})".format(
+            self.source.name, self.target.name, self.replica_name)
 
 
 class SendReplica(_Event):
     """An event when node sends back a replica to the requester."""
 
-    def __init__(self, source, target, replica, time):
+    def __init__(self, source, target, replica):
         """Initialize new instance.
 
         :param source: node that sends back requested `replica`
@@ -73,24 +71,22 @@ class SendReplica(_Event):
         :type target: :py:class:`~models.node.Node`
         :param replica: replica that was requested
         :type replica: :py:class:`~models.replica.Replica`
-        :param int time: time of occurence (sending back a replica)
         """
         super().__init__()
         self.source = source
         self.target = target
         self.replica = replica
-        self.time = time
 
     def __str__(self):
         target_name = self.target.name if self.target else "None"
-        return "<SendReplica event @ {}> ({} <-- {}, {})".format(
-            self.time, target_name, self.source.name, self.replica.name)
+        return "<SendReplica event> ({} <-- {}, {})".format(
+            target_name, self.source.name, self.replica.name)
 
 
 class ReceiveReplica(_Event):
     """An event when node sends back a replica to the requester."""
 
-    def __init__(self, source, target, replica, time):
+    def __init__(self, source, target, replica):
         """Initialize new instance.
 
         :param source: node that sent requested `replica`
@@ -99,14 +95,12 @@ class ReceiveReplica(_Event):
         :type target: :py:class:`~models.node.Node`
         :param replica: replica that was requested
         :type replica: :py:class:`~models.replica.Replica`
-        :param int time: time of occurence (sending back a replica)
         """
         super().__init__()
         self.source = source
         self.target = target
         self.replica = replica
-        self.time = time
 
     def __str__(self):
-        return "<ReceiveReplica event @ {}> ({} <-- {}, {})".format(
-            self.time, self.target.name, self.source.name, self.replica.name)
+        return "<ReceiveReplica event> ({} <-- {}, {})".format(
+            self.target.name, self.source.name, self.replica.name)
