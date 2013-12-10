@@ -34,15 +34,13 @@ debug_sim = dict(
 def main():
     print("Main function")
 
-    # XXX: have the main simulation code in a special class?
     sim = Simulation(**debug_sim)
 
     # XXX: move settings to here? as a parameter to initialize?
     sim.initialize()
-
     sim.run()
 
-    # print results
+    # TODO: get results and print them
 
 
 if __name__ == "__main__":

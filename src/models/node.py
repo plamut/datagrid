@@ -11,15 +11,12 @@ class _ReplicaStats(object):
     def __init__(self, nor=0, fsti=0, lrt=0):
         """Initialize replica stat values.
 
-        :param nor: number of requests of the replica
+        :param int nor: number of requests of the replica
             (optional, default: 0)
-        :type nor: int
-        :param fsti: width of the FSTI interval
+        :param int fsti: width of the FSTI interval
             (optional, default: 0)
-        :type fsti: int
-        :param lrt: the time of the last request of the replica
+        :param int lrt: the time of the last request of the replica
             (optional, default: 0)
-        :type lrt: int
         """
         if fsti < 0:
             raise ValueError("FSTI must be a non-negative number.")
@@ -53,8 +50,7 @@ class _ReplicaStats(object):
         indeed provide current time, or else subsequent calls to nor_fsti
         might return invalid results.
 
-        :param time: current time
-        :type time: int
+        :param float time: current time
 
         :returns: number of requests in the last FSTI interval
         :rtype: int
@@ -74,8 +70,7 @@ class _ReplicaStats(object):
         history, so make sure you always call this method in order (i.e.
         for older requests first).
 
-        :param time: time when the request was made
-        :type time: int
+        :param float time: time when the request was made
         """
         self._req_hist.append(time)
         self._lrt = time
@@ -88,10 +83,8 @@ class Node(object):
     def __init__(self, name, capacity, sim, replicas=None):
         """Initialize node instance.
 
-        :param name: name of the node
-        :type name: string
-        :param capacity: node capacity in megabits
-        :type capacity: int
+        :param str name: name of the node
+        :param int capacity: node capacity in megabits
         :param sim: simulation which the node is a part of
         :type sim: :py:class:`~models.simulation.Simulation`
         :param replicas: initial replicas the node contans copies of
@@ -99,11 +92,7 @@ class Node(object):
             :py:class:`~models.replica.Replica` instances
             (optional, default: None)
         """
-        # XXX: instead of "full" simulation object pass an adapter with
-        # a limited interface? (it doesn't make sense for the Node to call,
-        # e.g, sim.init_grid())
         self._sim = sim
-
         self._name = name
 
         if capacity <= 0:
@@ -118,7 +107,7 @@ class Node(object):
         if replicas is not None:
             for repl in replicas.values():
                 # TODO: set to true? replicas must always be sorted by RV
-                # better: coppy all replicas and sort at the end
+                # better: copy all replicas and sort at the end
                 self._copy_replica(repl, run_sort=False)
 
     @property
@@ -214,14 +203,6 @@ class Node(object):
         # XXX: perhaps rename copy_replica (or retain the name for easier
         # comparison with the pseudocode in the paper)
 
-        # TODO: notify simulation machinery about this? sim.increase_count
-        # actually wrap everything into a sim object ... e.g. sim.clock.time
-        # (or sim.now) - simulation should provide an API to the simulated
-        # entities
-        # UPDATE: after refactoring, _store_if_valuable will be probably
-        # called by Simulation itself which will then know how to calculate
-        # grid load stats (or maybe not ...)
-
         if self.free_capacity >= replica.size:
             self._copy_replica(replica)
             self._replica_stats[replica.name].new_request_made(self._sim.now)
@@ -230,17 +211,13 @@ class Node(object):
             # of the existing replicas
             sos = 0  # sum of sizes
             marked_replicas = []  # replicas visited and marked for deletion
-            for x, repl in enumerate(self._replicas.values()):
+            for repl in self._replicas.values():
                 if sos + self.free_capacity < replica.size:
                     sos += repl.size
                     marked_replicas.append(repl)
                 else:
                     break
 
-            # x: index of the first replica *excluded* from the group of
-            # replicas that would make enough free space for req. replica
-            # in case this group is deleted. - XXX: needed? we have
-            # a list of "makred" replicas for that
             gv = self._GV(marked_replicas)
 
             # TODO: what stats to use for a replica, which does not yet exist
@@ -296,9 +273,9 @@ class Node(object):
 
             # replica not available locally, request it from parent and
             # wait until we receive it - generate new event
-            e = self._sim.event_send_replica_request(
+            event = self._sim.event_send_replica_request(
                 self, self._parent, replica_name)
-            replica = (yield e)
+            replica = (yield event)
 
             msg = "[{} @ {:.8f}] Received \033[1m{}\033[0m from {}".format(
                 self.name, self._sim.now, replica_name, self._parent.name)
@@ -312,18 +289,17 @@ class Node(object):
             self.name, self._sim.now, replica_name, requester_name)
         print(msg)
 
-        e = self._sim.event_send_replica(self, requester, replica)
-        yield e
+        event = self._sim.event_send_replica(self, requester, replica)
+        yield event
 
     def _copy_replica(self, replica, run_sort=True):
         """Store a local copy of the given replica.
 
         :param replica: replica to copy
         :type replica: :py:class:`~models.replica.Replica`
-        :param run_sort: whether or not to sort the internal replica list by
-            replica value after storing a copy of the new replica
+        :param bool run_sort: whether or not to sort the internal replica list
+            by replica value after storing a copy of the new replica
             (optional, default: True)
-        :type run_sort: bool
         """
         if replica.size > self._free_capacity:
             raise ValueError(
@@ -349,8 +325,7 @@ class Node(object):
         """Remove a local copy of a replica. If replica does not exist
         on the node, an error is raised.
 
-        :param replica_name: name of the replica to delete
-        :type replica_name: string
+        :param str replica_name: name of the replica to delete
         """
         try:
             replica = self._replicas.pop(replica_name)
@@ -359,9 +334,10 @@ class Node(object):
         self._replica_stats.pop(replica_name)
         self._free_capacity += replica.size
 
-# Node: store NOR (# of requests) of each replica which resides on it
-# For a given node, the NOR of a replica is increased by one each
-# time that replica is requested by that node
+# XXX: maybe we should store stats for replicas not yet present, nevertheless
+# "Node: store NOR (# of requests) of each replica which resides on it
+#  For a given node, the NOR of a replica is increased by one each
+#  time that replica is requested by that node"
 
 
 # TODO: Node2011 (strategy = EFS)

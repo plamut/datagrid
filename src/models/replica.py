@@ -4,10 +4,8 @@ class Replica(object):
     def __init__(self, name, size):
         """Initialize replica instance.
 
-        :param name: replica name
-        :type name: string
-        :param size: replica size in megabits
-        :type size: int
+        :param str name: replica name
+        :param int size: replica size in megabits
         """
         self._name = name
 
