@@ -15,7 +15,7 @@ class _Event(object):
 
 
 class ReceiveReplicaRequest(_Event):
-    """An event when node receives a requests for a replica."""
+    """An event when node receives a requests for a replica from `source`."""
 
     def __init__(self, source, target, replica_name):
         """Initialize new instance.
@@ -38,7 +38,7 @@ class ReceiveReplicaRequest(_Event):
 
 
 class SendReplicaRequest(_Event):
-    """An event when node sends a requests for a replica."""
+    """An event when node sends a requests for a replica to `target`."""
 
     def __init__(self, source, target, replica_name):
         """Initialize new instance.
@@ -60,7 +60,8 @@ class SendReplicaRequest(_Event):
 
 
 class SendReplica(_Event):
-    """An event when node sends back a replica to the requester."""
+    """An event when node sends back a replica to `target` (requesting node).
+    """
 
     def __init__(self, source, target, replica):
         """Initialize new instance.
@@ -84,7 +85,7 @@ class SendReplica(_Event):
 
 
 class ReceiveReplica(_Event):
-    """An event when node sends back a replica to the requester."""
+    """An event when node receives requested replica from `source`."""
 
     def __init__(self, source, target, replica):
         """Initialize new instance.

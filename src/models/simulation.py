@@ -17,10 +17,9 @@ import random
 def _digits(number):
     """Caclulate the number of digits in an integer.
 
-    :param number: number in question
-    :type number: int
+    :param int number: number in question
 
-    :returns: number of digits
+    :returns: number of digits in `number`
     :rtype: int
     """
     if number == 0:
@@ -59,22 +58,17 @@ class _Clock(object):
     def tick(self, step=1.0):
         """Increase current simulation time by `step`.
 
-        :param step: by how much to increase the time
+        :param float step: by how much to increase the time
             (optional, default: 1)
-        :type step: int
 
         :returns: new simulation time
-        :rtype: int
+        :rtype: float
         """
-        if step < 0:
+        if step < 0.0:
             raise ValueError("Clock step must be non-negative.")
-        # self._time += int(step)
         self._time += step
         return self._time
 
-
-# XXX: provide a SimulationView for Node objects? A "readonly view" of the
-# sim object for nodes to use
 
 class Simulation(object):
     """Simulation runner."""
@@ -87,44 +81,41 @@ class Simulation(object):
         min_dist_km=1, max_dist_km=1000,
         replica_min_size=100, replica_max_size=1000,
         rnd_seed=None, total_reqs=100000,
+        network_bw_mbps=10, pspeed_kmps=6000
     ):
         """Initialize simulation parameters.
 
-        :param node_count: number of nodes in the grid including the server
-            node
+        :param int node_count: number of nodes in the grid including the
+            server node
             (optional, default: 20)
         :type node_count: int
-        :param node_capacity: capacity of each non-server node in megabits
+        :param int node_capacity: capacity of each non-server node in megabits
             (optional, default: 50000)
-        :type node_capacity: int
-        :param strategy: strategy to use for replica replacement
+        :param int strategy: strategy to use for replica replacement
             (optional, deafult: Strategy.EFS)
-        :type strategy: int
-        :param min_dist_km:  min distance between two adjacent nodes in
+        :param int min_dist_km:  min distance between two adjacent nodes in
             kilometers
             (optional, default: 1)
-        :type min_dist_km: int
-        :param max_dist_km:  max distance between two adjacent nodes in
+        :param int max_dist_km:  max distance between two adjacent nodes in
             kilometers
             (optional, default: 1)
-        :type max_dist_km: int
-        :param replica_count: number of different replicas in simulation
+        :param int replica_count: number of different replicas in simulation
             (optional, default: 1000)
-        :type replica_count: int
-        :param replica_min_size: min size of a single replica in megabits
+        :param int replica_min_size: min size of a single replica in megabits
             (optional, default: 100)
-        :param replica_max_size: max size of a single replica in megabits
+        :param int replica_max_size: max size of a single replica in megabits
             (optional, default: 1000)
-        :param total_reqs: number of replica requests to generate during the
-            simulation
+        :param int total_reqs: number of replica requests to generate during
+            the simulation
             (optional, default: 100000)
-        :type total_reqs: int
-        :param fsti: frequency specific time interval as defined in the paper
+        :param int fsti: frequency specific time interval (as defined in paper)
             (optional, default: 1000)
-        :type fsti: int
-        :param rnd_seed: seed for the random number generator
+        :param int network_bw_mbps:  network bandwidth (Mbit/s)
+            (optional, default: 10)
+        :param int pspeed_kmps:  propagation speed (km/s)
+            (optional, default: 6000)
+        :param int rnd_seed: seed for the random number generator
             (optional, default: current system time)
-        :type rnd_seed: int
         """
         self._node_capacity = node_capacity
         self._strategy = strategy
@@ -158,9 +149,13 @@ class Simulation(object):
             raise ValueError("Maximum distance must be positive.")
         self._max_dist_km = max_dist_km
 
-        # XXX: don't hard-code?
-        self._network_bw_mbps = 10  # network bandwidth (Mbits/s)
-        self._pspeed_kmps = 6e3  # propagation speed (km/s)
+        if network_bw_mbps <= 0:
+            raise ValueError("Network bandwidth must be positive.")
+        self._network_bw_mbps = network_bw_mbps
+
+        if pspeed_kmps <= 0:
+            raise ValueError("Propagation speed must be positive.")
+        self._pspeed_kmps = pspeed_kmps
 
         if replica_min_size >= replica_max_size:
             raise ValueError(
@@ -298,7 +293,7 @@ class Simulation(object):
         while q:
             # find: node in q with smallest distance (and has not been
             # visited) and remove it from the list
-            # XXX: use heap for efficiency? (just if it runs too slow)
+            # XXX: use heap for efficiency? (only if it runs too slow)
             u = min(q, key=lambda node: node_info[node].dist)
             q.remove(u)
             node_info[u].visited = True
@@ -315,37 +310,35 @@ class Simulation(object):
 
         return node_info
 
-    def notify_repl_req(self, node, parent, replica):
-        """Notify simulation that `node` had to request `replica` from its
-        `parent` (on the shortest path to server).
+    def event_send_replica_request(self, *args, **kwargs):
+        """Create and return a new SendReplicaRequest event instance.
 
-        :param node: node that issued a request for `replica`
-        :type node: :py:class:`~models.node.Node`
-        :param parent: `node`'s parent that received replica request
-        :type parent: :py:class:`~models.node.Node`
-        :param replica: replica requested
-        :type replica: :py:class:`~models.replica.Replica`
+        Parameters are the same as expected by the
+        :py:class:`~models.event.SendReplicaRequest` class.
+
+        :returns: new SendReplicaRequest instance
+        :rtype: :py:class:`~models.event.SendReplicaRequest`
         """
-        # total BW consumpion
-        self._total_bw += replica.size  # XXX: correct interpretation?
-
-        # total response time
-        dist_km = self._edges[node.name][parent.name]
-        self._total_rt_s += replica.size / self._network_bw_mbps + \
-            dist_km / self._pspeed_kmps
-
-    def send_replica_request(self, source, target, replica_name):
-        """TODO: Generate new SendReplicaRequest event"""
-        event = SendReplicaRequest(source, target, replica_name)
+        event = SendReplicaRequest(*args, **kwargs)
         return event
 
-    def send_replica(self, sender, receiver, replica):
-        """TODO: create new SendReplica event"""
-        event = SendReplica(sender, receiver, replica)
+    def event_send_replica(self, *args, **kwargs):
+        """Create and return a new SendReplica event instance.
+
+        Parameters are the same as expected by the
+        :py:class:`~models.event.SendReplica` class.
+
+        :returns: new SendReplica instance
+        :rtype: :py:class:`~models.event.SendReplica`
+        """
+        event = SendReplica(*args, **kwargs)
         return event
 
     def initialize(self):
-        """Initialize (reset) a simulation."""
+        """Initialize (reset) simulation."""
+
+        # XXX: accept settings here, too? (just like in init) ---> simplify
+        # init and move all sim. parameter initializing logic to here
         self._clock.reset()
         random.seed(self._rnd_seed)
 
@@ -368,23 +361,19 @@ class Simulation(object):
 
         NOTE: simulation must have already been initialized with initialize()
         """
-        ef = _EventFactory(self)
         self._clock.reset()
-
         self.event_queue = []
 
         print("[SIM    @ {:.8f}] SIMULATION STARTED".format(self.now))
 
+        ef = _EventFactory(self)
         t, event = ef.get_random()
         self._schedule_event(event, t)
 
-        total_reqs_gen = 1  # total requests generated
+        total_reqs_gen = 1  # total replica request events generated so far
 
-        # while evenet queue not empty: process next event
+        # main event loop
         while len(self.event_queue) > 0:
-
-            # print("[SIM @ {}] Events in queue:".format(
-            #     self.now), len(self.event_queue))
 
             if total_reqs_gen < self._total_reqs:
                 new_t, new_e = ef.get_random()
@@ -392,71 +381,55 @@ class Simulation(object):
                 total_reqs_gen += 1
 
                 if total_reqs_gen % 1000 == 0:
-                    print('\033[1;36m', "generated request {}/{}"
-                          "({:.2f} %)".format(total_reqs_gen, self._total_reqs,
-                          100 * total_reqs_gen / self._total_reqs),
-                          '\033[0m', sep='')
+                    print(
+                        '\033[1;36m', "generated request {}/{}"
+                        "({:.2f} %)".format(
+                            total_reqs_gen, self._total_reqs,
+                            100 * total_reqs_gen / self._total_reqs),
+                        '\033[0m', sep='')
 
-            # XXX: have something like self._pop_next_event() ?
-            time, event = heapq.heappop(self.event_queue)
+            t, event = self._pop_next_event()
 
-            # msg = "[SIM @ {}] Next event at {}: {}".format(
-            #     self.now, event.time, event)
-            # print(msg)
-
-            # fast-forward time to event occurence
-            self._clock.tick(step=time - self.now)
-            # msg = "[SIM @ {0}] Time changed to {0}".format(self.now)
-            # print(msg)
-
-            # execute event
+            # fast-forward time to the next event occurence and then
+            # process the event
+            self._clock.tick(step=t - self.now)
             self._process_event(event)
-
-        # for i in range(1, self._total_reqs + 1):
-        #     #if i % 1000 == 0:
-        #     print('\033[1m', "request {}/{} ({:.2f} %)".format(
-        #             i, self._total_reqs, 100 * i / self._total_reqs),
-        #         '\033[0m',
-        #         sep='')
-
-        #     event = ef.get_random()
-
-        #     # fast-forward time to event occurence
-        #     self._clock.tick(step=event.time - self.now)
-
-        #     # execute an event (issue replica request)
-        #     gen = event.node.request_replica(event.replica.name)
-        #     replica = next(gen)
-        #     print("[SIM] Got replica from {}: {}".format(
-        #         event.node.name, replica.name))
-
-        #     try:
-        #         gen.send("NEW_TIME="+str(i))
-        #     except StopIteration:
-        #         print('')
 
         print("-" * 10, "END", "-" * 10)
         print("Total resp. time (s):", self._total_rt_s * self._c1)
         print("Total bandwidth:", self._total_bw * self._c2)
 
+    def _pop_next_event(self):
+        """Pop next event from the event queue and return it.
+
+        :returns: time of next event and the event instance itself
+        :rtype: tuple (float, :py:class:`~models.event._Event` instance)
+        """
+        return heapq.heappop(self.event_queue)
+
+    def _schedule_event(self, event, event_time):
+        """Add new event to event queue, scheduled at time `event_time`.
+
+        :param event: event to add to the schedule
+        :type event: subclass of :py:class:`~models.event._Event`
+        :param float event_time: time at which `event` should occur
+        """
+        heapq.heappush(self.event_queue, (event_time, event))
+
     def _process_event(self, event):
-        """TODO: docstring (processing an event)"""
+        """Process a single event occuring in simulation.
 
-        # print("[SIM    @ {}] processing event {}".format(self.now, event))
-
+        :param event: event to pocess
+        :type event: subclass of :py:class:`~models.event._Event`
+        """
         if type(event) == ReceiveReplicaRequest:
             g = event.target.request_replica(event.replica_name, event.source)
+            returned_event = next(g)
 
-            # print("Calling Next(g) on", event.target.name)
-            new_event = next(g)
-
-            # msg = "[SIM @ {}] {} returned event {})".format(
-            #     self.now, new_event.source.name, new_event)
-            # print(msg)
-
-            # node returns either SendReplicaRequest event (if it doesn't have)
-            # a replica or SendReplica (if it fnds replica and sends it back)
-            if type(new_event) == SendReplicaRequest:
+            # node returns either SendReplicaRequest event (if it doesn't have
+            # a requested replica) or SendReplica (if it has a replica and
+            # wants to send it back to the requesting node)
+            if type(returned_event) == SendReplicaRequest:
 
                 # XXX: really need to copy or is it fine if some events share
                 # a single generator list? probably better, because when a
@@ -464,81 +437,73 @@ class Simulation(object):
                 # *anywhere*
                 new_gens = event._generators.copy()
                 new_gens.append(g)
-                new_event._generators = new_gens
-                self._schedule_event(new_event, self.now)
+                returned_event._generators = new_gens
+                self._schedule_event(returned_event, self.now)
 
-            elif type(new_event) == SendReplica:
-                # node does have a replica and thus issued SendReplica request
-
+            elif type(returned_event) == SendReplica:
                 # pass generators from preceding ReceiveReplicaRequest event
-                new_event._generators = event._generators.copy()
-                self._schedule_event(new_event, self.now)
-
+                returned_event._generators = event._generators.copy()
+                self._schedule_event(returned_event, self.now)
             else:
-                raise Exception("Node returned unknown event: ", event)
+                raise TypeError(
+                    "Node returned unexpected event", returned_event)
 
         elif type(event) == SendReplicaRequest:
             # some node sends a replica request, schedule ReceiveReplicaRequest
-            # event for the parent
+            # event for that node's parent
 
             # it takes some time for the parent node to receive the request,
-            # so calculate the latency first and schedule the event accordingly
+            # so calculate the latency and schedule the event accordingly
             dist_km = self._edges[event.source.name][event.target.name]
             cl = dist_km / self._pspeed_kmps  # communication latency
             event_time = self.now + cl
 
             new_event = ReceiveReplicaRequest(
                 event.source, event.target, event.replica_name)
-
-            # ReceiveReplicaRequest - pass generator
-            new_event._generators = event._generators.copy()
+            new_event._generators = event._generators.copy()  # pass generators
 
             self._schedule_event(new_event, event_time)
 
-            self._total_rt_s += cl  # update stats
+            self._total_rt_s += cl  # update simulation stats
 
         elif type(event) == SendReplica:
-            # schedule replica receive for the receiver - after a delay
+            # some node sends a replica, schedule replica receive event
+            # for the receiver (after a delay, of course)
 
             # calculate the time needed for the replica to reach target
             # XXX: add CL here, too?
             delay_s = event.replica.size / self._network_bw_mbps
-
             event_time = self.now + delay_s
+
             new_event = ReceiveReplica(
                 event.source, event.target, event.replica)
-
-            # ReceiveReplica - pass generator so that we can call it
-            new_event._generators = event._generators.copy()
+            new_event._generators = event._generators.copy()  # pass generators
 
             self._schedule_event(new_event, event_time)
 
-            self._total_rt_s += delay_s  # update stats
+            # simulation update stats
+            self._total_rt_s += delay_s
             self._total_bw += event.replica.size  # XXX: correct interpretat.?
 
         elif type(event) == ReceiveReplica:
-            # node's request for replica has completed, proceed node from
-            # where it stopped
+            # some node's request for a replica has completed (replica
+            # received), we need to notify that node about it so that it
+            # continues its work from where it stopped
             if event._generators:
                 g = event._generators.pop()
                 new_event = g.send(event.replica)  # we get a SendReplica event
 
                 if new_event.target is not None:
+                    # another node needs to be notified down the chain ...
                     new_event._generators = event._generators.copy()
                     self._schedule_event(new_event, self.now)
                 else:
-                    print("[SIM    @ {:.8f}] Target is None, {} won't be sent "
-                          "anywhere anymore".format(
-                              self.now, event.replica.name)
-                          )
-            else:
-                print("No more generators to receive replicas")
+                    pass
+                    # target is None, meaning that node requested the replica
+                    # by itself, thus we don't need to send the replica to
+                    # another node
         else:
-            raise ValueError("Unknown event", type(event))
-
-    def _schedule_event(self, event, event_time):
-        """TODO: add new event to even schedule."""
-        heapq.heappush(self.event_queue, (event_time, event))
+            raise TypeError("Unknown event", type(event))
 
 
 class _EventFactory(object):
@@ -573,26 +538,3 @@ class _EventFactory(object):
 
         # return NodeRequest(node, replica, self._sim.now + time_from_now)
         return event_time, ReceiveReplicaRequest(None, receiver, replica.name)
-
-
-class NodeRequest(object):
-    """An event when node requests a replica."""
-
-    def __init__(self, node, replica, time):
-        """Initialize newly created instance.
-
-        :param node: node that requests a replica
-        :type node: string
-        :param replica: requested replica
-        :type replica: string
-        :param time: time when request is issued
-        :type time: int
-        """
-        self.node = node
-        self.replica = replica
-        self.time = time
-
-    def __str__(self):
-        node_name = self.node.name if self.node else "None"
-        return "NodeReqest ({} req. {} @ {})".format(
-            node_name, self.replica.name, self.time)

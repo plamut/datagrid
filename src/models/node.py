@@ -296,7 +296,7 @@ class Node(object):
 
             # replica not available locally, request it from parent and
             # wait until we receive it - generate new event
-            e = self._sim.send_replica_request(
+            e = self._sim.event_send_replica_request(
                 self, self._parent, replica_name)
             replica = (yield e)
 
@@ -312,7 +312,7 @@ class Node(object):
             self.name, self._sim.now, replica_name, requester_name)
         print(msg)
 
-        e = self._sim.send_replica(self, requester, replica)
+        e = self._sim.event_send_replica(self, requester, replica)
         yield e
 
     def _copy_replica(self, replica, run_sort=True):
