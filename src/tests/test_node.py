@@ -3,6 +3,7 @@
 from collections import OrderedDict
 from unittest.mock import Mock
 
+import inspect
 import unittest
 
 
@@ -375,7 +376,103 @@ class TestNode(unittest.TestCase):
         self.assertEqual(len(node._replicas), 3)
         self.assertNotIn('new_replica', node._replicas)
 
-    # TODO: request_replica
+    def test_request_replica_returns_generator(self):
+        """Test that `request_replica` method returns a generator."""
+        node = self._make_instance('node_1', 50000, Mock(name='sim_obj'))
+        g = node.request_replica('replica_XYZ', Mock(name='requesting_node'))
+        self.assertTrue(inspect.isgenerator(g))
+
+    def test_request_replica_replica_present(self):
+        """Test request_replica method when node has a copy of the requested
+        replica.
+        """
+        sim = Mock()
+        sim.fsti = 10
+        sim.now = 4
+        event_send_repl = Mock(name='SendReplica')
+        sim.event_send_replica.return_value = event_send_repl
+
+        replica_1 = self._make_replica('replica_1', size=100)
+        replica_2 = self._make_replica('replica_2', size=350)
+        replicas = OrderedDict([
+            (replica_1.name, replica_1),
+            (replica_2.name, replica_2),
+        ])
+
+        node = self._make_instance('node_1', 5000, sim, replicas)
+        node._replica_stats['replica_1']._nor = 10
+        requester = self._make_instance('req_node', 5000, sim)
+
+        g = node.request_replica('replica_1', requester)
+        event = next(g)
+
+        # check that correct event was yielded (send replica)
+        self.assertIs(event, event_send_repl)
+        self.assertEqual(
+            sim.event_send_replica.call_args,
+            ((node, requester, replica_1), {})
+        )
+
+        # check that requested replica's stats have been updated as well
+        stats = node._replica_stats['replica_1']
+        self.assertEqual(stats.nor, 11)
+        self.assertEqual(stats.nor_fsti(sim.now), 1)
+        self.assertEqual(stats.lrt, sim.now)
+
+        with self.assertRaises(StopIteration):
+            next(g)  # no more events yielded
+
+    def test_request_replica_replica_not_present(self):
+        """Test request_replica method when node does not have the requested
+        replica.
+        """
+        sim = Mock()
+        sim.fsti = 10
+        sim.now = 4
+
+        event_send_repl_req = Mock(name='SendReplicaRequest')
+        sim.event_send_replica_request.return_value = event_send_repl_req
+
+        event_send_repl = Mock(name='SendReplica')
+        sim.event_send_replica.return_value = event_send_repl
+
+        replica_1 = self._make_replica('replica_1', size=100)
+        replicas = OrderedDict(replica_1=replica_1)
+
+        parent = self._make_instance('parent', 5000, sim, replicas)
+
+        node = self._make_instance('node_1', 5000, sim)
+        node.set_parent(parent)
+        node._store_if_valuable = Mock(wraps=node._store_if_valuable)
+
+        requester = self._make_instance('req_node', 5000, sim)
+
+        g = node.request_replica('replica_1', requester)
+        event = next(g)
+
+        # check that correct event was yielded (send replica reques)
+        self.assertIs(event, event_send_repl_req)
+        self.assertEqual(
+            sim.event_send_replica_request.call_args,
+            ((node, parent, 'replica_1'), {})
+        )
+
+        # simulate response (replica received event) and see what we get
+        event = g.send(replica_1)
+
+        self.assertEqual(
+            node._store_if_valuable.call_args,
+            ((replica_1,), {})
+        )
+
+        self.assertIs(event, event_send_repl)
+        self.assertEqual(
+            sim.event_send_replica.call_args,
+            ((node, requester, replica_1), {})
+        )
+
+        with self.assertRaises(StopIteration):
+            next(g)  # no more events yielded
 
     def test_copy_replica_not_enough_space(self):
         """Test that _copy_replica raises ValueError if there is not enough
