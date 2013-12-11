@@ -1,3 +1,5 @@
+
+from unittest.mock import Mock
 import unittest
 
 
@@ -43,3 +45,61 @@ class TestReplica(unittest.TestCase):
             pass
         else:
             self.fail("Size attribute is not read-only.")
+
+    def test_eq_equal_replicas(self):
+        """Test 'equals' operator for equal replicas."""
+        this = self._make_instance('replica_1', 1234)
+        other = self._make_instance('replica_1', 1234)
+        self.assertTrue(this == other)
+
+    def test_eq_names_differ(self):
+        """Test 'equals' operator for replicas whose names differ."""
+        this = self._make_instance('replica_1', 1234)
+        other = self._make_instance('replica_2', 1234)
+        self.assertFalse(this == other)
+
+    def test_eq_sizes_differ(self):
+        """Test 'equals' operator for replicas whose names differ."""
+        this = self._make_instance('replica_1', 1234)
+        other = self._make_instance('replica_1', 2345)
+        self.assertFalse(this == other)
+
+    def test_eq_other_type(self):
+        """Test 'equals' operator when comparing with an object of a
+        different type.
+        """
+        this = self._make_instance('replica_1', 1234)
+        other = Mock()
+        other.name = 'replica_1'
+        other.size = 1234
+
+        self.assertFalse(this == other)
+
+    def test_neq_equal_replicas(self):
+        """Test 'equals' operator for two replicas whiequal replicas."""
+        this = self._make_instance('replica_1', 1234)
+        other = self._make_instance('replica_1', 1234)
+        self.assertFalse(this != other)
+
+    def test_neq_same_names(self):
+        """Test 'not equals' operator for replicas with the same name."""
+        this = self._make_instance('replica_1', 1234)
+        other = self._make_instance('replica_2', 1234)
+        self.assertTrue(this != other)
+
+    def test_neq_same_sizes(self):
+        """Test 'not equals' operator for replicas with the same size."""
+        this = self._make_instance('replica_1', 1234)
+        other = self._make_instance('replica_1', 2345)
+        self.assertTrue(this != other)
+
+    def test_neq_other_type(self):
+        """Test 'not equals' operator when comparing with an object of a
+        different type.
+        """
+        this = self._make_instance('replica_1', 1234)
+        other = Mock()
+        other.name = 'replica_1'
+        other.size = 1234
+
+        self.assertTrue(this != other)
