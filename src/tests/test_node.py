@@ -129,7 +129,7 @@ class TestNode(unittest.TestCase):
         return Replica(*args, **kwargs)
 
     def test_init(self):
-        """Test than new instances are correctly initialized."""
+        """Test that new instances are correctly initialized."""
         sim = self._make_sim()
         replicas = OrderedDict(
             replica_1=self._make_replica('replica_1', 3000),
@@ -147,7 +147,7 @@ class TestNode(unittest.TestCase):
         self.assertEqual(node._replicas.keys(), replicas.keys())
 
     def test_init_checks_capacity_to_be_positive(self):
-        """Test than new instances are correctly initialized."""
+        """Test that init checks that `capacity` is a positive number."""
         sim = self._make_sim()
 
         with self.assertRaises(ValueError):
