@@ -66,13 +66,13 @@ class TestClock(unittest.TestCase):
     def test_init(self):
         """Test than new _Clock instances are correctly initialized."""
         clock = self._make_instance()
-        self.assertEqual(clock.time, 0)
+        self.assertEqual(clock.time, 0.0)
 
     def test_time_readonly(self):
         """Test that instance's `time` property is read-only."""
         clock = self._make_instance()
         try:
-            clock.time = 123
+            clock.time = 123.45
         except AttributeError:
             pass
         else:
@@ -81,36 +81,36 @@ class TestClock(unittest.TestCase):
     def test_reset(self):
         """Test that `reset` method resets time to zero (0)."""
         clock = self._make_instance()
-        clock._time = 50  # cheating for easier testing
+        clock._time = 50.0  # cheating for easier testing
 
-        self.assertEqual(clock.time, 50)
+        self.assertEqual(clock.time, 50.0)
         clock.reset()
-        self.assertEqual(clock.time, 0)
+        self.assertEqual(clock.time, 0.0)
 
     def test_tick_default_step(self):
         """Test that `tick` method increases time by 1 unit by default."""
         clock = self._make_instance()
-        self.assertEqual(clock.time, 0)
+        self.assertEqual(clock.time, 0.0)
 
         clock.tick()
-        self.assertEqual(clock.time, 1)
+        self.assertEqual(clock.time, 1.0)
         clock.tick()
-        self.assertEqual(clock.time, 2)
+        self.assertEqual(clock.time, 2.0)
         clock.tick()
-        self.assertEqual(clock.time, 3)
+        self.assertEqual(clock.time, 3.0)
 
     def test_tick_non_default_step(self):
         """Test that `tick` method correctly increases time by given step."""
         clock = self._make_instance()
-        self.assertEqual(clock.time, 0)
+        self.assertEqual(clock.time, 0.0)
 
         clock.tick(step=4)
-        self.assertEqual(clock.time, 4)
+        self.assertEqual(clock.time, 4.0)
         clock.tick(step=0)
-        self.assertEqual(clock.time, 4)
+        self.assertEqual(clock.time, 4.0)
 
     def test_tick_checks_step_to_be_positive(self):
         """Test that `tick` method rejects negative steps."""
         clock = self._make_instance()
         with self.assertRaises(ValueError):
-            clock.tick(step=-1)
+            clock.tick(step=-1.0)
