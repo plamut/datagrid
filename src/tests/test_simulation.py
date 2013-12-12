@@ -1,6 +1,7 @@
 """Tests for :py:mod:`models.simulation` module."""
 
 from collections import OrderedDict
+from unittest.mock import Mock
 
 import unittest
 
@@ -287,3 +288,80 @@ class TestSimulation(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             self._make_instance(**settings)
+
+    def test_new_node(self):
+        """Test that _new_node indeed creates and returns a new Node instance.
+        """
+        from models.node import Node
+
+        settings = self._get_settings()
+        sim = self._make_instance(**settings)
+
+        new_node = sim._new_node('node_1', 15000, sim)
+        self.assertTrue(isinstance(new_node, Node))
+        self.assertEqual(sim._nodes.get('node_1'), new_node)
+
+    def test_now(self):
+        """Test that `now` returns internal clock's current time."""
+        settings = self._get_settings()
+        sim = self._make_instance(**settings)
+
+        sim._clock._time = 8.7602
+        self.assertEqual(sim.now, 8.7602)
+
+    def test_now_readonly(self):
+        """Test that `now`property is read-only."""
+        settings = self._get_settings()
+        sim = self._make_instance(**settings)
+
+        try:
+            sim.now = 10.501
+        except AttributeError:
+            pass
+        else:
+            self.fail("Now attribute is not read-only.")
+
+    def test_nodes(self):
+        """Test that `nodes` property returns simulation's list of nodes."""
+        settings = self._get_settings()
+        sim = self._make_instance(**settings)
+
+        fake_nodes = Mock()
+        sim._nodes = fake_nodes
+        self.assertIs(sim.nodes, fake_nodes)
+
+    def test_replicas(self):
+        """Test that `replicas` property returns simulation's list of replicas.
+        """
+        settings = self._get_settings()
+        sim = self._make_instance(**settings)
+
+        fake_replicas = Mock()
+        sim._replicas = fake_replicas
+        self.assertIs(sim.replicas, fake_replicas)
+
+    def test_generate_nodes(self):
+        """Test that _generate_nodes creates a new set of nodes."""
+        settings = self._get_settings()
+        settings['node_count'] = 5
+        sim = self._make_instance(**settings)
+
+        sim._generate_nodes()
+
+        self.assertEqual(len(sim.nodes), 5)
+        for name in ['server', 'node_1', 'node_2', 'node_3', 'node_4']:
+            self.assertIn(name, sim.nodes)
+            self.assertIs(sim.nodes[name]._sim, sim)
+
+            if name == 'server':
+                expected_capacity = \
+                    settings['replica_count'] * settings['replica_max_size']
+            else:
+                expected_capacity = settings['node_capacity']
+            self.assertEqual(sim.nodes[name].capacity, expected_capacity)
+
+    def test_generate_edges(self):
+        """Test that _generate_edges creates edges with random lengths between
+        all node pairs.
+        """
+        # TODO

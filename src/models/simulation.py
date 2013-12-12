@@ -138,9 +138,6 @@ class Simulation(object):
 
         self._clock = _Clock()
 
-        if min_dist_km >= max_dist_km:
-            raise ValueError("Min distance must be smaller than max distance")
-
         if min_dist_km <= 0:
             raise ValueError("Minimum distance must be positive.")
         self._min_dist_km = min_dist_km
@@ -148,6 +145,9 @@ class Simulation(object):
         if max_dist_km <= 0:
             raise ValueError("Maximum distance must be positive.")
         self._max_dist_km = max_dist_km
+
+        if min_dist_km >= max_dist_km:
+            raise ValueError("Min distance must be smaller than max distance")
 
         if network_bw_mbps <= 0:
             raise ValueError("Network bandwidth must be positive.")
