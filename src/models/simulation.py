@@ -129,7 +129,7 @@ class Simulation(object):
         self._replica_count = replica_count
 
         if fsti < 1:
-            raise ValueError("FSTE must be positive.")
+            raise ValueError("FSTI must be positive.")
         self._fsti = fsti
 
         self._replicas = OrderedDict()
