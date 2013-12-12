@@ -128,7 +128,7 @@ class Simulation(object):
             raise ValueError("Number of replicas must be positive.")
         self._replica_count = replica_count
 
-        if fsti < 1:
+        if fsti <= 0.0:
             raise ValueError("FSTI must be positive.")
         self._fsti = fsti
 
