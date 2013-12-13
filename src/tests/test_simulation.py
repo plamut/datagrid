@@ -3,6 +3,7 @@
 from collections import OrderedDict
 from unittest.mock import Mock
 
+import itertools
 import unittest
 
 
@@ -310,7 +311,7 @@ class TestSimulation(unittest.TestCase):
         self.assertEqual(sim.now, 8.7602)
 
     def test_now_readonly(self):
-        """Test that `now`property is read-only."""
+        """Test that `now` property is read-only."""
         settings = self._get_settings()
         sim = self._make_instance(**settings)
 
@@ -320,6 +321,26 @@ class TestSimulation(unittest.TestCase):
             pass
         else:
             self.fail("Now attribute is not read-only.")
+
+    def test_fsti(self):
+        """Test that `fsti` returns correct value."""
+        settings = self._get_settings()
+        sim = self._make_instance(**settings)
+
+        sim._fsti = 423
+        self.assertEqual(sim.fsti, 423)
+
+    def test_fsti_readonly(self):
+        """Test that `fsti` property is read-only."""
+        settings = self._get_settings()
+        sim = self._make_instance(**settings)
+
+        try:
+            sim.fsti = 99
+        except AttributeError:
+            pass
+        else:
+            self.fail("FSTI attribute is not read-only.")
 
     def test_nodes(self):
         """Test that `nodes` property returns simulation's list of nodes."""
@@ -363,5 +384,67 @@ class TestSimulation(unittest.TestCase):
     def test_generate_edges(self):
         """Test that _generate_edges creates edges with random lengths between
         all node pairs.
+        """
+        from models.node import Node
+
+        settings = self._get_settings()
+        settings['node_count'] = 20
+
+        # shorten [min_dist, max_dist] interval to detect out-of-range random
+        # edge distances with greater probability
+        settings['min_dist_km'] = 5
+        settings['max_dist_km'] = 20
+        sim = self._make_instance(**settings)
+
+        for i in range(1, 21):
+            name = 'node_' + str(i)
+            sim._nodes[name] = Node(name, 2000, sim)
+
+        sim._generate_edges()
+
+        for node_1, node_2 in itertools.combinations(sim.nodes, 2):
+            self.assertIn(node_1, sim._edges)
+            self.assertEqual(len(sim._edges[node_1]), 19)
+            self.assertIn(node_2, sim._edges[node_1])
+
+            self.assertIn(node_2, sim._edges)
+            self.assertEqual(len(sim._edges[node_2]), 19)
+            self.assertIn(node_1, sim._edges[node_2])
+
+            # check distance symmetry
+            dist = sim._edges[node_1][node_2]
+            self.assertEqual(dist, sim._edges[node_2][node_1])
+
+            # check distance lies withing the specified limits
+            self.assertGreaterEqual(dist, settings['min_dist_km'])
+            self.assertLessEqual(dist, settings['max_dist_km'])
+
+    def test_generate_replicas(self):
+        """Test that _generate_replicas creates replicas as specified by the
+        simulation parameters.
+        """
+        settings = self._get_settings()
+        settings['replica_count'] = 100
+
+        # shorten [min_size, max_size] interval to detect out-of-range random
+        # replica sizes distances with greater probability
+        settings['replica_min_size'] = 10
+        settings['replica_max_size'] = 20
+        sim = self._make_instance(**settings)
+
+        sim._generate_replicas()
+
+        self.assertEqual(len(sim.replicas), 100)
+        for i in range(1, 101):
+            name = 'replica_{:03d}'.format(i)
+            self.assertIn(name, sim.replicas)
+
+            replica = sim.replicas[name]
+            self.assertEqual(replica.name, name)
+            self.assertGreaterEqual(replica.size, settings['replica_min_size'])
+            self.assertLessEqual(replica.size, settings['replica_max_size'])
+
+    def test_dijkstra(self):
+        """Test that _dijkstra finds the shortest paths between all node pairs.
         """
         # TODO
