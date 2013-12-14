@@ -178,6 +178,8 @@ class Simulation(object):
         self._total_bw = 0.0  # total bandwidth used (in megabits)
         self._total_rt_s = 0.0  # total response time (in seconds)
 
+        self._event_queue = []
+
         # two constants used in metrics calculations
         self._c1 = 0.001
         self._c2 = 0.001
@@ -345,10 +347,12 @@ class Simulation(object):
         self._total_bw = 0.0
         self._total_rt_s = 0.0
 
-        # generate nodes
+        # generate grid
         self._generate_replicas()
         self._generate_nodes()
         self._generate_edges()
+
+        self._event_queue = []
 
         # calculate shortest paths from server node to all the other nodes
         # and update each of the latter with a relevant path
@@ -362,7 +366,6 @@ class Simulation(object):
         NOTE: simulation must have already been initialized with initialize()
         """
         self._clock.reset()
-        self.event_queue = []
 
         print("[SIM    @ {:.8f}] SIMULATION STARTED".format(self.now))
 
@@ -373,7 +376,7 @@ class Simulation(object):
         total_reqs_gen = 1  # total replica request events generated so far
 
         # main event loop
-        while len(self.event_queue) > 0:
+        while len(self._event_queue) > 0:
 
             if total_reqs_gen < self._total_reqs:
                 new_t, new_e = ef.get_random()
@@ -405,7 +408,7 @@ class Simulation(object):
         :returns: time of next event and the event instance itself
         :rtype: tuple (float, :py:class:`~models.event._Event` instance)
         """
-        return heapq.heappop(self.event_queue)
+        return heapq.heappop(self._event_queue)
 
     def _schedule_event(self, event, event_time):
         """Add new event to event queue, scheduled at time `event_time`.
@@ -414,7 +417,7 @@ class Simulation(object):
         :type event: subclass of :py:class:`~models.event._Event`
         :param float event_time: time at which `event` should occur
         """
-        heapq.heappush(self.event_queue, (event_time, event))
+        heapq.heappush(self._event_queue, (event_time, event))
 
     def _process_event(self, event):
         """Process a single event occuring in simulation.
