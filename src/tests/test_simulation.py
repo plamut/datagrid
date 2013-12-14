@@ -493,3 +493,46 @@ class TestSimulation(unittest.TestCase):
 
         self.assertEqual(node_info['server'].dist, 0)
         self.assertIs(node_info['server'].previous, None)
+
+    def test_event_send_replica_request(self):
+        """Test that event_send_replica_request creates a new
+        SendReplicaRequest event instance.
+        """
+        from models.event import SendReplicaRequest
+
+        settings = self._get_settings()
+        sim = self._make_instance(**settings)
+
+        source = Mock()
+        target = Mock()
+        event = sim.event_send_replica_request(source, target, 'replica_XY')
+
+        self.assertTrue(isinstance(event, SendReplicaRequest))
+        self.assertIs(event.source, source)
+        self.assertIs(event.target, target)
+        self.assertEqual(event.replica_name, 'replica_XY')
+
+    def test_event_send_replica(self):
+        """Test that event_send_replica_request creates a new SendReplica
+        event instance.
+        """
+        from models.event import SendReplica
+
+        settings = self._get_settings()
+        sim = self._make_instance(**settings)
+
+        source = Mock()
+        target = Mock()
+        replica = Mock()
+        event = sim.event_send_replica(source, target, replica)
+
+        self.assertTrue(isinstance(event, SendReplica))
+        self.assertIs(event.source, source)
+        self.assertIs(event.target, target)
+        self.assertIs(event.replica, replica)
+
+    # TODO: test initialize
+
+    # TODO: test run
+
+    # etc.
