@@ -445,6 +445,51 @@ class TestSimulation(unittest.TestCase):
             self.assertLessEqual(replica.size, settings['replica_max_size'])
 
     def test_dijkstra(self):
-        """Test that _dijkstra finds the shortest paths between all node pairs.
+        """Test that _dijkstra finds the shortest paths between the server
+        node and all other nodes.
         """
-        # TODO
+        settings = self._get_settings()
+        settings['node_count'] = 6
+        settings['min_dist_km'] = 1
+        settings['max_dist_km'] = 20
+        sim = self._make_instance(**settings)
+
+        sim._generate_nodes()
+        sim._generate_edges()
+
+        # NOTE: example was taken from Wikipedia (Dijsktra's algorithm) with
+        # node 1 renamed to 'server' and all other nodes' names reduced by 1:
+        # node_<X> --> node_<X-1>
+        distances = dict(
+            server=dict(node_1=7, node_2=9, node_5=14),
+            node_1=dict(server=7, node_2=10, node_3=15),
+            node_2=dict(server=9, node_1=10, node_3=11, node_5=2),
+            node_3=dict(node_1=15, node_2=11, node_4=6),
+            node_4=dict(node_3=6, node_5=9),
+            node_5=dict(server=14, node_2=2, node_4=9),
+        )
+
+        for node_1, node_2 in itertools.combinations(sim.nodes, 2):
+            dist = distances[node_1].get(node_2, float('inf'))
+            sim._edges[node_1][node_2] = dist
+            sim._edges[node_2][node_1] = dist
+
+        node_info = sim._dijkstra()
+
+        self.assertEqual(node_info['node_3'].dist, 20)
+        self.assertEqual(node_info['node_3'].previous, 'node_2')
+
+        self.assertEqual(node_info['node_4'].dist, 20)
+        self.assertEqual(node_info['node_4'].previous, 'node_5')
+
+        self.assertEqual(node_info['node_5'].dist, 11)
+        self.assertEqual(node_info['node_5'].previous, 'node_2')
+
+        self.assertEqual(node_info['node_2'].dist, 9)
+        self.assertEqual(node_info['node_2'].previous, 'server')
+
+        self.assertEqual(node_info['node_1'].dist, 7)
+        self.assertEqual(node_info['node_1'].previous, 'server')
+
+        self.assertEqual(node_info['server'].dist, 0)
+        self.assertIs(node_info['server'].previous, None)
