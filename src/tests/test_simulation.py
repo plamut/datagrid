@@ -3,7 +3,9 @@
 from collections import OrderedDict
 from unittest.mock import Mock
 
+import heapq
 import itertools
+import random
 import unittest
 
 
@@ -186,6 +188,7 @@ class TestSimulation(unittest.TestCase):
 
         self.assertEqual(sim._total_bw, 0.0)
         self.assertEqual(sim._total_rt_s, 0.0)
+        self.assertEqual(sim._event_queue, [])
         self.assertEqual(sim._c1, 0.001)
         self.assertEqual(sim._c2, 0.001)
 
@@ -531,8 +534,105 @@ class TestSimulation(unittest.TestCase):
         self.assertIs(event.target, target)
         self.assertIs(event.replica, replica)
 
-    # TODO: test initialize
+    def test_initialize(self):
+        """Test that initialize resets simulation state."""
+        from models.node import Node
+
+        settings = self._get_settings()
+        settings['node_count'] = 3
+        settings['replica_count'] = 2
+        sim = self._make_instance(**settings)
+
+        sim._clock._time = 12.506
+        wrapped_rndseed = Mock(wrap=random.seed)
+        sim._total_bw = 27.338
+        sim._total_rt_s = 4.7682
+
+        heapq.heappush(sim._event_queue, (13.60, Mock()))
+        heapq.heappush(sim._event_queue, (18.72, Mock()))
+
+        # manually construct the grid
+        sim._generate_replicas = Mock()
+        sim._generate_nodes = Mock()
+        sim._generate_edges = Mock()
+
+        sim._replicas = OrderedDict(
+            replica_1=Mock(),
+            replica_2=Mock(),
+        )
+        sim._nodes = OrderedDict(
+            server=Node('server', 1000, sim),
+            node_1=Node('node_1', 1000, sim),
+            node_2=Node('node_2', 1000, sim),
+        )
+        sim._edges = OrderedDict(
+            server=OrderedDict(node_1=10, node_2=20),
+            node_1=OrderedDict(server=10, node_2=5),
+            node_2=OrderedDict(server=20, node_1=5),
+        )
+
+        sim.initialize()
+
+        self.assertEqual(sim._clock.time, 0.0)
+        self.assertTrue(wrapped_rndseed.called_with(sim._rnd_seed))
+        self.assertEqual(sim._total_bw, 0.0)
+        self.assertEqual(sim._total_rt_s, 0.0)
+        self.assertEqual(sim._event_queue, [])
+
+        self.assertIs(sim._nodes['server']._parent, None)
+        self.assertEqual(sim._nodes['node_1']._parent.name, 'server')
+        self.assertEqual(sim._nodes['node_2']._parent.name, 'node_1')
 
     # TODO: test run
 
-    # etc.
+    def test_pop_next_event(self):
+        """Test that _pop_next_event pops the next event from the event queue.
+        """
+        settings = self._get_settings()
+        sim = self._make_instance(**settings)
+
+        event_1 = Mock()
+        event_2 = Mock()
+        event_3 = Mock()
+        event_4 = Mock()
+        sim._event_queue.append((40, event_4))
+        sim._event_queue.append((20, event_2))
+        sim._event_queue.append((10, event_1))
+        sim._event_queue.append((30, event_3))
+        heapq.heapify(sim._event_queue)
+
+        time, event = sim._pop_next_event()
+
+        self.assertEqual(len(sim._event_queue), 3)
+        self.assertEqual(time, 10)
+        self.assertIs(event, event_1)
+
+    def test_pop_next_event_empty_queue(self):
+        """Test that _pop_next_event raises an error if event queue is empty.
+        """
+        settings = self._get_settings()
+        sim = self._make_instance(**settings)
+
+        with self.assertRaises(IndexError):
+            sim._pop_next_event()
+
+    def test_schedule_event(self):
+        """Test that _schedule_event adds an event to the event queue."""
+        settings = self._get_settings()
+        sim = self._make_instance(**settings)
+
+        event_1 = Mock()
+        event_2 = Mock()
+        event_4 = Mock()
+        sim._event_queue.append((20, event_2))
+        sim._event_queue.append((10, event_1))
+        sim._event_queue.append((40, event_4))
+        heapq.heapify(sim._event_queue)
+
+        event_3 = Mock()
+        sim._schedule_event(event_3, 30)
+
+        self.assertEqual(len(sim._event_queue), 4)
+        self.assertIn((30, event_3), sim._event_queue)
+
+    # TODO: test process event (4+ tests, 1+ for each event type)
