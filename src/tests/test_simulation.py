@@ -2,6 +2,7 @@
 
 from collections import OrderedDict
 from unittest.mock import Mock
+from unittest.mock import patch
 
 import heapq
 import itertools
@@ -635,4 +636,170 @@ class TestSimulation(unittest.TestCase):
         self.assertEqual(len(sim._event_queue), 4)
         self.assertIn((30, event_3), sim._event_queue)
 
-    # TODO: test process event (4+ tests, 1+ for each event type)
+    def test_process_event_unknown_type(self):
+        """Test that _process_event raises an error on unknown event types."""
+        settings = self._get_settings()
+        sim = self._make_instance(**settings)
+
+        with self.assertRaises(TypeError):
+            sim._process_event(object())
+
+    def test_process_event_receive_replica_request_replica_not_found(self):
+        """Test that _process_event correctly processes ReceiveReplicaRequest
+        events when target node does not have the requested replica.
+        """
+        from models.node import Node
+        from models.event import ReceiveReplicaRequest
+        from models.event import SendReplicaRequest
+
+        settings = self._get_settings()
+        sim = self._make_instance(**settings)
+        sim._clock._time = 2.55
+
+        target = Node('target', 10000, sim)
+        target._parent = Mock()
+        target._parent.name = 'server'
+
+        source = Mock()
+        source._parent = target
+        event = ReceiveReplicaRequest(source, target, 'replica_X')
+
+        sim._process_event(event)
+
+        # ReceiveReplicaRequest should have resulted in a SendReplicaRequest
+        # (target node requests replica from its parent) with no time delay
+        self.assertEqual(len(sim._event_queue), 1)
+        next_event_time, next_event = sim._event_queue[0]
+        self.assertEqual(next_event_time, 2.55)
+        self.assertTrue(isinstance(next_event, SendReplicaRequest))
+        self.assertEqual(next_event.source.name, 'target')
+        self.assertEqual(next_event.target.name, 'server')
+        self.assertEqual(next_event.replica_name, 'replica_X')
+
+    def test_process_event_receive_replica_request_replica_found(self):
+        """Test that _process_event correctly processes ReceiveReplicaRequest
+        events when target node has a copy of the requested replica.
+        """
+        from models.node import Node
+        from models.event import ReceiveReplicaRequest
+        from models.event import SendReplica
+
+        settings = self._get_settings()
+        sim = self._make_instance(**settings)
+        sim._clock._time = 2.55
+
+        replica = Mock()
+        replica.name = 'replica_X'
+
+        target = Node('target', 10000, sim)
+        target._replicas[replica.name] = replica
+        target._replica_stats[replica.name] = Mock()
+
+        source = Node('source', 10000, sim)
+        source._parent = target
+        event = ReceiveReplicaRequest(source, target, 'replica_X')
+
+        sim._process_event(event)
+
+        # ReceiveReplicaRequest should have resulted in a SendReplica with no
+        # delay (target node had the replica and sent it back)
+        self.assertEqual(len(sim._event_queue), 1)
+        next_event_time, next_event = sim._event_queue[0]
+        self.assertEqual(next_event_time, 2.55)
+        self.assertTrue(isinstance(next_event, SendReplica))
+        self.assertEqual(next_event.source.name, 'target')
+        self.assertEqual(next_event.target.name, 'source')
+        self.assertIs(next_event.replica, replica)
+
+    @patch('builtins.next', lambda g: object())
+    def test_process_event_receive_replica_request_unknown_event_yielded(self):
+        """Test that _process_event raises an error when processing
+        ReceiveReplicaRequest resulting in an event of an unknown type.
+
+        For this to happen we patch the next() function so that it returns a
+        plain object instance instead of what the Node.request_replica()
+        generator would have returned.
+        """
+        from models.event import ReceiveReplicaRequest
+
+        settings = self._get_settings()
+        sim = self._make_instance(**settings)
+
+        event = ReceiveReplicaRequest(Mock(), Mock(), 'replica_X')
+
+        with self.assertRaises(TypeError):
+            sim._process_event(event)
+
+    def test_process_event_send_replica_request(self):
+        """Test that _process_event correctly processes SendReplicaRequest
+        events.
+        """
+        from models.node import Node
+        from models.event import ReceiveReplicaRequest
+        from models.event import SendReplicaRequest
+
+        settings = self._get_settings()
+        sim = self._make_instance(**settings)
+        sim._clock._time = 4.22
+        sim._total_rt_s = 0.72
+
+        # NOTE: signal propagation speed (as defined in settings) is 7000 km/s
+        sim._edges['source'] = OrderedDict(target=700)
+
+        target = Mock()
+        target.name = 'target'
+        source = Node('source', 10000, sim)
+        source._parent = target
+        event = SendReplicaRequest(source, target, 'replica_X')
+
+        sim._process_event(event)
+
+        # SendReplicaRequest should have resulted in a ReceiveReplicaRequest
+        # event on the target node after some propagation speed latency
+        self.assertEqual(len(sim._event_queue), 1)
+        next_event_time, next_event = sim._event_queue[0]
+        self.assertAlmostEqual(next_event_time, 4.32)
+        self.assertTrue(isinstance(next_event, ReceiveReplicaRequest))
+        self.assertEqual(next_event.source.name, 'source')
+        self.assertEqual(next_event.target.name, 'target')
+        self.assertEqual(next_event.replica_name, 'replica_X')
+
+        # total response time statistics should have to be updates as well
+        self.assertAlmostEqual(sim._total_rt_s, 0.82)
+
+    def test_process_event_send_replica(self):
+        """Test that _process_event correctly processes SendReplica events."""
+        from models.event import ReceiveReplica
+        from models.event import SendReplica
+
+        settings = self._get_settings()
+        sim = self._make_instance(**settings)
+        sim._clock._time = 22.57
+        sim._total_rt_s = 7.08
+        sim._total_bw = 110.25
+
+        source = Mock()
+        target = Mock()
+        replica = Mock(size=80)  # NOTE: network bandwidth is 20 Mb/s
+        event = SendReplica(source, target, replica)
+
+        sim._process_event(event)
+
+        # SendReplica should have resulted in a ReceiveReplica event on the
+        # target node after the time needed to send a replica over the network
+        self.assertEqual(len(sim._event_queue), 1)
+        next_event_time, next_event = sim._event_queue[0]
+        self.assertAlmostEqual(next_event_time, 26.57)
+        self.assertTrue(isinstance(next_event, ReceiveReplica))
+        self.assertIs(next_event.source, source)
+        self.assertIs(next_event.target, target)
+        self.assertIs(next_event.replica, replica)
+
+        # simulation statistics should have been updated as well
+        self.assertAlmostEqual(sim._total_rt_s, 11.08)
+        self.assertAlmostEqual(sim._total_bw, 190.25)
+
+    def test_process_event_receive_replica(self):
+        """TODO"""
+
+    # TODO: when tsting events, test that generators are copied as well!
