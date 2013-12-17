@@ -34,7 +34,8 @@ debug_sim = dict(
 def main():
     print("Main function")
 
-    sim = Simulation(**debug_sim)
+    # sim = Simulation(**debug_sim)
+    sim = Simulation(**sim_settings)
 
     # XXX: move settings to here? as a parameter to initialize?
     sim.initialize()

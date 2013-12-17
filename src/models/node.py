@@ -160,8 +160,11 @@ class Node(object):
         fsti = self._sim.fsti
         ct = self._sim.now  # current simulation time
 
-        gv = s_nor / s_size + s_nor_fsti / fsti + \
-            1 / (ct - s_lrt / len(replicas))
+        if ct == s_lrt / len(replicas):
+            gv = float('inf')
+        else:
+            gv = s_nor / s_size + s_nor_fsti / fsti + \
+                1 / (ct - s_lrt / len(replicas))
 
         return gv
 
@@ -181,10 +184,11 @@ class Node(object):
         if stats is None:
             stats = _ReplicaStats()
 
-        # TODO: possible division by zero (ct - stats.lrt) - if replica
-        # was last requested at the same time when it was last used
-        rv = stats.nor / replica.size + stats.nor_fsti(ct) / fsti + \
-            1 / (ct - stats.lrt)
+        if ct == stats.lrt:
+            rv = float('inf')
+        else:
+            rv = stats.nor / replica.size + stats.nor_fsti(ct) / fsti + \
+                1 / (ct - stats.lrt)
 
         return rv
 
