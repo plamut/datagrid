@@ -1,6 +1,7 @@
 """Tests for :py:mod:`models.simulation` module."""
 
 from collections import OrderedDict
+from inspect import isgenerator
 from unittest.mock import Mock
 from unittest.mock import patch
 
@@ -663,6 +664,7 @@ class TestSimulation(unittest.TestCase):
         source = Mock()
         source._parent = target
         event = ReceiveReplicaRequest(source, target, 'replica_X')
+        event._generators = [Mock(), Mock()]
 
         sim._process_event(event)
 
@@ -675,6 +677,11 @@ class TestSimulation(unittest.TestCase):
         self.assertEqual(next_event.source.name, 'target')
         self.assertEqual(next_event.target.name, 'server')
         self.assertEqual(next_event.replica_name, 'replica_X')
+
+        # a new generator should have been added to the end of the list
+        self.assertEqual(len(next_event._generators), 3)
+        self.assertEqual(next_event._generators[:2], event._generators)
+        self.assertTrue(isgenerator(next_event._generators[2]))
 
     def test_process_event_receive_replica_request_replica_found(self):
         """Test that _process_event correctly processes ReceiveReplicaRequest
@@ -698,6 +705,7 @@ class TestSimulation(unittest.TestCase):
         source = Node('source', 10000, sim)
         source._parent = target
         event = ReceiveReplicaRequest(source, target, 'replica_X')
+        event._generators = [Mock(), Mock()]
 
         sim._process_event(event)
 
@@ -710,6 +718,7 @@ class TestSimulation(unittest.TestCase):
         self.assertEqual(next_event.source.name, 'target')
         self.assertEqual(next_event.target.name, 'source')
         self.assertIs(next_event.replica, replica)
+        self.assertEqual(next_event._generators, event._generators)
 
     @patch('builtins.next', lambda g: object())
     def test_process_event_receive_replica_request_unknown_event_yielded(self):
@@ -751,6 +760,7 @@ class TestSimulation(unittest.TestCase):
         source = Node('source', 10000, sim)
         source._parent = target
         event = SendReplicaRequest(source, target, 'replica_X')
+        event._generators = [Mock(), Mock()]
 
         sim._process_event(event)
 
@@ -763,6 +773,7 @@ class TestSimulation(unittest.TestCase):
         self.assertEqual(next_event.source.name, 'source')
         self.assertEqual(next_event.target.name, 'target')
         self.assertEqual(next_event.replica_name, 'replica_X')
+        self.assertEqual(next_event._generators, event._generators)
 
         # total response time statistics should have to be updates as well
         self.assertAlmostEqual(sim._total_rt_s, 0.82)
@@ -782,6 +793,7 @@ class TestSimulation(unittest.TestCase):
         target = Mock()
         replica = Mock(size=80)  # NOTE: network bandwidth is 20 Mb/s
         event = SendReplica(source, target, replica)
+        event._generators = [Mock(), Mock()]
 
         sim._process_event(event)
 
@@ -794,6 +806,7 @@ class TestSimulation(unittest.TestCase):
         self.assertIs(next_event.source, source)
         self.assertIs(next_event.target, target)
         self.assertIs(next_event.replica, replica)
+        self.assertEqual(next_event._generators, event._generators)
 
         # simulation statistics should have been updated as well
         self.assertAlmostEqual(sim._total_rt_s, 11.08)
