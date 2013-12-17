@@ -11,7 +11,7 @@ class _Event(object):
         self.event_id = _Event.event_id
 
     def __lt__(self, other):
-        if not isinstance(other, self.__class__):
+        if not isinstance(other, _Event):
             raise TypeError(
                 "Cannot compare {} to another type.".format(self.__class__))
         return self.event_id < other.event_id
