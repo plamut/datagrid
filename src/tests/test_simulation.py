@@ -812,7 +812,73 @@ class TestSimulation(unittest.TestCase):
         self.assertAlmostEqual(sim._total_rt_s, 11.08)
         self.assertAlmostEqual(sim._total_bw, 190.25)
 
-    def test_process_event_receive_replica(self):
-        """TODO"""
+    def test_process_event_receive_replica_with_subtarget(self):
+        """Test that _process_event correctly processes ReceiveReplica events
+        when receiving node (target) has another sub-target to send replica to.
+        """
+        from models.event import ReceiveReplica
+        from models.event import SendReplica
 
-    # TODO: when tsting events, test that generators are copied as well!
+        settings = self._get_settings()
+        sim = self._make_instance(**settings)
+        sim._clock._time = 8.11
+
+        source = Mock()
+        target = Mock()
+        target_child = Mock()
+        replica = Mock()
+        event = ReceiveReplica(source, target, replica)
+
+        def g():
+            yield
+            yield SendReplica(target, target_child, replica)
+        gen = g()
+        next(gen)
+
+        another_gen = Mock()
+        event._generators = [another_gen, gen]
+
+        sim._process_event(event)
+
+        # ReceiveReplica should have resulted in a SendReplica event (target
+        # node sends replica to its own requester)
+        self.assertEqual(len(sim._event_queue), 1)
+        next_event_time, next_event = sim._event_queue[0]
+        self.assertEqual(next_event_time, 8.11)  # immediately (no delay)
+        self.assertTrue(isinstance(next_event, SendReplica))
+        self.assertIs(next_event.source, target)
+        self.assertIs(next_event.target, target_child)
+        self.assertIs(next_event.replica, replica)
+        self.assertEqual(next_event._generators, [another_gen])
+
+    def test_process_event_receive_replica_without_subtarget(self):
+        """Test that _process_event correctly processes ReceiveReplica events
+        when receiving node (target) does not have any sub-target to send
+        replica to.
+        """
+        from models.event import ReceiveReplica
+        from models.event import SendReplica
+
+        settings = self._get_settings()
+        sim = self._make_instance(**settings)
+        sim._clock._time = 8.11
+
+        source = Mock()
+        target = Mock()
+        replica = Mock()
+        event = ReceiveReplica(source, target, replica)
+
+        def g():
+            yield
+            yield SendReplica(target, None, replica)
+        gen = g()
+        next(gen)
+
+        event._generators = [gen]
+
+        sim._process_event(event)
+
+        # after processing ReceiveReplica event, no more events should have
+        # resulted from that (because there is no sub-target node to send
+        # replica to)
+        self.assertEqual(len(sim._event_queue), 0)

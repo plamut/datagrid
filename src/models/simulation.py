@@ -496,15 +496,12 @@ class Simulation(object):
                 g = event._generators.pop()
                 new_event = g.send(event.replica)  # we get a SendReplica event
 
+                # if target is not None, node did not request the replica
+                # by itself, thus we need to send the replica to another node
+                # down the chain
                 if new_event.target is not None:
-                    # another node needs to be notified down the chain ...
                     new_event._generators = event._generators.copy()
                     self._schedule_event(new_event, self.now)
-                else:
-                    pass
-                    # target is None, meaning that node requested the replica
-                    # by itself, thus we don't need to send the replica to
-                    # another node
         else:
             raise TypeError("Unknown event", type(event))
 
