@@ -368,3 +368,80 @@ class NodeEFS(Node):
                 1 / (ct - stats.lrt)
 
         return rv
+
+
+class NodeLRU(Node):
+    """Node that uses LRU strategy (least recently used)."""
+
+    def _GV(self, replicas):
+        """Calculate value of a group of replicas.
+
+        Since LRU *always* discards some replicas in favor of a new replica,
+        the value of replica group is negative (so that it is always lower
+        than the value of a new replica).
+
+        :param replicas: list representing a replica group
+        :type replicas: list of :py:class:`~models.replica.Replica` instances
+
+        :returns: value of the replica group
+        :rtype: float
+        """
+        return -1.0
+
+    def _RV(self, replica):
+        """Calculate value of a replica.
+
+        Replicas are valued by the time they were last requested. The more
+        recent that time is, the more valuable the corresponding replica is.
+
+        :param replica: replica to calclulate the value of
+        :type replica: :py:class:`~models.replica.Replica`
+
+        :returns: value of the `replica`
+        :rtype: float
+        """
+        stats = self._replica_stats.get(replica.name)
+        if stats is None:
+            stats = _ReplicaStats()    # XXX: LRT is sim.now instead of zero?
+            rv = self._sim.now
+        else:
+            rv = stats.lrt
+
+        return rv
+
+
+class NodeLFU(Node):
+    """Node that uses LFU strategy (least frequently used)."""
+
+    def _GV(self, replicas):
+        """Calculate value of a group of replicas.
+
+        Since LFU *always* discards some replicas in favor of a new replica,
+        the value of replica group is negative (so that it is always lower
+        than the value of a new replica).
+
+        :param replicas: list representing a replica group
+        :type replicas: list of :py:class:`~models.replica.Replica` instances
+
+        :returns: value of the replica group
+        :rtype: float
+        """
+        return -1.0
+
+    def _RV(self, replica):
+        """Calculate value of a replica.
+
+        Replicas are valued by the number of times they have been requested.
+        Replicas with more requests are valued higher.
+
+        :param replica: replica to calclulate the value of
+        :type replica: :py:class:`~models.replica.Replica`
+
+        :returns: value of the `replica`
+        :rtype: float
+        """
+        stats = self._replica_stats.get(replica.name)
+        if stats is None:
+            stats = _ReplicaStats()    # XXX: NOR is 1 instead of zero?
+
+        return stats.nor
