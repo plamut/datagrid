@@ -80,10 +80,6 @@ class _ReplicaStats(object):
 class Node(object):
     """Representation of a node (either client or server) in the grid."""
 
-
-class NodeEFS(object):
-    """Node that uses EFS strategy (enhanced fast spread)."""
-
     def __init__(self, name, capacity, sim, replicas=None):
         """Initialize node instance.
 
@@ -146,31 +142,7 @@ class NodeEFS(object):
         :returns: value of the replica group
         :rtype: float
         """
-        if not replicas:
-            return 0.0  # empty gorup has a vaue of zero
-
-        s_nor = 0  # sum of NORs
-        s_size = 0  # sum of replica sizes
-        s_nor_fsti = 0  # sum of replicas' nor_fsti values
-        s_lrt = 0  # sum of replicas' LRT times
-
-        for r in replicas:
-            stats = self._replica_stats[r.name]
-            s_size += r.size
-            s_nor += stats.nor
-            s_nor_fsti += stats.nor_fsti(self._sim.now)
-            s_lrt += stats.lrt
-
-        fsti = self._sim.fsti
-        ct = self._sim.now  # current simulation time
-
-        if ct == s_lrt / len(replicas):
-            gv = float('inf')
-        else:
-            gv = s_nor / s_size + s_nor_fsti / fsti + \
-                1 / (ct - s_lrt / len(replicas))
-
-        return gv
+        raise NotImplementedError("Should be implemented by a subclass.")
 
     def _RV(self, replica):
         """Calculate value of a replica.
@@ -181,20 +153,7 @@ class NodeEFS(object):
         :returns: value of the `replica`
         :rtype: float
         """
-        fsti = self._sim.fsti
-        ct = self._sim.now  # current simulation time
-
-        stats = self._replica_stats.get(replica.name)
-        if stats is None:
-            stats = _ReplicaStats()
-
-        if ct == stats.lrt:
-            rv = float('inf')
-        else:
-            rv = stats.nor / replica.size + stats.nor_fsti(ct) / fsti + \
-                1 / (ct - stats.lrt)
-
-        return rv
+        raise NotImplementedError("Should be implemented by a subclass.")
 
     def _store_if_valuable(self, replica):
         """Store a local copy of the given replica if valuable enough.
@@ -348,12 +307,64 @@ class NodeEFS(object):
 #  time that replica is requested by that node"
 
 
-# TODO: Node2011 (strategy = EFS)
-#       Node2012 (strategy = ...)
-#       Node2013 (strategy = ...)
+class NodeEFS(Node):
+    """Node that uses EFS strategy (enhanced fast spread)."""
 
-class NodeLRU(Node):
-    """Node that uses LRU strategy (least recently used)."""
+    def _GV(self, replicas):
+        """Calculate value of a group of replicas.
 
-class NodeLFU(Node):
-    """Node that uses LFU strategy (least frequently used)."""
+        :param replicas: list representing a replica group
+        :type replicas: list of :py:class:`~models.replica.Replica` instances
+
+        :returns: value of the replica group
+        :rtype: float
+        """
+        if not replicas:
+            return 0.0  # empty group has a value of zero
+
+        s_nor = 0  # sum of NORs
+        s_size = 0  # sum of replica sizes
+        s_nor_fsti = 0  # sum of replicas' nor_fsti values
+        s_lrt = 0  # sum of replicas' LRT times
+
+        for r in replicas:
+            stats = self._replica_stats[r.name]
+            s_size += r.size
+            s_nor += stats.nor
+            s_nor_fsti += stats.nor_fsti(self._sim.now)
+            s_lrt += stats.lrt
+
+        fsti = self._sim.fsti
+        ct = self._sim.now  # current simulation time
+
+        if ct == s_lrt / len(replicas):
+            gv = float('inf')
+        else:
+            gv = s_nor / s_size + s_nor_fsti / fsti + \
+                1 / (ct - s_lrt / len(replicas))
+
+        return gv
+
+    def _RV(self, replica):
+        """Calculate value of a replica.
+
+        :param replica: replica to calclulate the value of
+        :type replica: :py:class:`~models.replica.Replica`
+
+        :returns: value of the `replica`
+        :rtype: float
+        """
+        fsti = self._sim.fsti
+        ct = self._sim.now  # current simulation time
+
+        stats = self._replica_stats.get(replica.name)
+        if stats is None:
+            stats = _ReplicaStats()  # XXX: LRT is sim.now instead of zero?
+
+        if ct == stats.lrt:
+            rv = float('inf')
+        else:
+            rv = stats.nor / replica.size + stats.nor_fsti(ct) / fsti + \
+                1 / (ct - stats.lrt)
+
+        return rv

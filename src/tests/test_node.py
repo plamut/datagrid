@@ -2,6 +2,7 @@
 
 from collections import OrderedDict
 from unittest.mock import Mock
+from unittest.mock import patch
 
 import inspect
 import unittest
@@ -112,8 +113,8 @@ class TestNode(unittest.TestCase):
     """Tests for :py:class:`~models.node.Node` class."""
 
     def _get_target_class(self):
-        from models.node import NodeEFS
-        return NodeEFS
+        from models.node import Node
+        return Node
 
     def _make_instance(self, *args, **kw):
         return self._get_target_class()(*args, **kw)
@@ -202,154 +203,17 @@ class TestNode(unittest.TestCase):
         node.set_parent(parent_node)
         self.assertIs(node._parent, parent_node)
 
-    def test_group_value(self):
-        """Test that the value of a replica group is calculated correctly.
+    def test_gv_raises_not_implemented(self):
+        """Test that _GV() method raises NotImplementedError."""
+        node = self._make_instance('node_1', 1000, Mock())
+        with self.assertRaises(NotImplementedError):
+            node._GV([])
 
-        Group value is calculated by the following formula (from the paper):
-
-            sum(NOR) / sum(sizes) + sum(NOR_FSTI) / FSTI +
-            1 / (now - avg(last_req_time))
-        """
-        sim = Mock(spec=self._make_sim())
-        sim.fsti = 10
-        sim.now = 4
-
-        node = self._make_instance('node_1', 1000, sim)
-
-        replica_group = [
-            self._make_replica('replica_1', size=200),
-            self._make_replica('replica_2', size=400),
-            self._make_replica('replica_3', size=900),
-        ]
-
-        stats_1 = Mock(nor=0, lrt=0)
-        stats_1.nor_fsti.return_value = 0
-        node._replica_stats['replica_1'] = stats_1
-
-        stats_2 = Mock(nor=0, lrt=0)
-        stats_2.nor_fsti.return_value = 0
-        node._replica_stats['replica_2'] = stats_2
-
-        stats_3 = Mock(nor=0, lrt=0)
-        stats_3.nor_fsti.return_value = 0
-        node._replica_stats['replica_3'] = stats_3
-
-        self.assertAlmostEqual(node._GV(replica_group), 0.25)
-
-        stats_1.nor = 15
-        self.assertAlmostEqual(node._GV(replica_group), 0.26)
-        stats_2.nor = 45
-        self.assertAlmostEqual(node._GV(replica_group), 0.29)
-
-        replica_group[2]._size = 2400
-        self.assertAlmostEqual(node._GV(replica_group), 0.27)
-
-        stats_1.nor_fsti.return_value = 5
-        self.assertAlmostEqual(node._GV(replica_group), 0.77)
-        stats_2.nor_fsti.return_value = 20
-        self.assertAlmostEqual(node._GV(replica_group), 2.77)
-
-        stats_1.lrt = 1
-        stats_2.lrt = 2
-        stats_3.lrt = 3
-        self.assertAlmostEqual(node._GV(replica_group), 3.02)
-
-        sim.now = 7
-        self.assertAlmostEqual(node._GV(replica_group), 2.72)
-
-    def test_group_value_when_empty(self):
-        """Test that the calculated value of an empty replica group is zero."""
-        sim = Mock()
-        node = self._make_instance('node_1', 1000, sim)
-        self.assertAlmostEqual(node._GV([]), 0.0)
-
-    def test_group_value_zero_denominator(self):
-        """Test that the value of a replica group is calculated correctly in
-        cases of a zero denominator.
-
-        This can happen if the current simulation time is exactly equal to
-        replica's last requested time (e.g. when sorting replicas by
-        importance) and this replica is the only one in replica group.
-        """
-        sim = Mock(spec=self._make_sim())
-        sim.fsti = 10
-        sim.now = 4.0
-
-        node = self._make_instance('node_1', 1000, sim)
-
-        replica_group = [self._make_replica('replica_1', size=200)]
-
-        stats_1 = Mock(nor=0, lrt=4.0)
-        stats_1.nor_fsti.return_value = 0
-        node._replica_stats['replica_1'] = stats_1
-
-        try:
-            result = node._GV(replica_group)
-        except ZeroDivisionError:
-            self.fail("Incorrect handling of a zero denominator.")
-        else:
-            self.assertEqual(result, float('inf'))
-
-    def test_replica_value(self):
-        """Test that the value of a replica is calculated correctly.
-
-        Replica value is calculated by the following formula (from the paper):
-
-            NOR / replica.size + NOR_FSTI / FSTI +
-            1 / (now - repl_last_req_time)
-        """
-        sim = Mock(spec=self._make_sim())
-        sim.fsti = 10
-        sim.now = 4
-
-        replica = self._make_replica('replica_1', size=200)
-        node = self._make_instance('node_1', 1000, sim)
-
-        repl_stats = Mock(nor=0, lrt=0)
-        repl_stats.nor_fsti.return_value = 0
-        node._replica_stats['replica_1'] = repl_stats
-
-        self.assertAlmostEqual(node._RV(replica), 0.25)
-
-        repl_stats.nor = 20
-        self.assertAlmostEqual(node._RV(replica), 0.35)
-
-        replica._size = 50
-        self.assertAlmostEqual(node._RV(replica), 0.65)
-
-        repl_stats.nor_fsti.return_value = 15
-        self.assertAlmostEqual(node._RV(replica), 2.15)
-
-        repl_stats.lrt = 3
-        self.assertAlmostEqual(node._RV(replica), 2.90)
-
-        sim.now = 8
-        self.assertAlmostEqual(node._RV(replica), 2.10)
-
-    def test_replica_value_zero_denominator(self):
-        """Test that _RV correctly handles cases with a denominator of zero.
-
-        This can happen if the current simulation time is exactly equal to
-        replica's last requested time (e.g. when sorting replicas by
-        importance).
-        """
-        sim = Mock(spec=self._make_sim())
-        sim.fsti = 10
-        sim.now = 4
-
-        replica = self._make_replica('replica_1', size=200)
-        node = self._make_instance('node_1', 1000, sim)
-
-        repl_stats = Mock(nor=0, lrt=4)
-        repl_stats.nor_fsti.return_value = 0
-        node._replica_stats['replica_1'] = repl_stats
-
-        try:
-            result = node._RV(replica)
-        except ZeroDivisionError:
-            self.fail("Incorrect handling of a zero denominator.")
-        else:
-            self.assertEqual(result, float('inf'))
+    def test_rv_raises_not_implemented(self):
+        """Test that _RV() raises NotImplementedError."""
+        node = self._make_instance('node_1', 1000, Mock())
+        with self.assertRaises(NotImplementedError):
+            node._RV(Mock())
 
     def test_store_if_valuable_enough_free_space(self):
         """Test that _store_if_valuable method stores a new replica when there
@@ -474,6 +338,7 @@ class TestNode(unittest.TestCase):
         with self.assertRaises(StopIteration):
             next(g)  # no more events yielded
 
+    @patch('models.node.Node._RV', lambda self, replica: id(replica))
     def test_request_replica_replica_not_present(self):
         """Test request_replica method when node does not have the requested
         replica.
@@ -644,3 +509,179 @@ class TestNode(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             node._delete_replica('non-existent')
+
+
+class TestNodeEFS(unittest.TestCase):
+    """Tests for :py:class:`~models.node.NodeEFS` class."""
+
+    # XXX: refactor some common utility methods into some base testcase class?
+    def _get_target_class(self):
+        from models.node import NodeEFS
+        return NodeEFS
+
+    def _make_instance(self, *args, **kw):
+        return self._get_target_class()(*args, **kw)
+
+    def _make_sim(self, *args, **kwargs):
+        """Make an instance of Simulation."""
+        from models.simulation import Simulation
+        return Simulation(*args, **kwargs)
+
+    def _make_replica(self, *args, **kwargs):
+        """Make an instance of Replica."""
+        from models.replica import Replica
+        return Replica(*args, **kwargs)
+
+    def test_is_node_subclass(self):
+        """Test if target class is a subclass of Node."""
+        from models.node import Node
+        self.assertTrue(issubclass(self._get_target_class(), Node))
+
+    def test_group_value(self):
+        """Test that the value of a replica group is calculated correctly.
+
+        Group value is calculated by the following formula (from the paper):
+
+            sum(NOR) / sum(sizes) + sum(NOR_FSTI) / FSTI +
+            1 / (now - avg(last_req_time))
+        """
+        sim = Mock(spec=self._make_sim())
+        sim.fsti = 10
+        sim.now = 4
+
+        node = self._make_instance('node_1', 1000, sim)
+
+        replica_group = [
+            self._make_replica('replica_1', size=200),
+            self._make_replica('replica_2', size=400),
+            self._make_replica('replica_3', size=900),
+        ]
+
+        stats_1 = Mock(nor=0, lrt=0)
+        stats_1.nor_fsti.return_value = 0
+        node._replica_stats['replica_1'] = stats_1
+
+        stats_2 = Mock(nor=0, lrt=0)
+        stats_2.nor_fsti.return_value = 0
+        node._replica_stats['replica_2'] = stats_2
+
+        stats_3 = Mock(nor=0, lrt=0)
+        stats_3.nor_fsti.return_value = 0
+        node._replica_stats['replica_3'] = stats_3
+
+        self.assertAlmostEqual(node._GV(replica_group), 0.25)
+
+        stats_1.nor = 15
+        self.assertAlmostEqual(node._GV(replica_group), 0.26)
+        stats_2.nor = 45
+        self.assertAlmostEqual(node._GV(replica_group), 0.29)
+
+        replica_group[2]._size = 2400
+        self.assertAlmostEqual(node._GV(replica_group), 0.27)
+
+        stats_1.nor_fsti.return_value = 5
+        self.assertAlmostEqual(node._GV(replica_group), 0.77)
+        stats_2.nor_fsti.return_value = 20
+        self.assertAlmostEqual(node._GV(replica_group), 2.77)
+
+        stats_1.lrt = 1
+        stats_2.lrt = 2
+        stats_3.lrt = 3
+        self.assertAlmostEqual(node._GV(replica_group), 3.02)
+
+        sim.now = 7
+        self.assertAlmostEqual(node._GV(replica_group), 2.72)
+
+    def test_group_value_when_empty(self):
+        """Test that the calculated value of an empty replica group is zero."""
+        sim = Mock()
+        node = self._make_instance('node_1', 1000, sim)
+        self.assertAlmostEqual(node._GV([]), 0.0)
+
+    def test_group_value_zero_denominator(self):
+        """Test that the value of a replica group is calculated correctly in
+        cases of a zero denominator.
+
+        This can happen if the current simulation time is exactly equal to
+        replica's last requested time (e.g. when sorting replicas by
+        importance) and this replica is the only one in replica group.
+        """
+        sim = Mock(spec=self._make_sim())
+        sim.fsti = 10
+        sim.now = 4.0
+
+        node = self._make_instance('node_1', 1000, sim)
+
+        replica_group = [self._make_replica('replica_1', size=200)]
+
+        stats_1 = Mock(nor=0, lrt=4.0)
+        stats_1.nor_fsti.return_value = 0
+        node._replica_stats['replica_1'] = stats_1
+
+        try:
+            result = node._GV(replica_group)
+        except ZeroDivisionError:
+            self.fail("Incorrect handling of a zero denominator.")
+        else:
+            self.assertEqual(result, float('inf'))
+
+    def test_replica_value(self):
+        """Test that the value of a replica is calculated correctly.
+
+        Replica value is calculated by the following formula (from the paper):
+
+            NOR / replica.size + NOR_FSTI / FSTI +
+            1 / (now - repl_last_req_time)
+        """
+        sim = Mock(spec=self._make_sim())
+        sim.fsti = 10
+        sim.now = 4
+
+        replica = self._make_replica('replica_1', size=200)
+        node = self._make_instance('node_1', 1000, sim)
+
+        repl_stats = Mock(nor=0, lrt=0)
+        repl_stats.nor_fsti.return_value = 0
+        node._replica_stats['replica_1'] = repl_stats
+
+        self.assertAlmostEqual(node._RV(replica), 0.25)
+
+        repl_stats.nor = 20
+        self.assertAlmostEqual(node._RV(replica), 0.35)
+
+        replica._size = 50
+        self.assertAlmostEqual(node._RV(replica), 0.65)
+
+        repl_stats.nor_fsti.return_value = 15
+        self.assertAlmostEqual(node._RV(replica), 2.15)
+
+        repl_stats.lrt = 3
+        self.assertAlmostEqual(node._RV(replica), 2.90)
+
+        sim.now = 8
+        self.assertAlmostEqual(node._RV(replica), 2.10)
+
+    def test_replica_value_zero_denominator(self):
+        """Test that _RV correctly handles cases with a denominator of zero.
+
+        This can happen if the current simulation time is exactly equal to
+        replica's last requested time (e.g. when sorting replicas by
+        importance).
+        """
+        sim = Mock(spec=self._make_sim())
+        sim.fsti = 10
+        sim.now = 4
+
+        replica = self._make_replica('replica_1', size=200)
+        node = self._make_instance('node_1', 1000, sim)
+
+        repl_stats = Mock(nor=0, lrt=4)
+        repl_stats.nor_fsti.return_value = 0
+        node._replica_stats['replica_1'] = repl_stats
+
+        try:
+            result = node._RV(replica)
+        except ZeroDivisionError:
+            self.fail("Incorrect handling of a zero denominator.")
+        else:
+            self.assertEqual(result, float('inf'))
