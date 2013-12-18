@@ -298,13 +298,13 @@ class TestSimulation(unittest.TestCase):
     def test_new_node(self):
         """Test that _new_node indeed creates and returns a new Node instance.
         """
-        from models.node import NodeEFS
+        from models.node import Node
 
         settings = self._get_settings()
         sim = self._make_instance(**settings)
 
         new_node = sim._new_node('node_1', 15000, sim)
-        self.assertTrue(isinstance(new_node, NodeEFS))
+        self.assertTrue(isinstance(new_node, Node))
         self.assertEqual(sim._nodes.get('node_1'), new_node)
 
     def test_now(self):
