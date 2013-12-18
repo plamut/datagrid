@@ -1,6 +1,7 @@
 """Tests for :py:mod:`models.node` module."""
 
 from collections import OrderedDict
+from copy import deepcopy
 from unittest.mock import Mock
 from unittest.mock import patch
 
@@ -390,6 +391,23 @@ class TestNode(unittest.TestCase):
 
         with self.assertRaises(StopIteration):
             next(g)  # no more events yielded
+
+    @patch('models.node.Node._RV', lambda self, replica: id(replica))
+    def test_copy_replica_already_exists(self):
+        """Test that _copy_replica raises ValueError if replica already exists
+        on the node.
+        """
+        sim = Mock()
+        sim.fsti = 10
+        sim.now = 4
+
+        replica = self._make_replica('replica', size=100)
+        node = self._make_instance(
+            'node_1', 500, sim, OrderedDict(replica=replica))
+
+        replica_clone = deepcopy(replica)
+        with self.assertRaises(ValueError):
+            node._copy_replica(replica_clone)
 
     def test_copy_replica_not_enough_space(self):
         """Test that _copy_replica raises ValueError if there is not enough
