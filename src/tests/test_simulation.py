@@ -298,13 +298,13 @@ class TestSimulation(unittest.TestCase):
     def test_new_node(self):
         """Test that _new_node indeed creates and returns a new Node instance.
         """
-        from models.node import Node
+        from models.node import NodeEFS
 
         settings = self._get_settings()
         sim = self._make_instance(**settings)
 
         new_node = sim._new_node('node_1', 15000, sim)
-        self.assertTrue(isinstance(new_node, Node))
+        self.assertTrue(isinstance(new_node, NodeEFS))
         self.assertEqual(sim._nodes.get('node_1'), new_node)
 
     def test_now(self):
@@ -390,7 +390,7 @@ class TestSimulation(unittest.TestCase):
         """Test that _generate_edges creates edges with random lengths between
         all node pairs.
         """
-        from models.node import Node
+        from models.node import NodeEFS
 
         settings = self._get_settings()
         settings['node_count'] = 20
@@ -403,7 +403,7 @@ class TestSimulation(unittest.TestCase):
 
         for i in range(1, 21):
             name = 'node_' + str(i)
-            sim._nodes[name] = Node(name, 2000, sim)
+            sim._nodes[name] = NodeEFS(name, 2000, sim)
 
         sim._generate_edges()
 
@@ -538,7 +538,7 @@ class TestSimulation(unittest.TestCase):
 
     def test_initialize(self):
         """Test that initialize resets simulation state."""
-        from models.node import Node
+        from models.node import NodeEFS
 
         settings = self._get_settings()
         settings['node_count'] = 3
@@ -563,9 +563,9 @@ class TestSimulation(unittest.TestCase):
             replica_2=Mock(),
         )
         sim._nodes = OrderedDict(
-            server=Node('server', 1000, sim),
-            node_1=Node('node_1', 1000, sim),
-            node_2=Node('node_2', 1000, sim),
+            server=NodeEFS('server', 1000, sim),
+            node_1=NodeEFS('node_1', 1000, sim),
+            node_2=NodeEFS('node_2', 1000, sim),
         )
         sim._edges = OrderedDict(
             server=OrderedDict(node_1=10, node_2=20),
@@ -649,7 +649,7 @@ class TestSimulation(unittest.TestCase):
         """Test that _process_event correctly processes ReceiveReplicaRequest
         events when target node does not have the requested replica.
         """
-        from models.node import Node
+        from models.node import NodeEFS
         from models.event import ReceiveReplicaRequest
         from models.event import SendReplicaRequest
 
@@ -657,7 +657,7 @@ class TestSimulation(unittest.TestCase):
         sim = self._make_instance(**settings)
         sim._clock._time = 2.55
 
-        target = Node('target', 10000, sim)
+        target = NodeEFS('target', 10000, sim)
         target._parent = Mock()
         target._parent.name = 'server'
 
@@ -687,7 +687,7 @@ class TestSimulation(unittest.TestCase):
         """Test that _process_event correctly processes ReceiveReplicaRequest
         events when target node has a copy of the requested replica.
         """
-        from models.node import Node
+        from models.node import NodeEFS
         from models.event import ReceiveReplicaRequest
         from models.event import SendReplica
 
@@ -698,11 +698,11 @@ class TestSimulation(unittest.TestCase):
         replica = Mock()
         replica.name = 'replica_X'
 
-        target = Node('target', 10000, sim)
+        target = NodeEFS('target', 10000, sim)
         target._replicas[replica.name] = replica
         target._replica_stats[replica.name] = Mock()
 
-        source = Node('source', 10000, sim)
+        source = NodeEFS('source', 10000, sim)
         source._parent = target
         event = ReceiveReplicaRequest(source, target, 'replica_X')
         event._generators = [Mock(), Mock()]
@@ -743,7 +743,7 @@ class TestSimulation(unittest.TestCase):
         """Test that _process_event correctly processes SendReplicaRequest
         events.
         """
-        from models.node import Node
+        from models.node import NodeEFS
         from models.event import ReceiveReplicaRequest
         from models.event import SendReplicaRequest
 
@@ -757,7 +757,7 @@ class TestSimulation(unittest.TestCase):
 
         target = Mock()
         target.name = 'target'
-        source = Node('source', 10000, sim)
+        source = NodeEFS('source', 10000, sim)
         source._parent = target
         event = SendReplicaRequest(source, target, 'replica_X')
         event._generators = [Mock(), Mock()]

@@ -112,8 +112,8 @@ class TestNode(unittest.TestCase):
     """Tests for :py:class:`~models.node.Node` class."""
 
     def _get_target_class(self):
-        from models.node import Node
-        return Node
+        from models.node import NodeEFS
+        return NodeEFS
 
     def _make_instance(self, *args, **kw):
         return self._get_target_class()(*args, **kw)

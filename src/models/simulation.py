@@ -4,7 +4,7 @@ from models.event import ReceiveReplica
 from models.event import ReceiveReplicaRequest
 from models.event import SendReplica
 from models.event import SendReplicaRequest
-from models.node import Node
+from models.node import NodeEFS
 from models.replica import Replica
 from types import SimpleNamespace
 
@@ -190,7 +190,7 @@ class Simulation(object):
         :returns: newly created node instance
         :rtype: :py:class:`~models.node.Node`
         """
-        node = Node(*args, **kwargs)
+        node = NodeEFS(*args, **kwargs)
         self._nodes[node.name] = node
         return node
 

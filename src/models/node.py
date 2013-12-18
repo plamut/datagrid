@@ -78,7 +78,11 @@ class _ReplicaStats(object):
 
 
 class Node(object):
-    """A representation of a node (either client or server) in the grid."""
+    """Representation of a node (either client or server) in the grid."""
+
+
+class NodeEFS(object):
+    """Node that uses EFS strategy (enhanced fast spread)."""
 
     def __init__(self, name, capacity, sim, replicas=None):
         """Initialize node instance.
@@ -347,3 +351,9 @@ class Node(object):
 # TODO: Node2011 (strategy = EFS)
 #       Node2012 (strategy = ...)
 #       Node2013 (strategy = ...)
+
+class NodeLRU(Node):
+    """Node that uses LRU strategy (least recently used)."""
+
+class NodeLFU(Node):
+    """Node that uses LFU strategy (least frequently used)."""
