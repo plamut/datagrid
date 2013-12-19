@@ -220,23 +220,22 @@ class Node(object):
         :returns: requested replica
         :rtype: :py:class:`~models.replica.Replica`
         """
-        requester_name = requester.name if requester else "None"
-        msg = ("[{} @ {:.8f}] Received request for \033[1m{}\033[0m "
-               "from \033[1m{}\033[0m".format(
-                   self.name, self._sim.now, replica_name, requester_name))
-        print(msg)
+        # requester_name = requester.name if requester else "None"
+        # msg = ("[{} @ {:.8f}] Received request for \033[1m{}\033[0m "
+        #        "from \033[1m{}\033[0m".format(
+        #            self.name, self._sim.now, replica_name, requester_name))
+        # print(msg)
 
         replica = self._replicas.get(replica_name)
         if replica is not None:
-            # "UseReplica()" - update its stats
             self._replica_stats[replica_name].new_request_made(
                 self._sim.now)
         else:
-            msg = ("[{} @ {:.8f}] \033[1m{}\033[0m not here, need to request "
-                   "it from \033[1m{}\033[0m".format(
-                       self.name, self._sim.now, replica_name,
-                       self._parent.name))
-            print(msg)
+            # msg = ("[{} @ {:.8f}] \033[1m{}\033[0m not here, need to request"
+            #        " it from \033[1m{}\033[0m".format(
+            #            self.name, self._sim.now, replica_name,
+            #            self._parent.name))
+            # print(msg)
 
             # replica not available locally, request it from parent and
             # wait until we receive it - generate new event
@@ -244,17 +243,18 @@ class Node(object):
                 self, self._parent, replica_name)
             replica = (yield event)
 
-            msg = "[{} @ {:.8f}] Received \033[1m{}\033[0m from {}".format(
-                self.name, self._sim.now, replica_name, self._parent.name)
-            print(msg)
+            # msg = "[{} @ {:.8f}] Received \033[1m{}\033[0m from {}".format(
+            #     self.name, self._sim.now, replica_name, self._parent.name)
+            # print(msg)
 
             # now that we have retrieved replica, store it if it is valuable
             # enough
             self._store_if_valuable(replica)
 
-        msg = "[{} @ {:.8f}] I have \033[1m{}\033[0m, sending it to {}".format(
-            self.name, self._sim.now, replica_name, requester_name)
-        print(msg)
+        # msg = ("[{} @ {:.8f}] I have \033[1m{}\033[0m, sending it to"
+        #        "{}").format(
+        #     self.name, self._sim.now, replica_name, requester_name)
+        # print(msg)
 
         event = self._sim.event_send_replica(self, requester, replica)
         yield event
