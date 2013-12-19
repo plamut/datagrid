@@ -5,6 +5,8 @@ from models.event import ReceiveReplicaRequest
 from models.event import SendReplica
 from models.event import SendReplicaRequest
 from models.node import NodeEFS
+from models.node import NodeLFU
+from models.node import NodeLRU
 from models.replica import Replica
 from types import SimpleNamespace
 
@@ -32,10 +34,12 @@ def _digits(number):
 
 Strategy = namedtuple('Strategy', [
     'EFS',  # Enhanced Fast Spread, used in the 2011 paper
+    'LFU',  # Least Frequently Used
+    'LRU',  # Least Recently Used
     's2012',  # TODO
     's2013',  # TODO
 ])
-Strategy = Strategy(*range(1, 4))
+Strategy = Strategy(*range(1, 6))
 """Possible strategies for the nodes to use when deciding, which
 replica(s) (if any) to replace when locally storing a new replica."""
 
@@ -190,7 +194,16 @@ class Simulation(object):
         :returns: newly created node instance
         :rtype: :py:class:`~models.node.Node`
         """
-        node = NodeEFS(*args, **kwargs)
+        if self._strategy == Strategy.EFS:
+            node = NodeEFS(*args, **kwargs)
+        elif self._strategy == Strategy.LFU:
+            node = NodeLFU(*args, **kwargs)
+        elif self._strategy == Strategy.LRU:
+            node = NodeLRU(*args, **kwargs)
+        else:
+            raise NotImplementedError(
+                "No Node implementation for the current strategy.")
+
         self._nodes[node.name] = node
         return node
 

@@ -1,8 +1,10 @@
+
+from copy import copy
 from models.simulation import Strategy
 from models.simulation import Simulation
 
 
-sim_settings = dict(
+settings_EFS = dict(
     node_count=20,
     node_capacity=50000,
     strategy=Strategy.EFS,
@@ -16,7 +18,14 @@ sim_settings = dict(
     fsti=1000,  # frequency specific time interval
 )
 
-debug_sim = dict(
+settings_LFU = copy(settings_EFS)
+settings_LFU['strategy'] = Strategy.LFU
+
+settings_LRU = copy(settings_EFS)
+settings_LRU['strategy'] = Strategy.LRU
+
+# debugging configuration
+settings_dbg = dict(
     node_count=6,
     node_capacity=50000,
     strategy=Strategy.EFS,
@@ -32,10 +41,8 @@ debug_sim = dict(
 
 
 def main():
-    print("Main function")
 
-    # sim = Simulation(**debug_sim)
-    sim = Simulation(**sim_settings)
+    sim = Simulation(**settings_EFS)
 
     # XXX: move settings to here? as a parameter to initialize?
     sim.initialize()
