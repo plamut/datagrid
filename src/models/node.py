@@ -268,15 +268,12 @@ class Node(object):
             by replica value after storing a copy of the new replica
             (optional, default: True)
         """
+        if replica.name in self._replicas:
+            return  # nothing to do
+
         if replica.size > self._free_capacity:
             raise ValueError(
                 "Cannot store a copy of replica, not enough free capacity.")
-
-        if replica.name in self._replicas:
-            raise ValueError(
-                "Trying to store a copy of {}, but it already exist!".format(
-                    replica.name
-                ))
 
         self._replicas[replica.name] = deepcopy(replica)
         self._free_capacity -= replica.size

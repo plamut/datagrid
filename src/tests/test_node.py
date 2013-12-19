@@ -394,20 +394,23 @@ class TestNode(unittest.TestCase):
 
     @patch('models.node.Node._RV', lambda self, replica: id(replica))
     def test_copy_replica_already_exists(self):
-        """Test that _copy_replica raises ValueError if replica already exists
-        on the node.
+        """Test that _copy_replica correctly handles already existing replicas.
         """
         sim = Mock()
         sim.fsti = 10
         sim.now = 4
 
-        replica = self._make_replica('replica', size=100)
+        replica = self._make_replica('replica', size=120)
         node = self._make_instance(
             'node_1', 500, sim, OrderedDict(replica=replica))
 
         replica_clone = deepcopy(replica)
-        with self.assertRaises(ValueError):
-            node._copy_replica(replica_clone)
+        node._copy_replica(replica_clone)
+
+        # the number of stored replicas and node's free capacity should not
+        # have changed
+        self.assertEqual(len(node._replicas), 1)
+        self.assertEqual(node.free_capacity, 380)
 
     def test_copy_replica_not_enough_space(self):
         """Test that _copy_replica raises ValueError if there is not enough
