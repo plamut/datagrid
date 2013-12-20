@@ -524,6 +524,8 @@ class _EventFactory(object):
 
     def __init__(self, sim):
         self._sim = sim
+        self._keys = list(self._sim.nodes.keys())
+        self._replica_keys = list(self._sim.replicas.keys())
 
     def get_random(self):
         """Create new random event (some node receives a request for replica).
@@ -536,12 +538,12 @@ class _EventFactory(object):
         # do exactly that? converting to a list first?
 
         # XXX: exclude server node from this!
-        receiver = random.sample(self._sim.nodes.keys(), 1)[0]
+        receiver = random.sample(self._keys, 1)[0]
         receiver = self._sim.nodes[receiver]
 
         # XXX: in other scenarios, replica request distribution is not
         # uniform - change when needed
-        replica = random.sample(self._sim.replicas.keys(), 1)[0]
+        replica = random.sample(self._replica_keys, 1)[0]
         replica = self._sim.replicas[replica]
 
         # XXX: don't hardcode the limits, read them from the simulation
