@@ -15,7 +15,7 @@ settings_EFS = dict(
     replica_max_size=1000,  # megabits
     rnd_seed=1,
     total_reqs=100000,
-    fsti=1000,  # frequency specific time interval
+    fsti=10000,  # frequency specific time interval
 )
 
 settings_LFU = copy(settings_EFS)
