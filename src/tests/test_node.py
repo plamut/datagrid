@@ -216,6 +216,32 @@ class TestNode(unittest.TestCase):
         with self.assertRaises(NotImplementedError):
             node._RV(Mock())
 
+    def test_reorder_replicas(self):
+        """Test that _reorder_replicas orders replicas by their replica value.
+        """
+        sim = Mock()
+
+        replicas = [
+            self._make_replica('replica_1', size=270),
+            self._make_replica('replica_2', size=800),
+            self._make_replica('replica_3', size=500),
+            self._make_replica('replica_4', size=750),
+            self._make_replica('replica_5', size=110),
+        ]
+
+        node = self._make_instance('node_1', 2000, sim)
+        node._replicas = OrderedDict((r.name, r) for r in replicas)
+        node._replica_stats = OrderedDict((r.name, Mock()) for r in replicas)
+
+        # make smaller replicas less valuable
+        node._RV = Mock(side_effect=lambda r: r.size)
+        node._reorder_replicas()
+
+        self.assertEqual(
+            list(node._replicas.keys()),
+            ['replica_5', 'replica_1', 'replica_3', 'replica_4', 'replica_2']
+        )
+
     def test_store_if_valuable_enough_free_space(self):
         """Test that _store_if_valuable method stores a new replica when there
         is enough free space.
@@ -457,35 +483,6 @@ class TestNode(unittest.TestCase):
         self.assertIn('new_replica', node._replicas)
         self.assertIn('new_replica', node._replica_stats)
         self.assertEqual(node.free_capacity, 200)
-
-        # check that replicas are also correctly ordered by their value
-        self.assertEqual(
-            list(node._replicas.keys()),
-            ['replica_2', 'replica_3', 'new_replica', 'replica_1']
-        )
-
-    def test_copy_replica_enough_space_no_sort(self):
-        """Test that _copy_replica does not sort replicas if run_sort is False.
-        """
-        sim = Mock()
-        sim.fsti = 10
-        sim.now = 4
-
-        replicas = [
-            self._make_replica('replica_1', size=100),
-            self._make_replica('replica_2', size=800),
-            self._make_replica('replica_3', size=500),
-        ]
-        replicas = OrderedDict((r.name, r) for r in replicas)
-        node = self._make_instance('node_1', 2000, sim, replicas)
-
-        # make smaller replicas more valuable
-        node._RV = Mock(side_effect=lambda r: 1000 - r.size)
-
-        new_replica = self._make_replica('new_replica', size=400)
-        node._copy_replica(new_replica, run_sort=False)
-
-        # replicas must still be ordered by their insertion order
         self.assertEqual(
             list(node._replicas.keys()),
             ['replica_1', 'replica_2', 'replica_3', 'new_replica']

@@ -106,9 +106,7 @@ class Node(object):
         self._replica_stats = OrderedDict()
         if replicas is not None:
             for repl in replicas.values():
-                # TODO: set to true? replicas must always be sorted by RV
-                # better: copy all replicas and sort at the end
-                self._copy_replica(repl, run_sort=False)
+                self._copy_replica(repl)
 
     @property
     def name(self):
@@ -155,6 +153,12 @@ class Node(object):
         """
         raise NotImplementedError("Should be implemented by a subclass.")
 
+    def _reorder_replicas(self):
+        """Order replicas by their replica values (least valued first)."""
+        self._replicas = OrderedDict(
+            sorted(self._replicas.items(), key=lambda x: self._RV(x[1]))
+        )
+
     def _store_if_valuable(self, replica):
         """Store a local copy of the given replica if valuable enough.
 
@@ -176,6 +180,8 @@ class Node(object):
         else:
             # not enough space to copy replica, might replace some
             # of the existing replicas
+            self._reorder_replicas()
+
             sos = 0  # sum of sizes
             marked_replicas = []  # replicas visited and marked for deletion
             for repl in self._replicas.values():
@@ -259,14 +265,11 @@ class Node(object):
         event = self._sim.event_send_replica(self, requester, replica)
         yield event
 
-    def _copy_replica(self, replica, run_sort=True):
+    def _copy_replica(self, replica):
         """Store a local copy of the given replica.
 
         :param replica: replica to copy
         :type replica: :py:class:`~models.replica.Replica`
-        :param bool run_sort: whether or not to sort the internal replica list
-            by replica value after storing a copy of the new replica
-            (optional, default: True)
         """
         if replica.name in self._replicas:
             return  # nothing to do
@@ -281,15 +284,6 @@ class Node(object):
         # initialize with default stats - the latter need to be updated
         # separately (in case this is needed)
         self._replica_stats[replica.name] = _ReplicaStats(fsti=self._sim.fsti)
-
-        # XXX: this OK? if default stats, then subsequent sorting by replica
-        # value (RV) might be wrong
-
-        if run_sort:
-            # re-create dictionary ordered by replica value (lowest first)
-            self._replicas = OrderedDict(
-                sorted(self._replicas.items(), key=lambda x: self._RV(x[1]))
-            )
 
     def _delete_replica(self, replica_name):
         """Remove a local copy of a replica. If replica does not exist
