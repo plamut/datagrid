@@ -81,7 +81,7 @@ class Simulation(object):
 
     def __init__(
         self, node_capacity=50000, strategy=Strategy.EFS,
-        replica_count=1000, node_count=20, fsti=10000,
+        replica_count=1000, replica_groups=10, node_count=20, fsti=10000,
         min_dist_km=1, max_dist_km=1000,
         replica_min_size=100, replica_max_size=1000,
         rnd_seed=None, total_reqs=100000,
@@ -104,6 +104,8 @@ class Simulation(object):
             kilometers
             (optional, default: 1)
         :param int replica_count: number of different replicas in simulation
+            (optional, default: 1000)
+        :param int replica_groups: number of different replica groups
             (optional, default: 1000)
         :param int replica_min_size: min size of a single replica in megabits
             (optional, default: 100)
@@ -132,12 +134,17 @@ class Simulation(object):
             raise ValueError("Number of replicas must be positive.")
         self._replica_count = replica_count
 
+        if replica_groups < 1:
+            raise ValueError("Number of replicas must be positive.")
+        self._replica_groups = replica_groups
+
         if fsti <= 0.0:
             raise ValueError("FSTI must be positive.")
         self._fsti = fsti
 
         self._replicas = OrderedDict()
         self._nodes = OrderedDict()
+        self._nodes_mwg = OrderedDict()  # nodes' most wanted replica groups
         self._edges = OrderedDict()  # nodes' outbound edges
 
         self._clock = _Clock()
@@ -205,6 +212,7 @@ class Simulation(object):
                 "No Node implementation for the current strategy.")
 
         self._nodes[node.name] = node
+        self._nodes_mwg[node.name] = random.randint(1, self._replica_groups)
         return node
 
     @property

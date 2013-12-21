@@ -150,6 +150,7 @@ class TestSimulation(unittest.TestCase):
             strategy=Strategy.EFS,
             node_count=14,
             replica_count=100,
+            replica_groups=10,
             fsti=500,  # frequency specific time interval
             min_dist_km=5,  # min distance between two adjacent nodes
             max_dist_km=800,  # max distance between two adjacent nodes
@@ -175,6 +176,7 @@ class TestSimulation(unittest.TestCase):
         self.assertEqual(sim._strategy, settings['strategy'])
         self.assertEqual(sim._node_count, settings['node_count'])
         self.assertEqual(sim._replica_count, settings['replica_count'])
+        self.assertEqual(sim._replica_groups, settings['replica_groups'])
         self.assertEqual(sim._fsti, settings['fsti'])
         self.assertEqual(sim._min_dist_km, settings['min_dist_km'])
         self.assertEqual(sim._max_dist_km, settings['max_dist_km'])
@@ -187,6 +189,7 @@ class TestSimulation(unittest.TestCase):
 
         self.assertEqual(sim._replicas, OrderedDict())
         self.assertEqual(sim._nodes, OrderedDict())
+        self.assertEqual(sim._nodes_mwg, OrderedDict())
         self.assertEqual(sim._edges, OrderedDict())
 
         from models.simulation import _Clock
@@ -216,6 +219,14 @@ class TestSimulation(unittest.TestCase):
         """Test that init rejects non-positive values for `replica_count`."""
         settings = self._get_settings()
         settings['replica_count'] = 0
+
+        with self.assertRaises(ValueError):
+            self._make_instance(**settings)
+
+    def test_init_rejects_non_positive_replica_groups(self):
+        """Test that init rejects non-positive values for `replica_groups`."""
+        settings = self._get_settings()
+        settings['replica_groups'] = 0
 
         with self.assertRaises(ValueError):
             self._make_instance(**settings)
@@ -309,6 +320,7 @@ class TestSimulation(unittest.TestCase):
         with self.assertRaises(NotImplementedError):
             sim._new_node('node_1', 15000, sim)
 
+    @patch('random.randint', Mock(return_value=6))
     def test_new_node_EFS(self):
         """Test that _new_node currectly creates a new NodeEFS instance.
         """
@@ -322,7 +334,12 @@ class TestSimulation(unittest.TestCase):
         new_node = sim._new_node('node_1', 15000, sim)
         self.assertTrue(isinstance(new_node, NodeEFS))
         self.assertIs(sim._nodes.get('node_1'), new_node)
+        self.assertIn('node_1', sim._nodes_mwg)
+        self.assertEqual(sim._nodes_mwg['node_1'], 6)
+        self.assertTrue(
+            random.randint.called_with(1, settings['replica_groups']))
 
+    @patch('random.randint', Mock(return_value=6))
     def test_new_node_LFU(self):
         """Test that _new_node currectly creates a new NodeLFU instance.
         """
@@ -336,7 +353,12 @@ class TestSimulation(unittest.TestCase):
         new_node = sim._new_node('node_1', 15000, sim)
         self.assertTrue(isinstance(new_node, NodeLFU))
         self.assertIs(sim._nodes.get('node_1'), new_node)
+        self.assertIn('node_1', sim._nodes_mwg)
+        self.assertEqual(sim._nodes_mwg['node_1'], 6)
+        self.assertTrue(
+            random.randint.called_with(1, settings['replica_groups']))
 
+    @patch('random.randint', Mock(return_value=6))
     def test_new_node_LRU(self):
         """Test that _new_node currectly creates a new NodeLRU instance.
         """
@@ -350,6 +372,10 @@ class TestSimulation(unittest.TestCase):
         new_node = sim._new_node('node_1', 15000, sim)
         self.assertTrue(isinstance(new_node, NodeLRU))
         self.assertIs(sim._nodes.get('node_1'), new_node)
+        self.assertIn('node_1', sim._nodes_mwg)
+        self.assertEqual(sim._nodes_mwg['node_1'], 6)
+        self.assertTrue(
+            random.randint.called_with(1, settings['replica_groups']))
 
     def test_now(self):
         """Test that `now` returns internal clock's current time."""
