@@ -81,7 +81,8 @@ class Simulation(object):
 
     def __init__(
         self, node_capacity=50000, strategy=Strategy.EFS,
-        replica_count=1000, replica_groups=10, node_count=20, fsti=10000,
+        replica_count=1000, replica_group_count=10, mwg_prob=0.1,
+        node_count=20, fsti=10000,
         min_dist_km=1, max_dist_km=1000,
         replica_min_size=100, replica_max_size=1000,
         rnd_seed=None, total_reqs=100000,
@@ -105,8 +106,11 @@ class Simulation(object):
             (optional, default: 1)
         :param int replica_count: number of different replicas in simulation
             (optional, default: 1000)
-        :param int replica_groups: number of different replica groups
+        :param int replica_group_count: number of different replica groups
             (optional, default: 1000)
+        :param float mwg_prob: probability that node requests a replica from
+            from its Most Wanted Group
+            (optional, default: 0.1)
         :param int replica_min_size: min size of a single replica in megabits
             (optional, default: 100)
         :param int replica_max_size: max size of a single replica in megabits
@@ -134,15 +138,20 @@ class Simulation(object):
             raise ValueError("Number of replicas must be positive.")
         self._replica_count = replica_count
 
-        if replica_groups < 1:
-            raise ValueError("Number of replicas must be positive.")
-        self._replica_groups = replica_groups
+        if replica_group_count < 1:
+            raise ValueError("Number of replica groups must be positive.")
+        self._replica_group_count = replica_group_count
+
+        if mwg_prob < 0.0 or mwg_prob > 1.0:
+            raise ValueError("MWG probability outside the interval [0, 1).")
+        self._mwg_prob = mwg_prob
 
         if fsti <= 0.0:
             raise ValueError("FSTI must be positive.")
         self._fsti = fsti
 
         self._replicas = OrderedDict()
+        self._replica_groups = dict()
         self._nodes = OrderedDict()
         self._nodes_mwg = OrderedDict()  # nodes' most wanted replica groups
         self._edges = OrderedDict()  # nodes' outbound edges
@@ -212,7 +221,10 @@ class Simulation(object):
                 "No Node implementation for the current strategy.")
 
         self._nodes[node.name] = node
-        self._nodes_mwg[node.name] = random.randint(1, self._replica_groups)
+
+        # XXX: move outside new_node, just as node stats are created elsewhere
+        self._nodes_mwg[node.name] = random.randint(
+            1, self._replica_group_count)
         return node
 
     @property
@@ -278,6 +290,11 @@ class Simulation(object):
         """
         name_tpl = 'replica_{{0:0{}d}}'.format(_digits(self._replica_count))
 
+        # TODO: add tests for replica_groups!
+        self._replica_groups = dict()
+        for i in range(1, self._replica_group_count + 1):
+            self._replica_groups[i] = []
+
         self._replicas = OrderedDict()
 
         for i in range(1, self._replica_count + 1):
@@ -287,6 +304,9 @@ class Simulation(object):
                     self._replica_min_size, self._replica_max_size)
             )
             self._replicas[replica.name] = replica
+
+            group_idx = (i - 1) % self._replica_group_count + 1
+            self._replica_groups[group_idx].append(replica)
 
     def _dijkstra(self):
         """Find the shortest paths from server node to all other nodes.
@@ -532,8 +552,10 @@ class _EventFactory(object):
 
     def __init__(self, sim):
         self._sim = sim
-        self._keys = list(self._sim.nodes.keys())
-        self._replica_keys = list(self._sim.replicas.keys())
+        self._node_names = list(self._sim.nodes.keys())[1:]  # omit server node
+
+        # XXX: add tests for _replica_gorups
+        self._replica_groups = list(self._sim._replica_groups.keys())
 
     def get_random(self):
         """Create new random event (some node receives a request for replica).
@@ -541,18 +563,29 @@ class _EventFactory(object):
         :returns: new random instance of receive replica request
         :rtype: :py:class:`~models.simulation.ReceiveReplicaRequest`
         """
-        # XXX: is there a better way to select a random element from a dict?
-        # (without converting to list, which is slow) - BTW, does random.choice
-        # do exactly that? converting to a list first?
-
-        # XXX: exclude server node from this!
-        receiver = random.sample(self._keys, 1)[0]
+        receiver = random.choice(self._node_names)
         receiver = self._sim.nodes[receiver]
 
-        # XXX: in other scenarios, replica request distribution is not
-        # uniform - change when needed
-        replica = random.sample(self._replica_keys, 1)[0]
-        replica = self._sim.replicas[replica]
+        # TODO: add tests for replica_groups! MWG etc.
+        # and test that server node is expluded from the list etc.
+
+        mwg = self._sim._nodes_mwg[receiver.name]
+
+        # first choose a group - either MWG or any other non-MWG group,
+        # then choose a random replica from this randomly chosen group
+        if random.random() < self._sim._mwg_prob:
+            group = mwg
+        else:
+            # XXX: more efficient than constructing a new list with MWG
+            # omitted, but there might be some more elegant ways
+            while True:
+                group = random.choice(self._replica_groups)
+                if group != mwg:
+                    break
+
+        # XXX: not uniform distribution if groups do not contain the same
+        # number of replicas!
+        replica = random.choice(self._sim._replica_groups[group])
 
         # XXX: don't hardcode the limits, read them from the simulation
         # object (and the same for time?)
