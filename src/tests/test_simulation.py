@@ -981,3 +981,34 @@ class TestSimulation(unittest.TestCase):
         # resulted from that (because there is no sub-target node to send
         # replica to)
         self.assertEqual(len(sim._event_queue), 0)
+
+
+class TestEventFactory(unittest.TestCase):
+    """Tests for :py:class:`models.simulation._EventFactory`."""
+
+    def _get_target_class(self):
+        from models.simulation import _EventFactory
+        return _EventFactory
+
+    def _make_instance(self, *args, **kw):
+        return self._get_target_class()(*args, **kw)
+
+    def test_init(self):
+        """Test that new instances are correctly initialized."""
+
+        simulation = Mock()
+
+        node_keys = ['server', 'node_1', 'node_2']
+        simulation.nodes.keys.return_value = node_keys
+
+        group_keys = [1, 2, 3]
+        simulation._replica_groups.keys.return_value = group_keys
+
+        instance = self._make_instance(simulation)
+
+        self.assertIs(instance._sim, simulation)
+        self.assertEqual(instance._node_names, node_keys[1:])  # server omitted
+        self.assertEqual(instance._replica_groups, group_keys)
+
+    # TODO: test get_random ... random evetn, source None, target random
+    # replica, then test MWG probability etc.

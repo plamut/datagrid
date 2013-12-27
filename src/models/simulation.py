@@ -552,8 +552,6 @@ class _EventFactory(object):
     def __init__(self, sim):
         self._sim = sim
         self._node_names = list(self._sim.nodes.keys())[1:]  # omit server node
-
-        # XXX: add tests for _replica_gorups
         self._replica_groups = list(self._sim._replica_groups.keys())
 
     def get_random(self):
