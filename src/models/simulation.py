@@ -290,7 +290,6 @@ class Simulation(object):
         """
         name_tpl = 'replica_{{0:0{}d}}'.format(_digits(self._replica_count))
 
-        # TODO: add tests for replica_groups!
         self._replica_groups = dict()
         for i in range(1, self._replica_group_count + 1):
             self._replica_groups[i] = []

@@ -522,6 +522,7 @@ class TestSimulation(unittest.TestCase):
         """
         settings = self._get_settings()
         settings['replica_count'] = 100
+        settings['replica_group_count'] = 5
 
         # shorten [min_size, max_size] interval to detect out-of-range random
         # replica sizes distances with greater probability
@@ -540,6 +541,12 @@ class TestSimulation(unittest.TestCase):
             self.assertEqual(replica.name, name)
             self.assertGreaterEqual(replica.size, settings['replica_min_size'])
             self.assertLessEqual(replica.size, settings['replica_max_size'])
+
+        # check that all replica groups have been initialized and contain the
+        # same number of replicas
+        for i in range(1, settings['replica_group_count'] + 1):
+            self.assertIn(i, sim._replica_groups)
+            self.assertEqual(len(sim._replica_groups[i]), 20)
 
     def test_dijkstra(self):
         """Test that _dijkstra finds the shortest paths between the server
