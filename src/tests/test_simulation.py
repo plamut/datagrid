@@ -996,12 +996,11 @@ class TestEventFactory(unittest.TestCase):
     def test_init(self):
         """Test that new instances are correctly initialized."""
 
-        simulation = Mock()
-
         node_keys = ['server', 'node_1', 'node_2']
-        simulation.nodes.keys.return_value = node_keys
-
         group_keys = [1, 2, 3]
+
+        simulation = Mock()
+        simulation.nodes.keys.return_value = node_keys
         simulation._replica_groups.keys.return_value = group_keys
 
         instance = self._make_instance(simulation)
@@ -1010,5 +1009,61 @@ class TestEventFactory(unittest.TestCase):
         self.assertEqual(instance._node_names, node_keys[1:])  # server omitted
         self.assertEqual(instance._replica_groups, group_keys)
 
-    # TODO: test get_random ... random evetn, source None, target random
-    # replica, then test MWG probability etc.
+    @patch('random.random')
+    @patch('random.randint')
+    @patch('random.choice')
+    def test_get_random(self, choice, randint, random):
+        """Test that get_random behaves as expected."""
+        from models.event import ReceiveReplicaRequest
+
+        nodes = OrderedDict(
+            server=Mock(name='server'),
+            node_1=Mock(name='node_1'),
+            node_2=Mock(name='node_2'),
+            node_3=Mock(name='node_3'),
+            node_4=Mock(name='node_4'),
+        )
+        for key, item in nodes.items():
+            item.name = key
+
+        replica = Mock()
+        replica.name = 'replica_1'
+
+        replica_groups = {
+            1: Mock(),
+            2: Mock(),
+        }
+
+        nodes_mwg = dict(
+            server=1,  # XXX: irrelevant?
+            node_1=1,
+            node_2=2,
+            node_3=2,
+            node_4=1,
+        )
+
+        simulation = Mock(name='simulation')
+        simulation.nodes = nodes
+        simulation._replica_groups = replica_groups
+        simulation._nodes_mwg = nodes_mwg
+        simulation._mwg_prob = 0.500
+        simulation.now = 2.7
+
+        choice.side_effect = ['node_3', 2, 1, replica]
+        randint.return_value = 60
+        random.return_value = 0.501
+
+        event_factory = self._make_instance(simulation)
+        ret_val = event_factory.get_random()
+
+        self.assertTrue(len(ret_val), 2)
+        self.assertEqual(ret_val[0], 62.7)  # event time
+
+        event = ret_val[1]
+        self.assertTrue(isinstance(event, ReceiveReplicaRequest))
+        self.assertIs(event.source, None)
+        self.assertIs(event.target, nodes['node_3'])
+        self.assertEqual(event.replica_name, 'replica_1')
+
+        # TODO: test for MWG probability? select mwg, select non-mwg
+        # ... refactor setup into some helper method
