@@ -503,85 +503,120 @@ class Simulation(object):
         :param event: event to pocess
         :type event: subclass of :py:class:`~models.event._Event`
         """
-        if type(event) == ReceiveReplicaRequest:
-            g = event.target.request_replica(event.replica_name, event.source)
-            returned_event = next(g)
+        e_type = type(event)
 
-            # node returns either SendReplicaRequest event (if it doesn't have
-            # a requested replica) or SendReplica (if it has a replica and
-            # wants to send it back to the requesting node)
-            if type(returned_event) == SendReplicaRequest:
+        if e_type == ReceiveReplicaRequest:
+            self._process_receive_replica_request(event)
 
-                # XXX: really need to copy or is it fine if some events share
-                # a single generator list? probably better, because when a
-                # generator is axhausted (and removed), it is no longer needed
-                # *anywhere*
-                new_gens = event._generators.copy()
-                new_gens.append(g)
-                returned_event._generators = new_gens
-                self._schedule_event(returned_event, self.now)
+        elif e_type == SendReplicaRequest:
+            self._process_send_replica_request(event)
 
-            elif type(returned_event) == SendReplica:
-                # pass generators from preceding ReceiveReplicaRequest event
-                returned_event._generators = event._generators.copy()
-                self._schedule_event(returned_event, self.now)
-            else:
-                raise TypeError(
-                    "Node returned unexpected event", returned_event)
+        elif e_type == SendReplica:
+            self._process_send_replica(event)
 
-        elif type(event) == SendReplicaRequest:
-            # some node sends a replica request, schedule ReceiveReplicaRequest
-            # event for that node's parent
+        elif e_type == ReceiveReplica:
+            self._process_receive_replica(event)
 
-            # it takes some time for the parent node to receive the request,
-            # so calculate the latency and schedule the event accordingly
-            dist_km = self._edges[event.source.name][event.target.name]
-            cl = dist_km / self._pspeed_kmps  # communication latency
-            event_time = self.now + cl
-
-            new_event = ReceiveReplicaRequest(
-                event.source, event.target, event.replica_name)
-            new_event._generators = event._generators.copy()  # pass generators
-
-            self._schedule_event(new_event, event_time)
-
-            self._total_rt_s += cl  # update simulation stats
-
-        elif type(event) == SendReplica:
-            # some node sends a replica, schedule replica receive event
-            # for the receiver (after a delay, of course)
-
-            # calculate the time needed for the replica to reach target
-            # XXX: add CL here, too?
-            delay_s = event.replica.size / self._network_bw_mbps
-            event_time = self.now + delay_s
-
-            new_event = ReceiveReplica(
-                event.source, event.target, event.replica)
-            new_event._generators = event._generators.copy()  # pass generators
-
-            self._schedule_event(new_event, event_time)
-
-            # simulation update stats
-            self._total_rt_s += delay_s
-            self._total_bw += event.replica.size  # XXX: correct interpretat.?
-
-        elif type(event) == ReceiveReplica:
-            # some node's request for a replica has completed (replica
-            # received), we need to notify that node about it so that it
-            # continues its work from where it stopped
-            if event._generators:
-                g = event._generators.pop()
-                new_event = g.send(event.replica)  # we get a SendReplica event
-
-                # if target is not None, node did not request the replica
-                # by itself, thus we need to send the replica to another node
-                # down the chain
-                if new_event.target is not None:
-                    new_event._generators = event._generators.copy()
-                    self._schedule_event(new_event, self.now)
         else:
-            raise TypeError("Unknown event", type(event))
+            raise TypeError("Unknown event", e_type)
+
+    def _process_receive_replica_request(self, event):
+        """Process receive replica request event.
+
+        :param event: event to pocess
+        :type event: :py:class:`~models.event.ReceiveReplicaRequest`
+        """
+        g = event.target.request_replica(event.replica_name, event.source)
+        returned_event = next(g)
+
+        # node returns either SendReplicaRequest event (if it doesn't have
+        # a requested replica) or SendReplica (if it has a replica and
+        # wants to send it back to the requesting node)
+        if type(returned_event) == SendReplicaRequest:
+
+            # XXX: really need to copy or is it fine if some events share
+            # a single generator list? probably better, because when a
+            # generator is axhausted (and removed), it is no longer needed
+            # *anywhere*
+            new_gens = event._generators.copy()
+            new_gens.append(g)
+            returned_event._generators = new_gens
+            self._schedule_event(returned_event, self.now)
+
+        elif type(returned_event) == SendReplica:
+            # pass generators from preceding ReceiveReplicaRequest event
+            returned_event._generators = event._generators.copy()
+            self._schedule_event(returned_event, self.now)
+        else:
+            raise TypeError(
+                "Node returned unexpected event", returned_event)
+
+    def _process_send_replica_request(self, event):
+        """Process send replica request event.
+
+        :param event: event to pocess
+        :type event: :py:class:`~models.event.SendReplicaRequest`
+        """
+        # some node sends a replica request, schedule ReceiveReplicaRequest
+        # event for that node's parent
+
+        # it takes some time for the parent node to receive the request,
+        # so calculate the latency and schedule the event accordingly
+        dist_km = self._edges[event.source.name][event.target.name]
+        cl = dist_km / self._pspeed_kmps  # communication latency
+        event_time = self.now + cl
+
+        new_event = ReceiveReplicaRequest(
+            event.source, event.target, event.replica_name)
+        new_event._generators = event._generators.copy()  # pass generators
+
+        self._schedule_event(new_event, event_time)
+
+        self._total_rt_s += cl  # update simulation stats
+
+    def _process_send_replica(self, event):
+        """Process send replica event.
+
+        :param event: event to pocess
+        :type event: :py:class:`~models.event.SendReplica`
+        """
+        # some node sends a replica, schedule replica receive event
+        # for the receiver (after a delay, of course)
+
+        # calculate the time needed for the replica to reach target
+        # XXX: add CL here, too?
+        delay_s = event.replica.size / self._network_bw_mbps
+        event_time = self.now + delay_s
+
+        new_event = ReceiveReplica(
+            event.source, event.target, event.replica)
+        new_event._generators = event._generators.copy()  # pass generators
+
+        self._schedule_event(new_event, event_time)
+
+        # simulation update stats
+        self._total_rt_s += delay_s
+        self._total_bw += event.replica.size  # XXX: correct interpretat.?
+
+    def _process_receive_replica(self, event):
+        """Process receive replica event.
+
+        :param event: event to pocess
+        :type event: :py:class:`~models.event.ReceiveReplica`
+        """
+        # some node's request for a replica has completed (replica
+        # received), we need to notify that node about it so that it
+        # continues its work from where it stopped
+        if event._generators:
+            g = event._generators.pop()
+            new_event = g.send(event.replica)  # we get a SendReplica event
+
+            # if target is not None, node did not request the replica
+            # by itself, thus we need to send the replica to another node
+            # down the chain
+            if new_event.target is not None:
+                new_event._generators = event._generators.copy()
+                self._schedule_event(new_event, self.now)
 
 
 class _EventFactory(object):

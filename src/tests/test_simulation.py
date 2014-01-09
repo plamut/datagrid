@@ -884,7 +884,7 @@ class TestSimulation(unittest.TestCase):
         self.assertIn([20, sim._CANCELED], sim._event_queue)
         self.assertIn([42, event_2], sim._event_queue)
 
-    def test_process_event_unknown_type(self):
+    def test_process_event_type_unknown(self):
         """Test that _process_event raises an error on unknown event types."""
         settings = self._get_settings()
         sim = self._make_instance(**settings)
@@ -892,9 +892,90 @@ class TestSimulation(unittest.TestCase):
         with self.assertRaises(TypeError):
             sim._process_event(object())
 
-    def test_process_event_receive_replica_request_replica_not_found(self):
-        """Test that _process_event correctly processes ReceiveReplicaRequest
-        events when target node does not have the requested replica.
+    def test_process_event_type_receive_replica_request(self):
+        """Test that _process_event invokes correct handler for receive
+        replica request events.
+        """
+        from models.event import ReceiveReplicaRequest
+
+        settings = self._get_settings()
+        sim = self._make_instance(**settings)
+        fake_handler = Mock()
+        sim._process_receive_replica_request = fake_handler
+
+        event = ReceiveReplicaRequest(Mock(), Mock(), Mock())
+        sim._process_event(event)
+
+        self.assertEqual(fake_handler.call_count, 1)
+        try:
+            fake_handler.assert_called_with(event)
+        except AssertionError:
+            self.fail("Event handler called with incorrect parameter.")
+
+    def test_process_event_type_send_replica_request(self):
+        """Test that _process_event invokes correct handler for send replica
+        request events.
+        """
+        from models.event import SendReplicaRequest
+
+        settings = self._get_settings()
+        sim = self._make_instance(**settings)
+        fake_handler = Mock()
+        sim._process_send_replica_request = fake_handler
+
+        event = SendReplicaRequest(Mock(), Mock(), Mock())
+        sim._process_event(event)
+
+        self.assertEqual(fake_handler.call_count, 1)
+        try:
+            fake_handler.assert_called_with(event)
+        except AssertionError:
+            self.fail("Event handler called with incorrect parameter.")
+
+    def test_process_event_type_send_replica(self):
+        """Test that _process_event invokes correct handler for send replica
+        events.
+        """
+        from models.event import SendReplica
+
+        settings = self._get_settings()
+        sim = self._make_instance(**settings)
+        fake_handler = Mock()
+        sim._process_send_replica = fake_handler
+
+        event = SendReplica(Mock(), Mock(), Mock())
+        sim._process_event(event)
+
+        self.assertEqual(fake_handler.call_count, 1)
+        try:
+            fake_handler.assert_called_with(event)
+        except AssertionError:
+            self.fail("Event handler called with incorrect parameter.")
+
+    def test_process_event_type_receive_replica(self):
+        """Test that _process_event invokes correct handler for receive
+        replica events.
+        """
+        from models.event import ReceiveReplica
+
+        settings = self._get_settings()
+        sim = self._make_instance(**settings)
+        fake_handler = Mock()
+        sim._process_receive_replica = fake_handler
+
+        event = ReceiveReplica(Mock(), Mock(), Mock())
+        sim._process_event(event)
+
+        self.assertEqual(fake_handler.call_count, 1)
+        try:
+            fake_handler.assert_called_with(event)
+        except AssertionError:
+            self.fail("Event handler called with incorrect parameter.")
+
+    def test_process_receive_replica_request_replica_not_found(self):
+        """Test that _process_receive_replica_request correctly processes
+        ReceiveReplicaRequest events when target node does not have the
+        requested replica.
         """
         from models.node import NodeEFS
         from models.event import ReceiveReplicaRequest
@@ -913,7 +994,7 @@ class TestSimulation(unittest.TestCase):
         event = ReceiveReplicaRequest(source, target, 'replica_X')
         event._generators = [Mock(), Mock()]
 
-        sim._process_event(event)
+        sim._process_receive_replica_request(event)
 
         # ReceiveReplicaRequest should have resulted in a SendReplicaRequest
         # (target node requests replica from its parent) with no time delay
@@ -930,9 +1011,10 @@ class TestSimulation(unittest.TestCase):
         self.assertEqual(next_event._generators[:2], event._generators)
         self.assertTrue(isgenerator(next_event._generators[2]))
 
-    def test_process_event_receive_replica_request_replica_found(self):
-        """Test that _process_event correctly processes ReceiveReplicaRequest
-        events when target node has a copy of the requested replica.
+    def test_process_receive_replica_request_replica_found(self):
+        """Test that _process_receive_replica_request correctly processes
+        ReceiveReplicaRequest events when target node has a copy of the
+        requested replica.
         """
         from models.node import NodeEFS
         from models.event import ReceiveReplicaRequest
@@ -954,7 +1036,7 @@ class TestSimulation(unittest.TestCase):
         event = ReceiveReplicaRequest(source, target, 'replica_X')
         event._generators = [Mock(), Mock()]
 
-        sim._process_event(event)
+        sim._process_receive_replica_request(event)
 
         # ReceiveReplicaRequest should have resulted in a SendReplica with no
         # delay (target node had the replica and sent it back)
@@ -968,9 +1050,10 @@ class TestSimulation(unittest.TestCase):
         self.assertEqual(next_event._generators, event._generators)
 
     @patch('builtins.next', lambda g: object())
-    def test_process_event_receive_replica_request_unknown_event_yielded(self):
-        """Test that _process_event raises an error when processing
-        ReceiveReplicaRequest resulting in an event of an unknown type.
+    def test_process_receive_replica_request_unknown_event_yielded(self):
+        """Test that _process_receive_replica_request raises an error when
+        processing ReceiveReplicaRequest resulting in an event of an unknown
+        type.
 
         For this to happen we patch the next() function so that it returns a
         plain object instance instead of what the Node.request_replica()
@@ -984,11 +1067,11 @@ class TestSimulation(unittest.TestCase):
         event = ReceiveReplicaRequest(Mock(), Mock(), 'replica_X')
 
         with self.assertRaises(TypeError):
-            sim._process_event(event)
+            sim._process_receive_replica_request(event)
 
-    def test_process_event_send_replica_request(self):
-        """Test that _process_event correctly processes SendReplicaRequest
-        events.
+    def test_process_send_replica_request(self):
+        """Test that _process_send_replica_request correctly processes
+        SendReplicaRequest events.
         """
         from models.node import NodeEFS
         from models.event import ReceiveReplicaRequest
@@ -1009,7 +1092,7 @@ class TestSimulation(unittest.TestCase):
         event = SendReplicaRequest(source, target, 'replica_X')
         event._generators = [Mock(), Mock()]
 
-        sim._process_event(event)
+        sim._process_send_replica_request(event)
 
         # SendReplicaRequest should have resulted in a ReceiveReplicaRequest
         # event on the target node after some propagation speed latency
@@ -1025,8 +1108,10 @@ class TestSimulation(unittest.TestCase):
         # total response time statistics should have to be updates as well
         self.assertAlmostEqual(sim._total_rt_s, 0.82)
 
-    def test_process_event_send_replica(self):
-        """Test that _process_event correctly processes SendReplica events."""
+    def test_process_send_replica(self):
+        """Test that _process_send_replica correctly processes SendReplica
+        events.
+        """
         from models.event import ReceiveReplica
         from models.event import SendReplica
 
@@ -1042,7 +1127,7 @@ class TestSimulation(unittest.TestCase):
         event = SendReplica(source, target, replica)
         event._generators = [Mock(), Mock()]
 
-        sim._process_event(event)
+        sim._process_send_replica(event)
 
         # SendReplica should have resulted in a ReceiveReplica event on the
         # target node after the time needed to send a replica over the network
@@ -1059,9 +1144,10 @@ class TestSimulation(unittest.TestCase):
         self.assertAlmostEqual(sim._total_rt_s, 11.08)
         self.assertAlmostEqual(sim._total_bw, 190.25)
 
-    def test_process_event_receive_replica_with_subtarget(self):
-        """Test that _process_event correctly processes ReceiveReplica events
-        when receiving node (target) has another sub-target to send replica to.
+    def test_process_receive_replica_with_subtarget(self):
+        """Test that _process_receive_replica correctly processes
+        ReceiveReplica events when receiving node (target) has another
+        sub-target to send replica to.
         """
         from models.event import ReceiveReplica
         from models.event import SendReplica
@@ -1085,7 +1171,7 @@ class TestSimulation(unittest.TestCase):
         another_gen = Mock()
         event._generators = [another_gen, gen]
 
-        sim._process_event(event)
+        sim._process_receive_replica(event)
 
         # ReceiveReplica should have resulted in a SendReplica event (target
         # node sends replica to its own requester)
@@ -1098,10 +1184,10 @@ class TestSimulation(unittest.TestCase):
         self.assertIs(next_event.replica, replica)
         self.assertEqual(next_event._generators, [another_gen])
 
-    def test_process_event_receive_replica_without_subtarget(self):
-        """Test that _process_event correctly processes ReceiveReplica events
-        when receiving node (target) does not have any sub-target to send
-        replica to.
+    def test_process_receive_replica_without_subtarget(self):
+        """Test that _process_receive_replica correctly processes
+        ReceiveReplica events when receiving node (target) does not have any
+        sub-target to send replica to.
         """
         from models.event import ReceiveReplica
         from models.event import SendReplica
@@ -1123,7 +1209,7 @@ class TestSimulation(unittest.TestCase):
 
         event._generators = [gen]
 
-        sim._process_event(event)
+        sim._process_receive_replica(event)
 
         # after processing ReceiveReplica event, no more events should have
         # resulted from that (because there is no sub-target node to send
