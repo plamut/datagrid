@@ -202,6 +202,7 @@ class TestSimulation(unittest.TestCase):
         self.assertEqual(sim._total_bw, 0.0)
         self.assertEqual(sim._total_rt_s, 0.0)
         self.assertEqual(sim._event_queue, [])
+        self.assertEqual(sim._event_index, {})
         self.assertEqual(sim._c1, 0.001)
         self.assertEqual(sim._c2, 0.001)
 
@@ -649,8 +650,12 @@ class TestSimulation(unittest.TestCase):
         sim._total_bw = 27.338
         sim._total_rt_s = 4.7682
 
-        heapq.heappush(sim._event_queue, (13.60, Mock()))
+        event_mock = Mock()
+        event_entry = (13.60, event_mock)
+        heapq.heappush(sim._event_queue, event_entry)
         heapq.heappush(sim._event_queue, (18.72, Mock()))
+
+        sim._event_index[event_mock] = event_entry
 
         # manually construct the grid
         sim._generate_replicas = Mock()
@@ -679,6 +684,7 @@ class TestSimulation(unittest.TestCase):
         self.assertEqual(sim._total_bw, 0.0)
         self.assertEqual(sim._total_rt_s, 0.0)
         self.assertEqual(sim._event_queue, [])
+        self.assertEqual(sim._event_index, {})
 
         self.assertIs(sim._nodes['server']._parent, None)
         self.assertEqual(sim._nodes['node_1']._parent.name, 'server')
@@ -696,11 +702,23 @@ class TestSimulation(unittest.TestCase):
         event_2 = Mock()
         event_3 = Mock()
         event_4 = Mock()
-        sim._event_queue.append((40, event_4))
-        sim._event_queue.append((20, event_2))
-        sim._event_queue.append((10, event_1))
-        sim._event_queue.append((30, event_3))
+        entry_1 = [10, event_1]
+        entry_2 = [20, event_2]
+        entry_3 = [30, event_3]
+        entry_4 = [40, event_4]
+
+        sim._event_queue.append(entry_4)
+        sim._event_queue.append(entry_2)
+        sim._event_queue.append(entry_1)
+        sim._event_queue.append(entry_3)
         heapq.heapify(sim._event_queue)
+
+        sim._event_index = {
+            event_1: entry_1,
+            event_2: entry_2,
+            event_3: entry_3,
+            event_4: entry_4,
+        }
 
         time, event = sim._pop_next_event()
 
@@ -708,14 +726,90 @@ class TestSimulation(unittest.TestCase):
         self.assertEqual(time, 10)
         self.assertIs(event, event_1)
 
+    def test_pop_next_event_skip_canceled(self):
+        """Test that _pop_next_event skips events marked as canceled."""
+        settings = self._get_settings()
+        sim = self._make_instance(**settings)
+
+        event_1 = Mock()
+        event_2 = Mock()
+        event_3 = Mock()
+        entry_1 = [10, sim._CANCELED]
+        entry_2 = [20, event_2]
+        entry_3 = [30, event_3]
+
+        sim._event_queue.append(entry_1)
+        sim._event_queue.append(entry_2)
+        sim._event_queue.append(entry_3)
+        heapq.heapify(sim._event_queue)
+
+        sim._event_index = {
+            event_1: entry_1,
+            event_2: entry_2,
+            event_3: entry_3,
+        }
+
+        time, event = sim._pop_next_event()
+
+        self.assertEqual(len(sim._event_queue), 1)
+        self.assertEqual(time, 20)
+        self.assertIs(event, event_2)
+
     def test_pop_next_event_empty_queue(self):
         """Test that _pop_next_event raises an error if event queue is empty.
         """
         settings = self._get_settings()
         sim = self._make_instance(**settings)
 
-        with self.assertRaises(IndexError):
+        with self.assertRaises(KeyError):
             sim._pop_next_event()
+
+    def test_cancel_event(self):
+        """Test that existing event is correctly canceled."""
+        settings = self._get_settings()
+        sim = self._make_instance(**settings)
+
+        event_1 = Mock()
+        event_2 = Mock()
+        entry_1 = [10, event_1]
+        entry_2 = [20, event_2]
+
+        sim._event_queue.append(entry_1)
+        sim._event_queue.append(entry_2)
+        heapq.heapify(sim._event_queue)
+
+        sim._event_index = {
+            event_1: entry_1,
+            event_2: entry_2,
+        }
+
+        sim._cancel_event(event_1)
+
+        self.assertEqual(len(sim._event_queue), 2)  # entry_1 is still there!
+        self.assertIs(sim._event_queue[0][0], 10)   # time unchanged
+        self.assertIs(sim._event_queue[0][1], sim._CANCELED)
+
+    def test_cancel_event_nonexistent(self):
+        """Test that an error is raised if canceling a nonexistent event."""
+        settings = self._get_settings()
+        sim = self._make_instance(**settings)
+
+        event_1 = Mock()
+        event_2 = Mock()
+        entry_1 = [10, event_1]
+        entry_2 = [20, event_2]
+
+        sim._event_queue.append(entry_1)
+        sim._event_queue.append(entry_2)
+        heapq.heapify(sim._event_queue)
+
+        sim._event_index = {
+            event_1: entry_1,
+            event_2: entry_2,
+        }
+
+        with self.assertRaises(KeyError):
+            sim._cancel_event(Mock(name='nonexistent event'))
 
     def test_schedule_event(self):
         """Test that _schedule_event adds an event to the event queue."""
@@ -725,16 +819,70 @@ class TestSimulation(unittest.TestCase):
         event_1 = Mock()
         event_2 = Mock()
         event_4 = Mock()
-        sim._event_queue.append((20, event_2))
-        sim._event_queue.append((10, event_1))
-        sim._event_queue.append((40, event_4))
+        entry_1 = [10, event_1]
+        entry_2 = [20, event_2]
+        entry_4 = [40, event_4]
+
+        sim._event_queue.append(entry_1)
+        sim._event_queue.append(entry_2)
+        sim._event_queue.append(entry_4)
         heapq.heapify(sim._event_queue)
+
+        sim._event_index = {
+            event_1: entry_1,
+            event_2: entry_2,
+            event_4: entry_4,
+        }
 
         event_3 = Mock()
         sim._schedule_event(event_3, 30)
 
         self.assertEqual(len(sim._event_queue), 4)
-        self.assertIn((30, event_3), sim._event_queue)
+        self.assertIn([30, event_3], sim._event_queue)
+
+    def test_schedule_event_in_the_past(self):
+        """Test that _schedule_event rejects events which would occur in past
+        time.
+        """
+        settings = self._get_settings()
+        sim = self._make_instance(**settings)
+        sim._clock._time = 8.00
+
+        with self.assertRaises(ValueError):
+            sim._schedule_event(Mock(), 7.999)
+
+    def test_schedule_event_reschedule_existing(self):
+        """Test that _schedule_event reschedules an event if the latter already
+        exists.
+        """
+        settings = self._get_settings()
+        sim = self._make_instance(**settings)
+
+        event_1 = Mock()
+        event_2 = Mock()
+        event_3 = Mock()
+        entry_1 = [10, event_1]
+        entry_2 = [20, event_2]
+        entry_3 = [30, event_3]
+
+        sim._event_queue.append(entry_1)
+        sim._event_queue.append(entry_2)
+        sim._event_queue.append(entry_3)
+        heapq.heapify(sim._event_queue)
+
+        sim._event_index = {
+            event_1: entry_1,
+            event_2: entry_2,
+            event_3: entry_3,
+        }
+
+        sim._schedule_event(event_2, 42)
+
+        # original event entry is marked as canceled and a new rescheduled
+        # event entry is added to event queue
+        self.assertEqual(len(sim._event_queue), 4)
+        self.assertIn([20, sim._CANCELED], sim._event_queue)
+        self.assertIn([42, event_2], sim._event_queue)
 
     def test_process_event_unknown_type(self):
         """Test that _process_event raises an error on unknown event types."""

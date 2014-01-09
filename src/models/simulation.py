@@ -77,6 +77,7 @@ class _Clock(object):
 class Simulation(object):
     """Simulation runner."""
 
+    _CANCELED = '<event-canceled>'  # marker for canceled events
     SERVER_NAME = 'server'  # XXX: make configurable?
 
     def __init__(
@@ -199,6 +200,7 @@ class Simulation(object):
         self._total_rt_s = 0.0  # total response time (in seconds)
 
         self._event_queue = []
+        self._event_index = {}  # for finding events in queue in O(1)
 
         # two constants used in metrics calculations
         self._c1 = 0.001
@@ -393,6 +395,7 @@ class Simulation(object):
         self._generate_edges()
 
         self._event_queue = []
+        self._event_index = {}
 
         # calculate shortest paths from server node to all the other nodes
         # and update each of the latter with a relevant path
@@ -416,7 +419,7 @@ class Simulation(object):
         total_reqs_gen = 1  # total replica request events generated so far
 
         # main event loop
-        while len(self._event_queue) > 0:
+        while self._event_queue:
 
             if total_reqs_gen < self._total_reqs:
                 new_t, new_e = ef.get_random()
@@ -443,21 +446,56 @@ class Simulation(object):
         print("Total bandwidth:", self._total_bw * self._c2)
 
     def _pop_next_event(self):
-        """Pop next event from the event queue and return it.
+        """Find next non-canceled event in event queue and return it.
+
+        The event itself and all marked-as-canceled events preceeding it are
+        removed from event queue.
 
         :returns: time of next event and the event instance itself
         :rtype: tuple (float, :py:class:`~models.event._Event` instance)
         """
-        return heapq.heappop(self._event_queue)
+        while self._event_queue:
+            t, event = heapq.heappop(self._event_queue)
+            if event is not self._CANCELED:
+                del self._event_index[event]
+                return t, event
+        else:
+            raise KeyError("Event queue is empty.")
+
+    def _cancel_event(self, event):
+        """Mark event as canceled (event will thus not be processed).
+
+        If event does not exist, an error is raised.
+
+        :param event: event to cancel
+        :type event: subclass of :py:class:`~models.event._Event`
+        """
+        entry = self._event_index.pop(event)
+        entry[-1] = self._CANCELED
 
     def _schedule_event(self, event, event_time):
         """Add new event to event queue, scheduled at time `event_time`.
+
+        If the event already exists, it is rescheduled to a different time
+        (existing entry in event queue is masked as canceled and a new entry
+        is inserted).
+
+        NOTE: event_time must be equal to or greater than the current
+        simulation time.
 
         :param event: event to add to the schedule
         :type event: subclass of :py:class:`~models.event._Event`
         :param float event_time: time at which `event` should occur
         """
-        heapq.heappush(self._event_queue, (event_time, event))
+        if event_time < self.now:
+            raise ValueError("Cannot schedule event in the past.")
+
+        if event in self._event_index:
+            self._cancel_event(event)
+
+        entry = [event_time, event]
+        self._event_index[event] = entry
+        heapq.heappush(self._event_queue, entry)
 
     def _process_event(self, event):
         """Process a single event occuring in simulation.
