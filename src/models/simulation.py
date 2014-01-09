@@ -178,10 +178,6 @@ class Simulation(object):
             raise ValueError("Propagation speed must be positive.")
         self._pspeed_kmps = pspeed_kmps
 
-        if replica_min_size >= replica_max_size:
-            raise ValueError(
-                "Min replica size must be smaller than max replica size.")
-
         if replica_min_size <= 0:
             raise ValueError("Minimum replica size must be positive.")
         self._replica_min_size = replica_min_size
@@ -189,6 +185,10 @@ class Simulation(object):
         if replica_max_size <= 0:
             raise ValueError("Maximum replica size must be positive.")
         self._replica_max_size = replica_max_size
+
+        if replica_min_size >= replica_max_size:
+            raise ValueError(
+                "Min replica size must be smaller than max replica size.")
 
         self._rnd_seed = rnd_seed
 
