@@ -401,12 +401,72 @@ class TestNode(unittest.TestCase):
             ((node, parent, 'replica_1'), {})
         )
 
-        # simulate response (replica received event) and see what we get
+        # simulate response (replica receive event after some delay) and see
+        # what we get
+        sim.now += 10
         event = g.send(replica_1)
 
         self.assertEqual(
             node._store_if_valuable.call_args,
             ((replica_1,), {})
+        )
+
+        self.assertIs(event, event_send_repl)
+        self.assertEqual(
+            sim.event_send_replica.call_args,
+            ((node, requester, replica_1), {})
+        )
+
+        # check that requested replica's stats have been updated as well
+        stats = node._replica_stats['replica_1']
+        self.assertEqual(stats.nor, 1)
+        self.assertEqual(stats.nor_fsti(sim.now), 1)
+        self.assertEqual(stats.lrt, 4)  # the time replica was requested
+
+        with self.assertRaises(StopIteration):
+            next(g)  # no more events yielded
+
+    def test_request_replica_replica_received_during_waiting(self):
+        """Test request_replica method when replica is received (because of an
+        earlier request) while the node is still waiting for this same replica.
+        """
+        sim = Mock()
+        sim.fsti = 10
+        sim.now = 4
+
+        event_send_repl_req = Mock(name='SendReplicaRequest')
+        sim.event_send_replica_request.return_value = event_send_repl_req
+
+        event_send_repl = Mock(name='SendReplica')
+        sim.event_send_replica.return_value = event_send_repl
+
+        replica_1 = self._make_replica('replica_1', size=100)
+        replicas = OrderedDict(replica_1=replica_1)
+
+        parent = self._make_instance('parent', 5000, sim, replicas)
+
+        node = self._make_instance('node_1', 5000, sim)
+        node.set_parent(parent)
+        node._store_if_valuable = Mock(wraps=node._store_if_valuable)
+
+        requester = self._make_instance('req_node', 5000, sim)
+
+        g = node.request_replica('replica_1', requester)
+        event = next(g)
+
+        # simulate early arrival of a replica
+        node._copy_replica(replica_1)
+        sim.now += 10
+        stats_1 = node._replica_stats[replica_1.name]
+        stats_1.new_request_made = Mock(wraps=stats_1.new_request_made)
+
+        event = g.send(replica_1)
+
+        self.assertFalse(node._store_if_valuable.called)
+        self.assertEqual(stats_1.new_request_made.call_count, 1)
+        self.assertEqual(
+            stats_1.new_request_made.call_args,
+            ((4,), {})  # the last time replica was requested
         )
 
         self.assertIs(event, event_send_repl)

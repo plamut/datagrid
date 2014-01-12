@@ -176,7 +176,6 @@ class Node(object):
 
         if self.free_capacity >= replica.size:
             self._copy_replica(replica)
-            self._replica_stats[replica.name].new_request_made(self._sim.now)
         else:
             # not enough space to copy replica, might replace some
             # of the existing replicas
@@ -202,11 +201,6 @@ class Node(object):
                 for mr in marked_replicas:
                     self._delete_replica(mr.name)
                 self._copy_replica(replica)
-                self._replica_stats[replica.name].new_request_made(
-                    self._sim.now)
-                # TODO: it's not sim.now, there was some delay from the time
-                # request was issued to the time replica was received!
-                # (currently we have a frozen time) - fix this!
 
     def request_replica(self, replica_name, requester):
         """Request a replica from the node.
@@ -245,6 +239,7 @@ class Node(object):
 
             # replica not available locally, request it from parent and
             # wait until we receive it - generate new event
+            repl_requested_at = self._sim.now
             event = self._sim.event_send_replica_request(
                 self, self._parent, replica_name)
             replica = (yield event)
@@ -253,9 +248,17 @@ class Node(object):
             #     self.name, self._sim.now, replica_name, self._parent.name)
             # print(msg)
 
-            # now that we have retrieved replica, store it if it is valuable
-            # enough
-            self._store_if_valuable(replica)
+            # Now that we have retrieved replica, store it if it is valuable
+            # enought and we don't have it yet (we might have received it
+            # during the waiting as a result of some earlier request)
+            if replica.name not in self._replicas:
+                self._store_if_valuable(replica)
+
+            # if a copy of replica is now indeed present (either just copied
+            # or from an earlier request completion), update its stats
+            if replica.name in self._replicas:
+                self._replica_stats[replica.name].new_request_made(
+                    repl_requested_at)
 
         # msg = ("[{} @ {:.8f}] I have \033[1m{}\033[0m, sending it to"
         #        "{}").format(
