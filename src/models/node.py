@@ -272,7 +272,8 @@ class Node(object):
         :type replica: :py:class:`~models.replica.Replica`
         """
         if replica.name in self._replicas:
-            return  # nothing to do
+            raise ValueError(
+                "Replica already exists ({.name})".format(replica))
 
         if replica.size > self._free_capacity:
             raise ValueError(
