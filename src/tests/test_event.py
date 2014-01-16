@@ -76,9 +76,9 @@ class TestEvent(unittest.TestCase):
         self.assertFalse(e3 < e2)
         self.assertFalse(e3 < e1)
 
-        self.assertFalse(e1 > e1)
-        self.assertFalse(e2 > e2)
-        self.assertFalse(e3 > e3)
+        self.assertFalse(e1 < e1)
+        self.assertFalse(e2 < e2)
+        self.assertFalse(e3 < e3)
 
 
 class TestReceiveReplicaRequest(unittest.TestCase):
