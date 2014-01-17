@@ -1,3 +1,4 @@
+from collections import defaultdict
 from collections import namedtuple
 from collections import OrderedDict
 from models.event import ReceiveReplica
@@ -202,6 +203,9 @@ class Simulation(object):
         self._event_queue = []
         self._event_index = {}  # for finding events in queue in O(1)
 
+        self._node_transfers = defaultdict(list)
+        self._autoinc = itertools.count(start=1)
+
         # two constants used in metrics calculations
         self._c1 = 0.001
         self._c2 = 0.001
@@ -397,6 +401,9 @@ class Simulation(object):
         self._event_queue = []
         self._event_index = {}
 
+        self._node_transfers = defaultdict(list)
+        self._autoinc = itertools.count(start=1)
+
         # calculate shortest paths from server node to all the other nodes
         # and update each of the latter with a relevant path
         node_info = self._dijkstra()
@@ -436,6 +443,13 @@ class Simulation(object):
                             total_reqs_gen, self._total_reqs,
                             100 * total_reqs_gen / self._total_reqs),
                         '\033[0m', sep='')
+
+            if len(self._event_queue) % 10000 == 0:
+                print(
+                    '\033[1;36m', "events in queue: {}".format(
+                        len(self._event_queue)),
+                    '\033[0m', sep=''
+                )
 
             t, event = self._pop_next_event()
 
@@ -586,20 +600,111 @@ class Simulation(object):
         # some node sends a replica, schedule replica receive event
         # for the receiver (after a delay, of course)
 
-        # calculate the time needed for the replica to reach target
-        # XXX: add CL here, too?
-        delay_s = event.replica.size / self._network_bw_mbps
-        event_time = self.now + delay_s
+        # TODO: this code works, but needs comments and refactoring
+        # for readability - do it!
 
+        transfers = self._node_transfers[event.source.name]
+        new_queue = []
+
+        # TODO: describe how it is split into chunks
+        replica = event.replica
+        remaining_size = replica.size  # size of the chunks not processed yet
+        t0 = self.now
+        replica_eta = t0 + replica.size / self._network_bw_mbps
+
+        # cf optimization: read len(queue) once, then decrement by 1 each time
+        # might be faster ... (XXX: don't optimize prematurely!)
+        while remaining_size > 0:
+            # find min time of next "send replica" event completion
+            # (for every node in node_transfers have e.g. (eta, event_obj)
+            # eta - estimated time of (replica) arrival
+            cf = len(transfers) if transfers else 0  # concurrency factor
+
+            if cf == 0:
+                chunk_size = remaining_size
+                next_t = t0  # irrelevant acutally ...
+            else:
+                next_t = transfers[0][0]  # minimal ETA
+                delta_t = next_t - t0  # XXX: what if zero? no effect?
+                chunk_size = delta_t * self._network_bw_mbps / cf
+
+            # TODO: skupne stvari v teh dveh ifih izpostavi ven,
+            # pa recimo v prvem naredi chunk_size = remaining_size
+            # ali pa min(), brez if-a
+            # najdi še način, kako erplica_eta poenostaviti, ampak najbrz lahko
+            # to v enem ifu, ostalo skrajsas
+            if remaining_size < chunk_size:
+                chunk_size = remaining_size
+
+                delay = chunk_size / self._network_bw_mbps  # = delta_t / cf
+
+                # delay all transfers (no need to reorder the heap, because
+                # all elements get delayed by the same amount)
+                for entry in transfers:
+                    entry[0] += delay
+
+                replica_eta += delay * cf
+                # TODO: add (replica_eta, ReceiveReplica) to queue
+                remaining_size -= chunk_size
+
+                # update stats
+                self._total_rt_s += cf * delay
+
+                # remove event that would be completed at t0 and in the next
+                # iteration solve the same problem with one less event and
+                # t0 moved to the time the removed event has completed
+                if transfers:
+                    entry = heapq.heappop(transfers)
+                    new_queue.append(entry)
+                    # reschedule popped event
+                    self._schedule_event(entry[-1], entry[0])
+            else:
+                # delay all events
+                delay = chunk_size / self._network_bw_mbps  # = delta_t / cf
+
+                if transfers:
+                    for entry in transfers:
+                        entry[0] += delay
+
+                replica_eta += delay * cf
+
+                remaining_size -= chunk_size
+
+                self._total_rt_s += cf * delay
+
+                # remove event that would be completed at t0 and in the next
+                # iteration solve the same problem with one less event and
+                # t0 moved to the time the removed event has completed
+                if transfers:
+                    entry = heapq.heappop(transfers)
+                    new_queue.append(entry)
+                    # reschedule popped event
+                    self._schedule_event(entry[-1], entry[0])
+
+                t0 = next_t + delay
+
+        # copy any remaining transfers to new queue
+        while transfers:
+            entry = heapq.heappop(transfers)
+            new_queue.append(entry)
+            # reschedule popped event
+            self._schedule_event(entry[-1], entry[0])
+
+        # add new ReplicaReceive event to global queue (schedule event)
         new_event = ReceiveReplica(
             event.source, event.target, event.replica)
         new_event._generators = event._generators.copy()  # pass generators
 
-        self._schedule_event(new_event, event_time)
+        self._schedule_event(new_event, replica_eta)
 
-        # simulation update stats
-        self._total_rt_s += delay_s
-        self._total_bw += event.replica.size  # XXX: correct interpretat.?
+        # also add this event to node transfers!
+        new_queue.append([replica_eta, next(self._autoinc), new_event])
+        heapq.heapify(new_queue)
+        self._node_transfers[event.source.name] = new_queue
+
+        # ... and update stats
+        self._total_rt_s += (replica_eta - self.now)
+        self._total_bw += new_event.replica.size
 
     def _process_receive_replica(self, event):
         """Process receive replica event.
@@ -607,6 +712,14 @@ class Simulation(object):
         :param event: event to pocess
         :type event: :py:class:`~models.event.ReceiveReplica`
         """
+        # sender has completed the transfer of repl_name and is thus no longer
+        # sending the replica - remove this entry from transfers (it's simply
+        # the first one - the one with the lowest ETA - estimated time of
+        # arrival)
+        # TODO: write a better comment, add a test for this
+        #import pdb; pdb.set_trace()
+        heapq.heappop(self._node_transfers[event.source.name])
+
         # some node's request for a replica has completed (replica
         # received), we need to notify that node about it so that it
         # continues its work from where it stopped

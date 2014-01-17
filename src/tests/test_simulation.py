@@ -203,6 +203,11 @@ class TestSimulation(unittest.TestCase):
         self.assertEqual(sim._total_rt_s, 0.0)
         self.assertEqual(sim._event_queue, [])
         self.assertEqual(sim._event_index, {})
+        self.assertEqual(sim._node_transfers, {})
+
+        self.assertEqual(next(sim._autoinc), 1)
+        self.assertEqual(next(sim._autoinc), 2)
+
         self.assertEqual(sim._c1, 0.001)
         self.assertEqual(sim._c2, 0.001)
 
@@ -657,6 +662,9 @@ class TestSimulation(unittest.TestCase):
 
         sim._event_index[event_mock] = event_entry
 
+        sim._node_transfers = {'server': [Mock(), Mock()]}
+        next(sim._autoinc)  # advance internal auto-increment counter
+
         # manually construct the grid
         sim._generate_replicas = Mock()
         sim._generate_nodes = Mock()
@@ -685,6 +693,10 @@ class TestSimulation(unittest.TestCase):
         self.assertEqual(sim._total_rt_s, 0.0)
         self.assertEqual(sim._event_queue, [])
         self.assertEqual(sim._event_index, {})
+
+        self.assertEqual(sim._node_transfers, {})
+        self.assertEqual(next(sim._autoinc), 1)
+        self.assertEqual(next(sim._autoinc), 2)
 
         self.assertIs(sim._nodes['server']._parent, None)
         self.assertEqual(sim._nodes['node_1']._parent.name, 'server')
@@ -1108,9 +1120,9 @@ class TestSimulation(unittest.TestCase):
         # total response time statistics should have to be updates as well
         self.assertAlmostEqual(sim._total_rt_s, 0.82)
 
-    def test_process_send_replica(self):
+    def test_process_send_replica_no_other_transfers(self):
         """Test that _process_send_replica correctly processes SendReplica
-        events.
+        events when there are no other concurrent replica transfers.
         """
         from models.event import ReceiveReplica
         from models.event import SendReplica
@@ -1122,6 +1134,7 @@ class TestSimulation(unittest.TestCase):
         sim._total_bw = 110.25
 
         source = Mock()
+        source.name = 'server'
         target = Mock()
         replica = Mock(size=80)  # NOTE: network bandwidth is 20 Mb/s
         event = SendReplica(source, target, replica)
@@ -1130,7 +1143,7 @@ class TestSimulation(unittest.TestCase):
         sim._process_send_replica(event)
 
         # SendReplica should have resulted in a ReceiveReplica event on the
-        # target node after the time needed to send a replica over the network
+        # target node after the time needed to send replica over the network
         self.assertEqual(len(sim._event_queue), 1)
         next_event_time, next_event = sim._event_queue[0]
         self.assertAlmostEqual(next_event_time, 26.57)
@@ -1140,9 +1153,211 @@ class TestSimulation(unittest.TestCase):
         self.assertIs(next_event.replica, replica)
         self.assertEqual(next_event._generators, event._generators)
 
+        # check that node's transfers have been updated
+        transfers = sim._node_transfers[source.name]
+        self.assertEqual(len(transfers), 1)
+        self.assertEqual(transfers[0][0], next_event_time)
+        self.assertIs(transfers[0][2], next_event)
+
         # simulation statistics should have been updated as well
         self.assertAlmostEqual(sim._total_rt_s, 11.08)
         self.assertAlmostEqual(sim._total_bw, 190.25)
+
+    def test_process_send_replica_other_longer_transfers(self):
+        """Test that _process_send_replica correctly processes SendReplica
+        events when there are other replica transfers on the node, which will
+        last longer than the new transfer.
+        """
+        from models.event import ReceiveReplica
+        from models.event import SendReplica
+
+        # Scenario: node is currently sending replicas R1, R2, R3 which are
+        # supposed to arrive at now +6, +14 and +17 respectively.
+        # Sizes of not-yet-transfered replica parts are 20, 60 and 90 Mbit.
+        # The current total BW consumption stat is currently at 170 Mbit,
+        # while the total delay stat is 37 seconds.
+        #
+        # Node then starts sending replica R4 (80 Mbit) which delays
+        # the arrivals of all replicas and affects the stats.
+
+        settings = self._get_settings()
+        settings['network_bw_mbps'] = 10
+        sim = self._make_instance(**settings)
+        sim._clock._time = 1000.00
+        sim._total_rt_s = 37.00
+        sim._total_bw = 170.00
+
+        ev_receive_r1 = Mock(name='receive_R1')
+        ev_receive_r2 = Mock(name='receive_R2')
+        ev_receive_r3 = Mock(name='receive_R3')
+
+        transfers = sim._node_transfers['server']
+        transfers.append([1006.0, 1, ev_receive_r1])
+        transfers.append([1014.0, 2, ev_receive_r2])
+        transfers.append([1017.0, 3, ev_receive_r3])
+        heapq.heapify(transfers)
+        sim._autoinc = itertools.count(start=4)
+
+        entry_1 = [1006.0, ev_receive_r1]
+        entry_2 = [1014.0, ev_receive_r2]
+        entry_3 = [1017.0, ev_receive_r3]
+        heapq.heappush(sim._event_queue, entry_1)
+        heapq.heappush(sim._event_queue, entry_2)
+        heapq.heappush(sim._event_queue, entry_3)
+        sim._event_index = {
+            ev_receive_r1: entry_1,
+            ev_receive_r2: entry_2,
+            ev_receive_r3: entry_3,
+        }
+
+        source = Mock()
+        source.name = 'server'
+        target = Mock()
+        replica_4 = Mock(name='replica_4', size=80)
+        event = SendReplica(source, target, replica_4)
+        event._generators = [Mock(), Mock()]
+
+        sim._process_send_replica(event)
+
+        # SendReplica should have resulted in a ReceiveReplica event on the
+        # target node and with current active transfers delayed a bit due to
+        # bandwidth sharing
+        for key in sim._event_index.keys():
+            if isinstance(key, ReceiveReplica):
+                ev_receive_r4 = key
+                break
+        else:
+            self.fail("ReceiveReplica event not present in event index.")
+
+        # 7 == 3 canceled events + 3 rescheduled events + 1 new event
+        self.assertEqual(len(sim._event_queue), 7)
+
+        entry = sim._event_index[ev_receive_r4]
+        self.assertAlmostEqual(entry[0], 1024.00)  # event time
+        self.assertTrue(isinstance(ev_receive_r4, ReceiveReplica))
+        self.assertIs(ev_receive_r4.source, source)
+        self.assertIs(ev_receive_r4.target, target)
+        self.assertIs(ev_receive_r4.replica, replica_4)
+        self.assertEqual(ev_receive_r4._generators, event._generators)
+
+        # now check if other ReceiveReplica events have been correctly delayed
+        self.assertAlmostEqual(sim._event_index[ev_receive_r1][0], 1008.00)
+        self.assertAlmostEqual(sim._event_index[ev_receive_r2][0], 1020.00)
+        self.assertAlmostEqual(sim._event_index[ev_receive_r3][0], 1025.00)
+
+        # check that node's transfers have been updated
+        transfers = sim._node_transfers['server']
+        self.assertEqual(len(transfers), 4)
+
+        for entry in transfers:
+            if entry[-1] is ev_receive_r4:
+                break
+        else:
+            self.fail("New replica transfer not found in transfer list.")
+
+        self.assertAlmostEqual(entry[0], 1024.00)
+
+        # simulation statistics should have been updated as well
+        self.assertAlmostEqual(sim._total_rt_s, 77.00)
+        self.assertAlmostEqual(sim._total_bw, 250.00)
+
+    def test_process_send_replica_all_other_transfers_longer(self):
+        """Test that _process_send_replica correctly processes SendReplica
+        events when the transfer of new replica would finish before other
+        currently active transfers.
+
+        The main purpose of this test is to cover some cases when the current
+        node's transer queue is not correctly updated (some existing transfers
+        disappear).
+        """
+        from models.event import ReceiveReplica
+        from models.event import SendReplica
+
+        # Scenario: node is currently sending replica R1 and R2 which are
+        # supposed to arrive at now +50 and +80 respectively.
+        # Sizes of not-yet-transfered replica parts are 250 and 450 Mbit.
+        # The current total BW consumption stat is currently at 80 Mbit,
+        # while the total delay stat is 12 seconds.
+        #
+        # Node then starts sending replica R3 (100 Mbit) which delays
+        # the arrivals of all replicas and affects the stats.
+
+        settings = self._get_settings()
+        settings['network_bw_mbps'] = 10
+        sim = self._make_instance(**settings)
+        sim._clock._time = 1000.0
+        sim._total_rt_s = 12.00
+        sim._total_bw = 80.00
+
+        ev_receive_r1 = Mock(name='receive_R1')
+        ev_receive_r2 = Mock(name='receive_R2')
+
+        transfers = sim._node_transfers['server']
+        transfers.append([1050.0, 1, ev_receive_r1])
+        transfers.append([1070.0, 2, ev_receive_r2])
+        heapq.heapify(transfers)
+        sim._autoinc = itertools.count(start=3)
+
+        entry_1 = [1050.0, ev_receive_r1]
+        entry_2 = [1070.0, ev_receive_r2]
+        heapq.heappush(sim._event_queue, entry_1)
+        heapq.heappush(sim._event_queue, entry_2)
+        sim._event_index = {
+            ev_receive_r1: entry_1,
+            ev_receive_r2: entry_2,
+        }
+
+        source = Mock()
+        source.name = 'server'
+        target = Mock()
+        replica_3 = Mock(name='replica_3', size=100)
+        event = SendReplica(source, target, replica_3)
+        event._generators = [Mock(), Mock()]
+
+        sim._process_send_replica(event)
+
+        # SendReplica should have resulted in a ReceiveReplica event on the
+        # target node and with current active transfers delayed a bit due to
+        # bandwidth sharing
+        for key in sim._event_index.keys():
+            if isinstance(key, ReceiveReplica):
+                ev_receive_r3 = key
+                break
+        else:
+            self.fail("ReceiveReplica event not present in event index.")
+
+        # 5 == 2 canceled events + 2 rescheduled events + 1 new event
+        self.assertEqual(len(sim._event_queue), 5)
+
+        return
+
+        entry = sim._event_index[ev_receive_r3]
+        self.assertAlmostEqual(entry[0], 1030.00)  # event time
+        self.assertTrue(isinstance(ev_receive_r3, ReceiveReplica))
+        self.assertIs(ev_receive_r3.source, source)
+        self.assertIs(ev_receive_r3.target, target)
+        self.assertIs(ev_receive_r3.replica, replica_3)
+        self.assertEqual(ev_receive_r3._generators, event._generators)
+
+        # now check if other ReceiveReplica events have been correctly delayed
+        self.assertAlmostEqual(sim._event_index[ev_receive_r1][0], 1060.00)
+        self.assertAlmostEqual(sim._event_index[ev_receive_r2][0], 1080.00)
+
+        # check that node's transfers have been updated
+        transfers = sim._node_transfers['server']
+        self.assertEqual(len(transfers), 3)
+
+        for entry in transfers:
+            if entry[-1] is ev_receive_r3:
+                break
+        else:
+            self.fail("New replica transfer not found in transfer list.")
+
+        self.assertAlmostEqual(entry[0], 1030.00)
+
+        # simulation statistics should have been updated as well
+        self.assertAlmostEqual(sim._total_rt_s, 62.00)  # added 2*10 + 30
+        self.assertAlmostEqual(sim._total_bw, 180.00)
 
     def test_process_receive_replica_with_subtarget(self):
         """Test that _process_receive_replica correctly processes
@@ -1157,10 +1372,18 @@ class TestSimulation(unittest.TestCase):
         sim._clock._time = 8.11
 
         source = Mock()
+        source.name = 'source_node'
         target = Mock()
         target_child = Mock()
         replica = Mock()
         event = ReceiveReplica(source, target, replica)
+
+        # set some node transfers
+        sim._node_transfers[source.name] = [
+            [8.11, 100, event],
+            [12.01, 101, Mock()],
+            [17.20, 102, Mock()],
+        ]
 
         def g():
             yield
@@ -1184,6 +1407,11 @@ class TestSimulation(unittest.TestCase):
         self.assertIs(next_event.replica, replica)
         self.assertEqual(next_event._generators, [another_gen])
 
+        # check node's replica transfer list
+        transfers = sim._node_transfers[source.name]
+        self.assertEqual(len(transfers), 2)
+        self.assertNotIn([8.11, 100, event], transfers)
+
     def test_process_receive_replica_without_subtarget(self):
         """Test that _process_receive_replica correctly processes
         ReceiveReplica events when receiving node (target) does not have any
@@ -1201,6 +1429,13 @@ class TestSimulation(unittest.TestCase):
         replica = Mock()
         event = ReceiveReplica(source, target, replica)
 
+        # set some node transfers
+        sim._node_transfers[source.name] = [
+            [8.11, 100, event],
+            [12.01, 101, Mock()],
+            [17.20, 102, Mock()],
+        ]
+
         def g():
             yield
             yield SendReplica(target, None, replica)
@@ -1215,6 +1450,11 @@ class TestSimulation(unittest.TestCase):
         # resulted from that (because there is no sub-target node to send
         # replica to)
         self.assertEqual(len(sim._event_queue), 0)
+
+        # check node's replica transfer list
+        transfers = sim._node_transfers[source.name]
+        self.assertEqual(len(transfers), 2)
+        self.assertNotIn([8.11, 100, event], transfers)
 
 
 class TestEventFactory(unittest.TestCase):
