@@ -12,10 +12,16 @@ class _Event(object):
 
     def __lt__(self, other):
         if not isinstance(other, _Event):
+            # XXX: temp hack! later have counter for autoinc IDs!
+            if other == '<event-canceled>':
+                return False
             raise TypeError(
                 "Cannot compare {} to another type.".format(self.__class__))
         return self.event_id < other.event_id
 
+    def __gt__(self, other):
+        # XXX: temp hack! later have counter for autoinc IDs!
+        return not self.__lt__(other)
     # TODO: just a temporary hack to allow event sorting in msg_queue -
     # refactor it so that you get rid of ID and simulation provides that!
     # and stores (time, event_id, event_obj) into msg queue
