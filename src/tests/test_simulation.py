@@ -1284,14 +1284,14 @@ class TestEventFactory(unittest.TestCase):
         simulation.now = 2.7
 
         choice.side_effect = ['node_3', 2, 1, replica]
-        randint.return_value = 60
+        randint.return_value = 61
         random.return_value = 0.501
 
         event_factory = self._make_instance(simulation)
         ret_val = event_factory.get_random()
 
         self.assertTrue(len(ret_val), 2)
-        self.assertEqual(ret_val[0], 62.7)  # event time
+        self.assertEqual(ret_val[0], 61.0)  # event time
 
         event = ret_val[1]
         self.assertTrue(isinstance(event, ReceiveReplicaRequest))

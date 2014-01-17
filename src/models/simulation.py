@@ -415,6 +415,7 @@ class Simulation(object):
         ef = _EventFactory(self)
         t, event = ef.get_random()
         self._schedule_event(event, t)
+        prev_t = t
 
         total_reqs_gen = 1  # total replica request events generated so far
 
@@ -422,8 +423,10 @@ class Simulation(object):
         while self._event_queue:
 
             if total_reqs_gen < self._total_reqs:
-                new_t, new_e = ef.get_random()
-                self._schedule_event(new_e, new_t)
+                t_from_now, new_e = ef.get_random()
+                self._schedule_event(new_e, prev_t + t_from_now)
+                prev_t = prev_t + t_from_now
+
                 total_reqs_gen += 1
 
                 if total_reqs_gen % 1000 == 0:
@@ -613,7 +616,7 @@ class Simulation(object):
 
             # if target is not None, node did not request the replica
             # by itself, thus we need to send the replica to another node
-            # down the chain
+            # further down the chain
             if new_event.target is not None:
                 new_event._generators = event._generators.copy()
                 self._schedule_event(new_event, self.now)
@@ -660,7 +663,6 @@ class _EventFactory(object):
         # XXX: don't hardcode the limits, read them from the simulation
         # object (and the same for time?)
         time_from_now = random.randint(0, 99)
-        event_time = time_from_now + self._sim.now
 
-        # return NodeRequest(node, replica, self._sim.now + time_from_now)
-        return event_time, ReceiveReplicaRequest(None, receiver, replica.name)
+        return time_from_now, ReceiveReplicaRequest(
+            None, receiver, replica.name)
