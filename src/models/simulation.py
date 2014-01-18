@@ -472,7 +472,7 @@ class Simulation(object):
         :rtype: tuple (float, :py:class:`~models.event._Event` instance)
         """
         while self._event_queue:
-            t, event = heapq.heappop(self._event_queue)
+            t, entry_id, event = heapq.heappop(self._event_queue)
             if event is not self._CANCELED:
                 del self._event_index[event]
                 return t, event
@@ -510,7 +510,7 @@ class Simulation(object):
         if event in self._event_index:
             self._cancel_event(event)
 
-        entry = [event_time, event]
+        entry = [event_time, next(self._autoinc), event]
         self._event_index[event] = entry
         heapq.heappush(self._event_queue, entry)
 

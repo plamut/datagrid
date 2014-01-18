@@ -8,10 +8,6 @@ import unittest
 class TestEvent(unittest.TestCase):
     """Tests for :py:class:`~models.event._Event` base class."""
 
-    def setUp(self):
-        # reset event ID generator seed
-        self._get_target_class().event_id = 0
-
     def _get_target_class(self):
         from models.event import _Event
         return _Event
@@ -24,61 +20,6 @@ class TestEvent(unittest.TestCase):
         event = self._make_instance()
 
         self.assertEqual(event._generators, [])
-        self.assertEqual(event.event_id, 1)
-        self.assertEqual(self._get_target_class().event_id, 1)
-
-    def test_lt_defined(self):
-        """Test than __lt__ operator is defined on event instances."""
-        e1 = self._make_instance()
-        e2 = self._make_instance()
-
-        try:
-            e1 < e2
-        except TypeError:
-            self.fail("__lt__ not implemented.")
-
-    def test_event_id_generation(self):
-        """Test that new instances' IDs are automatically auto-incremented.
-        """
-        e1 = self._make_instance()  # event_id 1
-        e2 = self._make_instance()  # event_id 2
-        e3 = self._make_instance()  # event_id 3
-
-        self.assertEqual(e1.event_id, 1)
-        self.assertEqual(e2.event_id, 2)
-        self.assertEqual(e3.event_id, 3)
-        self.assertEqual(self._get_target_class().event_id, 3)
-
-    def test_lt_raises_error_comparing_to_other_types(self):
-        """Test than __lt__ operator is defined on event instances."""
-        e1 = self._make_instance()
-        obj = object()
-
-        try:
-            e1 < obj
-        except TypeError:
-            pass  # expected
-        except:
-            self.fail("Wrong exception type raised, TypeError expected.")
-        else:
-            self.fail("TypeError not raised.")
-
-    def test_lt_compares_by_id(self):
-        """Test that __lt__ operator orders events by their event_id."""
-        e1 = self._make_instance()  # event_id 1
-        e2 = self._make_instance()  # event_id 2
-        e3 = self._make_instance()  # event_id 3
-
-        self.assertTrue(e1 < e2)
-        self.assertTrue(e2 < e3)
-        self.assertTrue(e1 < e3)
-        self.assertFalse(e2 < e1)
-        self.assertFalse(e3 < e2)
-        self.assertFalse(e3 < e1)
-
-        self.assertFalse(e1 < e1)
-        self.assertFalse(e2 < e2)
-        self.assertFalse(e3 < e3)
 
 
 class TestReceiveReplicaRequest(unittest.TestCase):

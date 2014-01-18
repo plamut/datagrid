@@ -714,10 +714,10 @@ class TestSimulation(unittest.TestCase):
         event_2 = Mock()
         event_3 = Mock()
         event_4 = Mock()
-        entry_1 = [10, event_1]
-        entry_2 = [20, event_2]
-        entry_3 = [30, event_3]
-        entry_4 = [40, event_4]
+        entry_1 = [10, 1, event_1]
+        entry_2 = [20, 2, event_2]
+        entry_3 = [30, 3, event_3]
+        entry_4 = [40, 4, event_4]
 
         sim._event_queue.append(entry_4)
         sim._event_queue.append(entry_2)
@@ -746,9 +746,9 @@ class TestSimulation(unittest.TestCase):
         event_1 = Mock()
         event_2 = Mock()
         event_3 = Mock()
-        entry_1 = [10, sim._CANCELED]
-        entry_2 = [20, event_2]
-        entry_3 = [30, event_3]
+        entry_1 = [10, 1, sim._CANCELED]
+        entry_2 = [20, 2, event_2]
+        entry_3 = [30, 3, event_3]
 
         sim._event_queue.append(entry_1)
         sim._event_queue.append(entry_2)
@@ -831,14 +831,15 @@ class TestSimulation(unittest.TestCase):
         event_1 = Mock()
         event_2 = Mock()
         event_4 = Mock()
-        entry_1 = [10, event_1]
-        entry_2 = [20, event_2]
-        entry_4 = [40, event_4]
+        entry_1 = [10, 1, event_1]
+        entry_2 = [20, 2, event_2]
+        entry_4 = [40, 3, event_4]
 
         sim._event_queue.append(entry_1)
         sim._event_queue.append(entry_2)
         sim._event_queue.append(entry_4)
         heapq.heapify(sim._event_queue)
+        sim._autoinc = itertools.count(start=4)
 
         sim._event_index = {
             event_1: entry_1,
@@ -850,7 +851,7 @@ class TestSimulation(unittest.TestCase):
         sim._schedule_event(event_3, 30)
 
         self.assertEqual(len(sim._event_queue), 4)
-        self.assertIn([30, event_3], sim._event_queue)
+        self.assertIn([30, 4, event_3], sim._event_queue)
 
     def test_schedule_event_in_the_past(self):
         """Test that _schedule_event rejects events which would occur in past
@@ -873,14 +874,15 @@ class TestSimulation(unittest.TestCase):
         event_1 = Mock()
         event_2 = Mock()
         event_3 = Mock()
-        entry_1 = [10, event_1]
-        entry_2 = [20, event_2]
-        entry_3 = [30, event_3]
+        entry_1 = [10, 1, event_1]
+        entry_2 = [20, 2, event_2]
+        entry_3 = [30, 3, event_3]
 
         sim._event_queue.append(entry_1)
         sim._event_queue.append(entry_2)
         sim._event_queue.append(entry_3)
         heapq.heapify(sim._event_queue)
+        sim._autoinc = itertools.count(start=4)
 
         sim._event_index = {
             event_1: entry_1,
@@ -893,8 +895,8 @@ class TestSimulation(unittest.TestCase):
         # original event entry is marked as canceled and a new rescheduled
         # event entry is added to event queue
         self.assertEqual(len(sim._event_queue), 4)
-        self.assertIn([20, sim._CANCELED], sim._event_queue)
-        self.assertIn([42, event_2], sim._event_queue)
+        self.assertIn([20, 2, sim._CANCELED], sim._event_queue)
+        self.assertIn([42, 4, event_2], sim._event_queue)
 
     def test_process_event_type_unknown(self):
         """Test that _process_event raises an error on unknown event types."""
@@ -1011,7 +1013,7 @@ class TestSimulation(unittest.TestCase):
         # ReceiveReplicaRequest should have resulted in a SendReplicaRequest
         # (target node requests replica from its parent) with no time delay
         self.assertEqual(len(sim._event_queue), 1)
-        next_event_time, next_event = sim._event_queue[0]
+        next_event_time, entry_id, next_event = sim._event_queue[0]
         self.assertEqual(next_event_time, 2.55)
         self.assertTrue(isinstance(next_event, SendReplicaRequest))
         self.assertEqual(next_event.source.name, 'target')
@@ -1053,7 +1055,7 @@ class TestSimulation(unittest.TestCase):
         # ReceiveReplicaRequest should have resulted in a SendReplica with no
         # delay (target node had the replica and sent it back)
         self.assertEqual(len(sim._event_queue), 1)
-        next_event_time, next_event = sim._event_queue[0]
+        next_event_time, entry_id, next_event = sim._event_queue[0]
         self.assertEqual(next_event_time, 2.55)
         self.assertTrue(isinstance(next_event, SendReplica))
         self.assertEqual(next_event.source.name, 'target')
@@ -1109,7 +1111,7 @@ class TestSimulation(unittest.TestCase):
         # SendReplicaRequest should have resulted in a ReceiveReplicaRequest
         # event on the target node after some propagation speed latency
         self.assertEqual(len(sim._event_queue), 1)
-        next_event_time, next_event = sim._event_queue[0]
+        next_event_time, entry_id, next_event = sim._event_queue[0]
         self.assertAlmostEqual(next_event_time, 4.32)
         self.assertTrue(isinstance(next_event, ReceiveReplicaRequest))
         self.assertEqual(next_event.source.name, 'source')
@@ -1145,7 +1147,7 @@ class TestSimulation(unittest.TestCase):
         # SendReplica should have resulted in a ReceiveReplica event on the
         # target node after the time needed to send replica over the network
         self.assertEqual(len(sim._event_queue), 1)
-        next_event_time, next_event = sim._event_queue[0]
+        next_event_time, entry_id, next_event = sim._event_queue[0]
         self.assertAlmostEqual(next_event_time, 26.57)
         self.assertTrue(isinstance(next_event, ReceiveReplica))
         self.assertIs(next_event.source, source)
@@ -1399,7 +1401,7 @@ class TestSimulation(unittest.TestCase):
         # ReceiveReplica should have resulted in a SendReplica event (target
         # node sends replica to its own requester)
         self.assertEqual(len(sim._event_queue), 1)
-        next_event_time, next_event = sim._event_queue[0]
+        next_event_time, entry_id, next_event = sim._event_queue[0]
         self.assertEqual(next_event_time, 8.11)  # immediately (no delay)
         self.assertTrue(isinstance(next_event, SendReplica))
         self.assertIs(next_event.source, target)
