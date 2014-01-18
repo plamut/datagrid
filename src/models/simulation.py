@@ -682,11 +682,9 @@ class Simulation(object):
         :type event: :py:class:`~models.event.ReceiveReplica`
         """
         # sender has completed the transfer of repl_name and is thus no longer
-        # sending the replica - remove this entry from transfers (it's simply
-        # the first one - the one with the lowest ETA - estimated time of
-        # arrival)
-        # TODO: write a better comment, add a test for this
-        #import pdb; pdb.set_trace()
+        # sending the replica, thus remove this entry from transfers - it's
+        # simply the first one (the one with the lowest ETA, estimated time
+        # of arrival)
         heapq.heappop(self._node_transfers[event.source.name])
 
         # some node's request for a replica has completed (replica
