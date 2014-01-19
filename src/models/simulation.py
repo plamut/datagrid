@@ -417,6 +417,7 @@ class Simulation(object):
         """
         self._clock.reset()
 
+        # TODO: print simulation started with settings ... blah blah ...
         print("[SIM    @ {:.8f}] SIMULATION STARTED".format(self.now))
 
         ef = _EventFactory(self)
@@ -458,9 +459,10 @@ class Simulation(object):
             self._clock.tick(step=t - self.now)
             self._process_event(event)
 
-        print("-" * 10, "END", "-" * 10)
-        print("Total resp. time (s):", self._total_rt_s * self._c1)
-        print("Total bandwidth:", self._total_bw * self._c2)
+        return {
+            'total_resp_time': self._total_rt_s * self._c1,
+            'total_bw': self._total_bw * self._c2,
+        }
 
     def _pop_next_event(self):
         """Find next non-canceled event in event queue and return it.
