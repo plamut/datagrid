@@ -415,10 +415,23 @@ class Simulation(object):
 
         NOTE: simulation must have already been initialized with initialize()
         """
-        self._clock.reset()
+        bold = '\033[1m'
+        reset = '\033[0m'
+        yellow_b = '\033[1;33m'
 
-        # TODO: print simulation started with settings ... blah blah ...
-        print("[SIM    @ {:.8f}] SIMULATION STARTED".format(self.now))
+        print(
+            yellow_b, "*** SIMULATION STARTED ***", reset,
+            "\n(", bold, "nodes", reset, ": {}, ".format(self._node_count),
+            bold, "replicas", reset, ": {}, ".format(self._replica_count),
+            bold, "P(mwg)", reset, ": {:.2f}, ".format(self._mwg_prob),
+            bold, "strategy", reset, ": {}, ".format(
+                Strategy._fields[self._strategy - 1]),
+            bold, "n_requests", reset, ": {}, ".format(self._total_reqs),
+            bold, "seed", reset, ": {}".format(self._rnd_seed),
+            '\n', sep=''
+        )
+
+        self._clock.reset()
 
         ef = _EventFactory(self)
         t, event = ef.get_random()
@@ -437,19 +450,10 @@ class Simulation(object):
 
                 total_reqs_gen += 1
 
-                if total_reqs_gen % 1000 == 0:
-                    print(
-                        '\033[1;36m', "generated request {}/{}"
-                        "({:.2f} %)".format(
-                            total_reqs_gen, self._total_reqs,
-                            100 * total_reqs_gen / self._total_reqs),
-                        '\033[0m', sep='')
-
-            if len(self._event_queue) % 10000 == 0:
+            if len(self._event_queue) % 1000 == 0:
                 print(
-                    '\033[1;36m', "events in queue: {}".format(
-                        len(self._event_queue)),
-                    '\033[0m', sep=''
+                    "[SIM    @ {:.8f}]".format(self.now),
+                    "Events left in queue: {}".format(len(self._event_queue))
                 )
 
             t, event = self._pop_next_event()
