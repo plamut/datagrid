@@ -418,9 +418,11 @@ class Simulation(object):
         bold = '\033[1m'
         reset = '\033[0m'
         yellow_b = '\033[1;33m'
+        cursor_hide = '\033[?25l'
+        cursor_show = '\033[?25h'
 
         print(
-            yellow_b, "*** SIMULATION STARTED ***", reset,
+            yellow_b, "\n*** SIMULATION STARTED ***", reset,
             "\n(", bold, "nodes", reset, ": {}, ".format(self._node_count),
             bold, "replicas", reset, ": {}, ".format(self._replica_count),
             bold, "P(mwg)", reset, ": {:.2f}, ".format(self._mwg_prob),
@@ -428,7 +430,7 @@ class Simulation(object):
                 Strategy._fields[self._strategy - 1]),
             bold, "n_requests", reset, ": {}, ".format(self._total_reqs),
             bold, "seed", reset, ": {}".format(self._rnd_seed),
-            '\n', sep=''
+            sep=''
         )
 
         self._clock.reset()
@@ -440,6 +442,12 @@ class Simulation(object):
 
         total_reqs_gen = 1  # total replica request events generated so far
 
+        print(
+            cursor_hide,
+            "\rEvents in queue: {:<6d}".format(len(self._event_queue)),
+            end=''
+        )
+
         # main event loop
         while self._event_queue:
 
@@ -450,11 +458,10 @@ class Simulation(object):
 
                 total_reqs_gen += 1
 
-            if len(self._event_queue) % 1000 == 0:
-                print(
-                    "[SIM    @ {:.8f}]".format(self.now),
-                    "Events left in queue: {}".format(len(self._event_queue))
-                )
+            print(
+                "\rEvents in queue: {:<6d}".format(len(self._event_queue)),
+                end=''
+            )
 
             t, event = self._pop_next_event()
 
@@ -462,6 +469,11 @@ class Simulation(object):
             # process the event
             self._clock.tick(step=t - self.now)
             self._process_event(event)
+
+        print(
+            "\rEvents in queue: {:<6d}".format(len(self._event_queue)),
+            cursor_show
+        )
 
         return {
             'total_resp_time': self._total_rt_s * self._c1,
