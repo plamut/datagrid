@@ -302,11 +302,6 @@ class Node(object):
         self._replica_stats.pop(replica_name)
         self._free_capacity += replica.size
 
-# XXX: maybe we should store stats for replicas not yet present, nevertheless
-# "Node: store NOR (# of requests) of each replica which resides on it
-#  For a given node, the NOR of a replica is increased by one each
-#  time that replica is requested by that node"
-
 
 class NodeEFS(Node):
     """Node that uses EFS strategy (enhanced fast spread)."""
@@ -446,3 +441,33 @@ class NodeLFU(Node):
             stats = _ReplicaStats()    # XXX: NOR is 1 instead of zero?
 
         return stats.nor
+
+
+class NodeMFS(Node):
+    """Node that uses MFS strategy (modified fast spread)."""
+
+    def _GV(self, replicas):
+        """Calculate value of a group of replicas.
+
+        :param replicas: list representing a replica group
+        :type replicas: list of :py:class:`~models.replica.Replica` instances
+
+        :returns: value of the replica group
+        :rtype: float
+        """
+        return sum((self._replica_stats[r.name].nor for r in replicas), 0.0)
+
+    def _RV(self, replica):
+        """Calculate value of a replica.
+
+        :param replica: replica to calclulate the value of
+        :type replica: :py:class:`~models.replica.Replica`
+
+        :returns: value of the `replica`
+        :rtype: float
+        """
+        stats = self._replica_stats.get(replica.name)
+        if stats is None:
+            stats = _ReplicaStats()
+
+        return stats.nor * (1 - self._free_capacity / replica.size)

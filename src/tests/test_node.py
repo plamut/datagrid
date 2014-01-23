@@ -950,3 +950,112 @@ class TestNodeLFU(unittest.TestCase):
         node._replica_stats['replica_1'] = repl_stats
 
         self.assertEqual(node._RV(replica), 6)
+
+
+class TestNodeMFS(unittest.TestCase):
+    """Tests for :py:class:`~models.node.NodeMFS` class."""
+
+    # XXX: refactor some common utility methods into some base testcase class?
+    def _get_target_class(self):
+        from models.node import NodeMFS
+        return NodeMFS
+
+    def _make_instance(self, *args, **kw):
+        return self._get_target_class()(*args, **kw)
+
+    def _make_sim(self, *args, **kwargs):
+        """Make an instance of Simulation."""
+        from models.simulation import Simulation
+        return Simulation(*args, **kwargs)
+
+    def _make_replica(self, *args, **kwargs):
+        """Make an instance of Replica."""
+        from models.replica import Replica
+        return Replica(*args, **kwargs)
+
+    def test_is_node_subclass(self):
+        """Test if target class is a subclass of Node."""
+        from models.node import Node
+        self.assertTrue(issubclass(self._get_target_class(), Node))
+
+    def test_group_value(self):
+        """Test that the value of a replica group is calculated correctly.
+
+        Group value is simply the sum of numbers of requests for each replica
+        in the group.
+        """
+        sim = Mock(spec=self._make_sim())
+        sim.fsti = 1.50
+        sim.now = 4
+
+        node = self._make_instance('node_1', 1000, sim)
+
+        replica_group = [
+            self._make_replica('replica_1', size=200),
+            self._make_replica('replica_2', size=400),
+            self._make_replica('replica_3', size=900),
+        ]
+
+        stats_1 = Mock(nor=6, lrt=3.50)
+        stats_1.nor_fsti.return_value = 5
+        node._replica_stats['replica_1'] = stats_1
+
+        stats_2 = Mock(nor=0, lrt=0.04)
+        stats_2.nor_fsti.return_value = 0
+        node._replica_stats['replica_2'] = stats_2
+
+        stats_3 = Mock(nor=11, lrt=2.40)
+        stats_3.nor_fsti.return_value = 4
+        node._replica_stats['replica_3'] = stats_3
+
+        self.assertAlmostEqual(node._GV(replica_group), 17)
+
+    def test_group_value_when_empty(self):
+        """Test that the calculated value of an empty replica group is zero."""
+        sim = Mock()
+        node = self._make_instance('node_1', 1000, sim)
+        self.assertAlmostEqual(node._GV([]), 0.0)
+
+    def test_replica_value_no_stats(self):
+        """Test that the value of a replica with no stats is calculated
+        correctly.
+
+        Replica does not have any stats yet in cases when it has just been
+        retrieved from a parent node and is a candidate for storing a copy of
+        it on the node that requested it.
+
+        When replica does not yet have any stats, its value is zero (because
+        its NOR is zero as well).
+        """
+        sim = Mock(spec=self._make_sim())
+        sim.fsti = 10
+        sim.now = 4.77
+
+        replica = self._make_replica('replica_1', size=200)
+        node = self._make_instance('node_1', 1000, sim)
+
+        self.assertEqual(node._RV(replica), 0.0)
+
+    def test_replica_value_stats_exist(self):
+        """Test that the value of a replica with existing stats is calculated
+        correctly.
+
+        Replica does not have any stats yet in cases when it has just been
+        retrieved from a parent node and is a candidate for storing a copy of
+        it on the node that requested it.
+
+        Replica value is just the number of time it has been requested.
+        """
+        sim = Mock(spec=self._make_sim())
+        sim.fsti = 1.50
+        sim.now = 4.77
+
+        replica = self._make_replica('replica_1', size=200)
+        node = self._make_instance('node_1', 1000, sim)
+        node._free_capacity = 50
+
+        repl_stats = Mock(nor=10, lrt=2.57)
+        repl_stats.nor_fsti.return_value = 4
+        node._replica_stats['replica_1'] = repl_stats
+
+        self.assertEqual(node._RV(replica), 7.50)

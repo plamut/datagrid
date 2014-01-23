@@ -25,6 +25,8 @@ settings_LFU_1 = copy(settings_EFS_1)
 settings_LFU_1['strategy'] = Strategy.LFU
 settings_LRU_1 = copy(settings_EFS_1)
 settings_LRU_1['strategy'] = Strategy.LRU
+settings_MFS_1 = copy(settings_EFS_1)
+settings_MFS_1['strategy'] = Strategy.MFS
 
 settings_EFS_2 = copy(settings_EFS_1)
 settings_EFS_2['mwg_prob'] = 0.3
@@ -32,6 +34,8 @@ settings_LFU_2 = copy(settings_LFU_1)
 settings_LFU_2['mwg_prob'] = 0.3
 settings_LRU_2 = copy(settings_LRU_1)
 settings_LRU_2['mwg_prob'] = 0.3
+settings_MFS_2 = copy(settings_MFS_1)
+settings_MFS_2['mwg_prob'] = 0.3
 
 settings_EFS_3 = copy(settings_EFS_1)
 settings_EFS_3['mwg_prob'] = 0.5
@@ -39,6 +43,8 @@ settings_LFU_3 = copy(settings_LFU_1)
 settings_LFU_3['mwg_prob'] = 0.5
 settings_LRU_3 = copy(settings_LRU_1)
 settings_LRU_3['mwg_prob'] = 0.5
+settings_MFS_3 = copy(settings_MFS_1)
+settings_MFS_3['mwg_prob'] = 0.5
 
 # debugging configuration
 settings_dbg = dict(
@@ -65,18 +71,21 @@ def main():
                 ('LRU', settings_LRU_1),
                 ('LFU', settings_LFU_1),
                 ('EFS', settings_EFS_1),
+                ('MFS', settings_MFS_1)
             ])),
         ('SCENARIO 2 [P(mwg) = 0.3]',
             OrderedDict([
                 ('LRU', settings_LRU_2),
                 ('LFU', settings_LFU_2),
                 ('EFS', settings_EFS_2),
+                ('MFS', settings_MFS_2)
             ])),
         ('SCENARIO 3 [P(mwg) = 0.5]',
             OrderedDict([
                 ('LRU', settings_LRU_3),
                 ('LFU', settings_LFU_3),
                 ('EFS', settings_EFS_3),
+                ('MFS', settings_MFS_3)
             ])),
     ])
 

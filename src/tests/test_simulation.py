@@ -50,19 +50,17 @@ class TestStrategy(unittest.TestCase):
         """Test that `Strategy` contains all the right items and nothing else.
         """
         strategy = self._get_OUT()
-        self.assertEqual(len(strategy), 5)
+        self.assertEqual(len(strategy), 4)
 
         self.assertIn('EFS', strategy._fields)
         self.assertIn('LFU', strategy._fields)
         self.assertIn('LRU', strategy._fields)
-        self.assertIn('s2012', strategy._fields)
-        self.assertIn('s2013', strategy._fields)
+        self.assertIn('MFS', strategy._fields)
 
         self.assertEqual(strategy.EFS, 1)
         self.assertEqual(strategy.LFU, 2)
         self.assertEqual(strategy.LRU, 3)
-        self.assertEqual(strategy.s2012, 4)
-        self.assertEqual(strategy.s2013, 5)
+        self.assertEqual(strategy.MFS, 4)
 
 
 class TestClock(unittest.TestCase):
@@ -399,6 +397,25 @@ class TestSimulation(unittest.TestCase):
 
         new_node = sim._new_node('node_1', 15000, sim)
         self.assertTrue(isinstance(new_node, NodeLRU))
+        self.assertIs(sim._nodes.get('node_1'), new_node)
+        self.assertIn('node_1', sim._nodes_mwg)
+        self.assertEqual(sim._nodes_mwg['node_1'], 6)
+        self.assertTrue(
+            random.randint.called_with(1, settings['replica_group_count']))
+
+    @patch('random.randint', Mock(return_value=6))
+    def test_new_node_MFS(self):
+        """Test that _new_node currectly creates a new NodeMFS instance.
+        """
+        from models.node import NodeMFS
+        from models.simulation import Strategy
+
+        settings = self._get_settings()
+        settings['strategy'] = Strategy.MFS
+        sim = self._make_instance(**settings)
+
+        new_node = sim._new_node('node_1', 15000, sim)
+        self.assertTrue(isinstance(new_node, NodeMFS))
         self.assertIs(sim._nodes.get('node_1'), new_node)
         self.assertIn('node_1', sim._nodes_mwg)
         self.assertEqual(sim._nodes_mwg['node_1'], 6)
