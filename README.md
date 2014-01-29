@@ -11,10 +11,9 @@ Install (requires Python 3.3+)
 
 Run
 ---
-
     (datagrid)$ python src/main.py
 
-*Note:* Simulation parameters can be changed in *main.py*.
+**Note:** Simulation parameters can be changed in *main.py*.
 
 Run tests
 ---------
