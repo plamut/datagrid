@@ -10,7 +10,9 @@
 
 \documentclass[a4paper, 12pt]{book}
 
+% XXX: zakaj utf8x in ne utf8?
 \usepackage[utf8x]{inputenc}   % omogoča uporabo slovenskih črk kodiranih v formatu UTF-8 
+
 \usepackage[slovene,english]{babel}    % naloži, med drugim, slovenske delilne vzorce
 \usepackage[pdftex]{graphicx}  % omogoča vlaganje slik različnih formatov 
 \usepackage{fancyhdr}          % poskrbi, na primer, za glave strani
@@ -36,8 +38,11 @@
 
 % konstrukti
 \newtheorem{izrek}{Izrek}[chapter]
+
 %\newtheorem{trditev}{Trditev}[izrek]
 \newenvironment{dokaz}{\emph{Dokaz.}\ }{\hspace{\fill}{$\Box$}}
+
+
 
 \begin{document}
 \selectlanguage{slovene}
@@ -45,47 +50,55 @@
 \setcounter{page}{1} %
 \renewcommand{\thepage}{}       % preprecimo težave s številkami strani v kazalu 
 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %naslovnica
- \thispagestyle{empty}%
-   \begin{center}
+\label{naslovnica}
+\thispagestyle{empty}%
+\begin{center}
     {\large\sc Univerza v Ljubljani\\%
       Fakulteta za računalništvo in informatiko}%
     \vskip 10em%
-    {\autfont Matjaž Kralj\par}%
-    {\titfont Vzorec diplomskega dela \par}%
-    {\vskip 2em \textsc{DIPLOMSKO DELO\\[2mm] 
-    VISOKOŠOLSKI STROKOVNI ŠTUDIJSKI PROGRAM PRVE STOPNJE RAČUNALNIŠTVO IN INFORMATIKA}\par}%
+    {\autfont Peter Lamut\par}%
+    {\titfont TODO: naslov diplomskega dela \par}%
+    {\vskip 2em \textsc{DIPLOMSKO DELO NA UNIVERZITETNEM ŠTUDIJU}\par}%
     \vfill\null%
-    {\large \textsc{Mentor}: doc.\ dr.  Peter Klepec\par}%
-   {\large \textsc{Somentor}:  izr.\ prof.\ dr. Martin Krpan \par}%
-    {\vskip 2em \large Ljubljana 2011 \par}%
+    {\large \textsc{Mentor}: doc.\ dr. Boštjan Slivnik\par}%
+    {\vskip 2em \large Ljubljana 2014 \par}%
 \end{center}
+
 % prazna stran
 \clearemptydoublepage
 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %copyright stran
+\label{copyright_page}
 \thispagestyle{empty}
 \vspace*{8cm}
+
 {\small \noindent
 Rezultati diplomskega dela so intelektualna lastnina avtorja in Fakultete za ra\-ču\-nal\-niš\-tvo in informatiko Univerze v Ljubljani. 
 Za objavljanje ali izkoriščanje rezultatov di\-plom\-ske\-ga dela je potrebno pisno soglasje avtorja, Fakultete za ra\-ču\-nal\-niš\-tvo in 
-informatiko ter mentorja.}
+informatiko ter mentorja.}% TODO: morda pa res raje izdaj pod katero izmed prostih licenc?
 \footnote{V dogovorju z mentorjem lahko kandidat diplomsko delo s pripadajočo izvorno kodo izda tudi pod katero izmed alternativnih licenc, ki ponuja določen del pravic vsem: npr. Creative Commons, GNU GPL. V tem primeru na to mesto vstavite opis licence, na primer tekst \cite{licence}}
 
 
 \begin{center} 
 \mbox{}\vfill
+% TODO: a je to potrebno tukaj? kje drugje morda?
 \emph{Besedilo je oblikovano z urejevalnikom besedil \LaTeX.} 
 \end{center}
+
+
 % prazna stran
 \clearemptydoublepage
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % stran 3 med uvodnimi listi
 \noindent
-Namesto te strani {\bf vstavite} original izdane teme diplomskega 
+TODO: Namesto te strani {\bf vstavite} original izdane teme diplomskega 
 dela s podpisom mentorja in dekana ter žigom fakultete, ki ga diplomant
 dvigne v študent\-skem referatu,  preden odda izdelek v vezavo!
 Glej tudi sam konec Poglavja~\ref{ch2} na strani~\pageref{pp}.
@@ -93,38 +106,47 @@ Glej tudi sam konec Poglavja~\ref{ch2} na strani~\pageref{pp}.
 % prazna stran
 \clearemptydoublepage
 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % izjava o avtorstvu
+\label{izjava_avtorstvo}
+
 \vspace*{1cm}
 \begin{center} 
 {\Large \textbf{\sc Izjava o avtorstvu diplomskega dela}}
 \end{center}
 
 \vspace{1cm}
-\noindent Spodaj podpisani Matjaž Kralj,
-z vpisno številko \textbf{12345678}, sem avtor  diplomskega dela z naslovom:
+\noindent Spodaj podpisani Peter Lamut,
+z vpisno številko \textbf{63000200}, sem avtor diplomskega dela z naslovom:
    
 \vspace{0.5cm}
-\emph{Vzorec diplomskega dela}
+\emph{TODO: naslov diplomskega dela}
 
 \vspace{1.5cm}
 \noindent S svojim podpisom zagotavljam, da:
+
 \begin{itemize}
 	\item sem diplomsko delo izdelal samostojno pod mentorstvom 
-		doc.\ dr.\ Petra Klepca in somentorstvom izr.\ prof.\ dr.\ Martina Krpana,
+		doc.\ dr.\ Boštjana Slivnika,
 
-	\item	so elektronska oblika diplomskega dela, naslov (slov., angl.), povzetek (slov., angl.) ter ključne besede (slov., angl.) identični s tiskano obliko diplomskega dela
+	\item so elektronska oblika diplomskega dela, naslov (slov., angl.), povzetek (slov., angl.) ter ključne besede (slov., angl.) identični s tiskano obliko diplomskega dela,
+	
 	\item soglašam z javno objavo elektronske oblike diplomskega dela v zbirki ''Dela FRI''.
 \end{itemize}
 
 \vspace{1cm}
-\noindent V Ljubljani, dne 11. januarja 2011 \hfill Podpis avtorja:
+% TODO: pravi datum!
+\noindent V Ljubljani, dne 1. aprila 2014 \hfill Podpis avtorja:
 
 % prazna stran
 \clearemptydoublepage
 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % zahvala
+% TODO: napiši!
+\label{zahvala}
 \thispagestyle{empty}\mbox{}\vfill\null\it%
 Na tem mestu zapišite, komu se zahvaljujete za izdelavo diplomske naloge. Pazite, da ne boste koga pozabili. Utegnil vam bo zameriti. Temu se da izogniti tako, da pozabite na celo zahvalo.
 \rm\normalfont
@@ -132,14 +154,6 @@ Na tem mestu zapišite, komu se zahvaljujete za izdelavo diplomske naloge. Pazit
 % prazna stran
 \clearemptydoublepage
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% posvetilo
-\thispagestyle{empty}\mbox{}{\vskip0.20\textheight}\mbox{}\hfill\begin{minipage}{0.55\textwidth}%
-Svoji dragi Alenčici.
-\normalfont\end{minipage}
- 
-% prazna stran
-\clearemptydoublepage
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % kazalo
@@ -150,23 +164,35 @@ Svoji dragi Alenčici.
 % prazna stran
 \clearemptydoublepage
 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% povzetek 
+% povzetek
+% TODO: napiši na koncu
 \addcontentsline{toc}{chapter}{Povzetek}
 \chapter*{Povzetek}
-V vzorcu je predstavljen postopek priprave diplomskega dela z uporabo okolja \LaTeX. Vaš povzetek mora sicer vsebovati približno 100 besed, ta tukaj je odločno prekratek.
+
+TODO: ključne besede!%
+
+TODO: V vzorcu je predstavljen postopek priprave diplomskega dela z uporabo okolja \LaTeX. Vaš povzetek mora sicer vsebovati približno 100 besed, ta tukaj je odločno prekratek.
 % prazna stran
 \clearemptydoublepage
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % abstract
 \selectlanguage{english}
 \addcontentsline{toc}{chapter}{Abstract}
 \chapter*{Abstract}
-This sample document presents an approach to typesetting your BSc thesis using \LaTeX. A proper abstract should contain around 100 words which makes this one way too short.
+
+TODO: keywords!
+
+TODO: This sample document presents an approach to typesetting your BSc thesis using \LaTeX. A proper abstract should contain around 100 words which makes this one way too short.
+
 \selectlanguage{slovene}
+
 % prazna stran
 \clearemptydoublepage
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \mainmatter
@@ -174,6 +200,7 @@ This sample document presents an approach to typesetting your BSc thesis using \
 \pagestyle{fancy}
 
 \chapter{Uvod}
+
 Datoteka {\tt diploma.tex} na kratko opisuje, kako se pisanja diplomskega dela lotimo z uporabo programskega pateka \LaTeX. V tem dokumentu bomo predstavili nekaj njegovih prednosti in hib. Kar se slednjih tiče, mi pride na misel ena sama. Ko se srečamo z njim nam izgleda kot kislo jabolko, nismo prepričani, da bi želeli vanj ugrizniti. Lahko pa z njim pripravimo odličen zavitek ali pa pridemo na okus.
 
 Česa od tega dokumenta ne pričakujte? Izkušeni uporabniki \LaTeX{}a bi vse skupaj zastavili 
@@ -182,7 +209,9 @@ drugače. Morda bi napisali posebno razredno datoteko (\emph{class file}) --- v 
 Kaj vseeno najdemo. V Poglavju~\ref{ch1} bomo na hitro spoznali besedilne konstrukte kot so izreki, enačbe in dokazi. Naučili se bomo, kako se na njih sklicujemo. Poglavje~\ref{ch2} bo predstavilo vključevanje plovk: slik in tabel. V Poglavju~\ref{ch3} se bomo srečali s sklicevanjem na literaturo.
 Sledil bo samo še zaključek.
 
+
 \chapter{Sklicevanje na besedilne konstrukte}
+
 \label{ch1}
 Matematična ali popolna indukcija je eno prvih orodij, ki jih spoznamo za dokazovanje trditev pri matematičnih predmetih. 
 \begin{izrek}
