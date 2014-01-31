@@ -1,26 +1,19 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% datoteka diploma-vzorec.tex
-%
-% vzorčna datoteka za pisanje diplomskega dela v formatu LaTeX
-% na UL Fakulteti za računalništvo in informatiko
-%
-% vkup spravil Gašper Fijavž, december 2010
-% množica popravkov v januarju, februarju marcu 2011
-% verzija 29. marec 2011
 
 \documentclass[a4paper, 12pt]{book}
 
-% XXX: zakaj utf8x in ne utf8?
+% XXX: why utf8x and not utf8?
 \usepackage[utf8x]{inputenc}   % omogoča uporabo slovenskih črk kodiranih v formatu UTF-8 
 
-\usepackage[slovene,english]{babel}    % naloži, med drugim, slovenske delilne vzorce
+\usepackage[slovene,english]{babel}  % naloži, med drugim, slovenske delilne vzorce
 \usepackage[pdftex]{graphicx}  % omogoča vlaganje slik različnih formatov 
 \usepackage{fancyhdr}          % poskrbi, na primer, za glave strani
 \usepackage{amssymb}           % dodatni simboli
 \usepackage{amsmath}           % eqref, npr.
+\usepackage{fixltx2e}          % textsubscript etc. (XXX: used anywhere here?)
 
 
-\renewcommand{\baselinestretch}{1.3} % ustrezen razmik med vrsticami
+\renewcommand*{\familydefault}{\rmdefault}  % default font family (roman)
+\renewcommand{\baselinestretch}{1.3}  % ustrezen razmik med vrsticami
 
 %oznake strani
 \renewcommand{\chaptermark}[1]%
@@ -34,7 +27,7 @@
 \newcommand{\autfont}{\Large}
 \newcommand{\titfont}{\LARGE\bf}
 \newcommand{\clearemptydoublepage}{\newpage{\pagestyle{empty}\cleardoublepage}}
-\setcounter{tocdepth}{1}	      % globina kazala
+\setcounter{tocdepth}{2}	      % globina kazala
 
 % konstrukti
 \newtheorem{izrek}{Izrek}[chapter]
@@ -132,7 +125,7 @@ z vpisno številko \textbf{63000200}, sem avtor diplomskega dela z naslovom:
 
 	\item so elektronska oblika diplomskega dela, naslov (slov., angl.), povzetek (slov., angl.) ter ključne besede (slov., angl.) identični s tiskano obliko diplomskega dela,
 	
-	\item soglašam z javno objavo elektronske oblike diplomskega dela v zbirki ''Dela FRI''.
+	\item soglašam z javno objavo elektronske oblike diplomskega dela v zbirki ``Dela FRI''.
 \end{itemize}
 
 \vspace{1cm}
@@ -157,6 +150,7 @@ Na tem mestu zapišite, komu se zahvaljujete za izdelavo diplomske naloge. Pazit
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % kazalo
+\label{kazalo}
 \def\thepage{}% preprecimo tezave s stevilkami strani v kazalu 
 \tableofcontents{}
 
@@ -201,16 +195,116 @@ TODO: This sample document presents an approach to typesetting your BSc thesis u
 
 \chapter{Uvod}
 
-Datoteka {\tt diploma.tex} na kratko opisuje, kako se pisanja diplomskega dela lotimo z uporabo programskega pateka \LaTeX. V tem dokumentu bomo predstavili nekaj njegovih prednosti in hib. Kar se slednjih tiče, mi pride na misel ena sama. Ko se srečamo z njim nam izgleda kot kislo jabolko, nismo prepričani, da bi želeli vanj ugrizniti. Lahko pa z njim pripravimo odličen zavitek ali pa pridemo na okus.
-
-Česa od tega dokumenta ne pričakujte? Izkušeni uporabniki \LaTeX{}a bi vse skupaj zastavili 
-drugače. Morda bi napisali posebno razredno datoteko (\emph{class file}) --- v resnici priredili katero od obstoječih ---, v datoteki {\tt diploma.tex} ohranili samo najbolj grobo strukturo in vanjo vključevali  posamezna po\-glav\-ja. Hkrati s pisanjem teksta bi poskrbeli tudi za stvarno kazalo ({\tt makeindex}), literaturo pa bi citirali z uporabo {\BibTeX}{a}. Tega, skratka, v tem dokumentu ne boste našli.
-
-Kaj vseeno najdemo. V Poglavju~\ref{ch1} bomo na hitro spoznali besedilne konstrukte kot so izreki, enačbe in dokazi. Naučili se bomo, kako se na njih sklicujemo. Poglavje~\ref{ch2} bo predstavilo vključevanje plovk: slik in tabel. V Poglavju~\ref{ch3} se bomo srečali s sklicevanjem na literaturo.
-Sledil bo samo še zaključek.
+TODO: uvod - vse naj bo na kratko, da ``pritegne bralca''
 
 
-\chapter{Sklicevanje na besedilne konstrukte}
+\section{Nekaj o datagridih}
+
+TODO: slovenski términ? (podatkovne mreže?)
+Kaj so to, kako delujejo, 
+Kaj je problem? razporediti replike tako, da je čim manj pasovne širine
+porabljeno in d aje odzivni čas čim manji
+
+TODO: sklicevanje na vire
+
+TODO: še kakšna slika (nariši npr. z LaTeXom - kar tako, za vajo)
+
+\section{Replikacija podatkov v datagridih}
+Način, kako repliciramo podatke v omrežju
+
+\subsection{Statična replikacija}
+Povej, da vnaprej določiš, kaj bo kje shranjeno - prednost, da je enostavno,
+slabost, da se ne prilagaja morebitnim spremembam strukture zahtevkov
+
+TODO: referenca kakšnega članka, ki o tem govori
+
+\subsection{Dinamična replikacija}
+Vsako vozlišče je avtonomno in se sproti odloča, kopije katerih replik bo obdržalo, katerih pa ne. Algoritmi stremijo k temu, da poskušajo čim bolje
+oceniti, katere replike so bolj pomembne od drugih (te obdržimo), s ciljem
+minimizirati porabljeno pasovno širino in odzivni čas.
+
+TODO: referenca kakšnega članka, ki o tem govori
+
+\section{Algoritem Fast Spread}
+TODO: kako deluje, kaj je ideja in problem - kako se odločiti, katere replike
+zamenjati, kadar ni dovolj prostora
+
+\subsection{LRU}
+Ena varianta Fast Spreada, pri katerem zamenjamo replike, ki najdlje niso
+bile uporabljene (zahtevane)
+
+\subsection{LFU}
+Različica Fast Spreada, kjer zamenjamo replike, ki so bile najmanj pogosto
+uporabljane/zahtevane
+
+\section{Trditev v člankih: izboljšava}
+TODO: 2-3 odstavke. Oba članka trdita, da sta Fast Spread izboljšala glede
+na LRU in LFU strategiji in dosegla boljše rezultate, ker naj bi imela boljšo
+metriko za ocenjevanje vrednosti replik na nivoju posameznega vozlišča.
+
+Sumljivo je to, da sta članka zelo podobna, enaki odstavki, enaka slika,
+skratka sum, da gre za avtoplagiatorstvo (vstavi slike, dele besedila itd.)
+
+Motivacija: implementirati opisano ter primerjati rezultate, še posebej pa
+strategiji 2011 in 2012 med seboj (ker tega v članku ni bilo) - da vidimo:\\
+a) ali s strategijama dobimo opisane rezultate\\
+b) neposredno primerjati obe strategiji med seboj. Članka sta si namreč
+zelo podobna, neposredne medsebojne primerjave v članku 2012 pa ni.\\
+
+
+\chapter{Implementacija strategij iz člankov}
+
+\section{Opis strategij}
+\subsection{Enhanced Fast Spread (EFS)}
+To je članek 2011 ...
+
+\subsection{Modified Fast Spread (MFS)}
+To je pa članek 2012 ...
+
+\section{Implementacija}
+Povej, kako si naredil Python simulacijo, event SendReplica, ReceiveReplica,
+vsak node je neodvisen, kako na začetku poženeš Dijsktro ...
+
+\section{Meritve}
+\subsection{Priprava simulacije}
+Povej, da imaš štiri strategije (EFS, MFS, LRU, LFU). Pa povej tri scenarije,
+z različnim MWG probability. V posameznem scenariju poženemo vsako izmed
+štirih opisanih strategij in jih med seboj primerjamo, skupaj 12 poganjanj
+(3 scenariji X 4 sstrategije)
+
+Potem na kncu še povej, kakšni so parametri (koliko vozlišč itd. ... neka
+tabela). V vsaki rundi seveda enako, razlikuje se le scenarij in pa
+uporabljena trategija.
+
+\subsection{Rezultati simulacij}
+
+TODO:
+
+Na koncu povej, da rezultatov iz člankov ni bilo možno ponoviti, zato potem
+obstaja sum, da niso nič pametnega naredili, več o tem v nadaljevanju.
+
+\chapter{Kritična presoja člankov}
+
+TODO: tu pa zdaj cel kup stvari
+
+- copy-paste (kako so si podobni ... tega zato zgoraj v uvodu ne pišeš, tam
+le omeniš "sum plagiatorstva", tu pa potem razdelaš)
+
+- meritve se ne ujemajo
+Povej, zakaj ... kje je spodnja meja ... kritiziraj metrike ...
+
+- problemi: nejasnosti, slaba metrika (razdelaj), nappake v algoritmih,
+division by zero itd.
+
+
+\chapter{Sklepne ugotovitve}
+TODO: nek zaključek (kakšni šalabajzerji da so) - morda kot zanimivost, da
+so pošiljali plagiatorske članke še naprej v recenzijo?
+
+
+
+\chapter*{Sklicevanje na besedilne konstrukte TODO: delete}
+
 
 \label{ch1}
 Matematična ali popolna indukcija je eno prvih orodij, ki jih spoznamo za dokazovanje trditev pri matematičnih predmetih. 
@@ -237,11 +331,12 @@ Neenakost~\eqref{eq:2} je posledica indukcijske predpostavke, neenakost~\eqref{e
 Opazimo, da je \LaTeX\ številko izreka podredil številki poglavja.
 
 
-\chapter{Plovke: slike in tabele}
+
+\chapter*{Plovke: slike in tabele TODO: delete}
 \label{ch2}
 Slike in daljše tabele praviloma vključujemo v dokument kot plovke. Pozicija plovke v končnem izdelku ni pogojena s tekom besedila, temveč z izgledom strani. \LaTeX\ bo skušal plovko postaviti samostojno, praviloma na vrh strani, na kateri se na takšno plovko prvič sklicujemo. Pri tem pa bo na vsako stran končnega izdelka želel postaviti tudi sorazmerno velik del besedila. V skrajnem primeru, če imamo res preveč plovk, se bo odločil za stran popolnoma zapolnjeno s plovkami.
 
-\section{Formati slik}
+\section*{Formati slik}
 Bitne slike, vektorske slike, kakršnekoli slike, z \LaTeX{}om lahko vključimo vse. 
 Slika~\ref{pic1} je v {\tt .pdf} formatu.
 \begin{figure}
@@ -283,19 +378,13 @@ Kaj pa stran iz študentskega referata?\label{pp}
 Tudi njo lahko vključimo v dokument. Toda ne kot plovko.
  
 
-%\chapter{}
 
-\chapter{Kaj pa literatura}
-\label{ch3}
-Kot smo omenili že v uvodu, je pravi način za citiranje literature uporaba \BibTeX{}a~\cite{bib}. 
-Programski paket \LaTeX je prvotno predstavljen v priročniku~\cite{lat} in je v resnici nadgradnja sistema \TeX\ avtorja Donalda Knutha, znanega po denimo, če izpustim njegovo umetnost programiranja, Knuth-Bendixovem algoritmu~\cite{dk1}.
-
-Vsem raziskovalcem s področja računalništva pa svetujem v branje mnenje L.\ Fortnowa~\cite{lf}.
-
-\chapter{Sklepne ugotovitve}
-Izbira \LaTeX\ ali ne \LaTeX\ je seveda prepuščena vam samim. Res je, da so prvi koraki v \LaTeX{}u težavni. Ta dokument naj vam služi kot začetna opora pri hoji.
 
 \begin{thebibliography}{99}
+\label{bibliografija}
+
+% TODO: naj se to prikaže v kazalu! ("Literatura")
+
 \bibitem{lf} L.\ Fortnow, ``Viewpoint: Time for computer science to grow up'',
 {\it Communications of the ACM}, št.\ 52, zv.\ 8, str.\ 33--35, 2009.
 \bibitem{dk1} D.\ E.\ Knuth, P. Bendix. ``Simple word problems in universal algebras'', v zborniku: Computational Problems in Abstract Algebra (ur. J. Leech), 1970, str. 263--297.
@@ -303,6 +392,9 @@ Izbira \LaTeX\ ali ne \LaTeX\ je seveda prepuščena vam samim. Res je, da so pr
 \bibitem{bib} O.\ Patashnik (1998) \BibTeX{}ing. 
 Dostopno na:\\ http://ftp.univie.ac.at/packages/tex/biblio/bibtex/contrib/doc/btxdoc.pdf
 \bibitem{licence} licence-cc.pdf. Dostopno na: 
+
 \end{thebibliography}
+
+
 \end{document}
 
