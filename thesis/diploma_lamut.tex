@@ -10,6 +10,7 @@
 \usepackage{amssymb}           % dodatni simboli
 \usepackage{amsmath}           % eqref, npr.
 \usepackage{fixltx2e}          % textsubscript etc. (XXX: used anywhere here?)
+\usepackage{color}
 
 
 \renewcommand*{\familydefault}{\rmdefault}  % default font family (roman)
@@ -27,6 +28,9 @@
 \newcommand{\autfont}{\Large}
 \newcommand{\titfont}{\LARGE\bf}
 \newcommand{\newterm}{\textit}
+
+%\newcommand{\TODO}{\textcolor{red}}
+\newcommand{\TODO}[1]{\textcolor{red}{TODO: #1}}
 
 \newcommand{\clearemptydoublepage}{\newpage{\pagestyle{empty}\cleardoublepage}}
 \setcounter{tocdepth}{2}	      % globina kazala
@@ -55,7 +59,7 @@
       Fakulteta za računalništvo in informatiko}%
     \vskip 10em%
     {\autfont Peter Lamut\par}%
-    {\titfont TODO: naslov diplomskega dela \par}%
+    {\titfont \TODO{Naslov diplomskega dela} \par}%
     {\vskip 2em \textsc{DIPLOMSKO DELO NA UNIVERZITETNEM ŠTUDIJU
     RAČUNALNIŠTVA IN INFORMATIKE}\par}%
     \vfill\null%
@@ -76,8 +80,11 @@
 {\small \noindent
 Rezultati diplomskega dela so intelektualna lastnina avtorja in Fakultete za ra\-ču\-nal\-niš\-tvo in informatiko Univerze v Ljubljani. 
 Za objavljanje ali izkoriščanje rezultatov di\-plom\-ske\-ga dela je potrebno pisno soglasje avtorja, Fakultete za ra\-ču\-nal\-niš\-tvo in 
-informatiko ter mentorja.}% TODO: morda pa res raje izdaj pod katero izmed prostih licenc?
-\footnote{V dogovoru z mentorjem lahko kandidat diplomsko delo s pripadajočo izvorno kodo izda tudi pod katero izmed alternativnih licenc, ki ponuja določen del pravic vsem: npr. Creative Commons, GNU GPL. V tem primeru na to mesto vstavite opis licence, na primer tekst \cite{licence}}
+informatiko ter mentorja.}%
+\footnote{V dogovoru z mentorjem lahko kandidat diplomsko delo s pripadajočo izvorno kodo izda tudi pod katero izmed alternativnih licenc, ki ponuja določen del pravic vsem: npr. Creative Commons, GNU GPL. V tem primeru na to mesto vstavite opis licence, na primer tekst \cite{licence}
+
+ \TODO{Morda pa res raje izdaj pod katero izmed prostih licenc?}
+}
 
 
 \begin{center} 
@@ -94,10 +101,10 @@ informatiko ter mentorja.}% TODO: morda pa res raje izdaj pod katero izmed prost
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % stran 3 med uvodnimi listi
 \noindent
-TODO: Namesto te strani {\bf vstavite} original izdane teme diplomskega 
+\TODO{Namesto te strani {\bf vstavite} original izdane teme diplomskega 
 dela s podpisom mentorja in dekana ter žigom fakultete, ki ga diplomant
 dvigne v študent\-skem referatu,  preden odda izdelek v vezavo!
-Glej tudi sam konec Poglavja~\ref{ch2} na strani~\pageref{pp}.
+Glej tudi sam konec Poglavja~\ref{ch2} na strani~\pageref{pp}.}
 
 % prazna stran
 \clearemptydoublepage
@@ -117,7 +124,7 @@ Glej tudi sam konec Poglavja~\ref{ch2} na strani~\pageref{pp}.
 z vpisno številko \textbf{63000200}, sem avtor diplomskega dela z naslovom:
    
 \vspace{0.5cm}
-\emph{TODO: naslov diplomskega dela}
+\emph{\TODO{naslov diplomskega dela}}
 
 \vspace{1.5cm}
 \noindent S svojim podpisom zagotavljam, da:
@@ -132,8 +139,8 @@ z vpisno številko \textbf{63000200}, sem avtor diplomskega dela z naslovom:
 \end{itemize}
 
 \vspace{1cm}
-% TODO: pravi datum!
-\noindent V Ljubljani, dne 1. aprila 2014 \hfill Podpis avtorja:
+
+\noindent V Ljubljani, dne \TODO{datum, npr. 1. aprila 2014} \hfill Podpis avtorja:
 
 % prazna stran
 \clearemptydoublepage
@@ -141,10 +148,10 @@ z vpisno številko \textbf{63000200}, sem avtor diplomskega dela z naslovom:
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % zahvala
-% TODO: napiši!
+
 \label{zahvala}
 \thispagestyle{empty}\mbox{}\vfill\null\it%
-TODO: Na tem mestu zapišite, komu se zahvaljujete za izdelavo diplomske naloge. Pazite, da ne boste koga pozabili. Utegnil vam bo zameriti. Temu se da izogniti tako, da pozabite na celo zahvalo.
+\TODO{Na tem mestu zapišite, komu se zahvaljujete za izdelavo diplomske naloge. Pazite, da ne boste koga pozabili. Utegnil vam bo zameriti. Temu se da izogniti tako, da pozabite na celo zahvalo.}
 \rm\normalfont
 
 % prazna stran
@@ -168,9 +175,9 @@ TODO: Na tem mestu zapišite, komu se zahvaljujete za izdelavo diplomske naloge.
 \addcontentsline{toc}{chapter}{Povzetek}
 \chapter*{Povzetek}
 
-TODO: ključne besede!%
+\TODO{Ključne besede:}%
 
-TODO: V vzorcu je predstavljen postopek priprave diplomskega dela z uporabo okolja \LaTeX. Vaš povzetek mora sicer vsebovati približno 100 besed, ta tukaj je odločno prekratek.
+\TODO{V vzorcu je predstavljen postopek priprave diplomskega dela z uporabo okolja \LaTeX. Vaš povzetek mora sicer vsebovati približno 100 besed, ta tukaj je odločno prekratek.}
 % prazna stran
 \clearemptydoublepage
 
@@ -181,9 +188,9 @@ TODO: V vzorcu je predstavljen postopek priprave diplomskega dela z uporabo okol
 \addcontentsline{toc}{chapter}{Abstract}
 \chapter*{Abstract}
 
-TODO: keywords!
+\TODO{Keywords:}
 
-TODO: This sample document presents an approach to typesetting your BSc thesis using \LaTeX. A proper abstract should contain around 100 words which makes this one way too short.
+\TODO{This sample document presents an approach to typesetting your BSc thesis using \LaTeX. A proper abstract should contain around 100 words which makes this one way too short.}
 
 \selectlanguage{slovene}
 
@@ -200,7 +207,7 @@ TODO: This sample document presents an approach to typesetting your BSc thesis u
 
 \section{Splošno o podatkovnih omrežjih}
 
-TODO: slovenski términ pravilen?
+\TODO{slovenski términ za datagrid pravilen?}
 
 Podatkovno omrežje (angl. \textit{datagrid}) je množica med seboj
 povezanih računalnikov na različnih geografskih lokacijah, ki uporabnikom
@@ -210,8 +217,8 @@ omogočajo nalaganje, hranjenje in medsebojno izmenjavanje datotek.
 Omeni, da imaš različne topologije, da je cilj robustnost, redundanca,
 itd., sklicuj se pač na vire - odstavek ali dva max. (1 stran)
 
-TODO: pa morda še kakšna slika kot primer (nariši npr. z LaTeXom - kar tako,
- za vajo)
+\TODO{Pa morda še kakšna slika kot primer (nariši npr. z LaTeXom - kar tako,
+ za vajo)}
 
 \section{Replikacija podatkov v podatkovnih omrežjih}
 
@@ -223,40 +230,40 @@ datoteko ustvariti več njenih kopij na različnih lokacijah v omrežju.
 Tovrstne kopije datotek imenujemo \newterm{replike}.
 
 Cilj ustvarjanja replik je zmanjšati porabo pasovne širine in izboljšati
-odzivne čase podatkovnega omrežja (TODO: vir, kjer sta omenjena ta dva
-cilja). Če je neka replika na voljo tudi lokalno (bliže
+odzivne čase podatkovnega omrežja (\TODO{vir, kjer sta omenjena ta dva
+cilja}). Če je neka replika na voljo tudi lokalno (bliže
 uporabniku, ki jo zahteva), je namreč ni potrebno vsakič znova prenašati s
 strežnika, temveč se preprosto uporabi lokalna kopija.
 
 Posamezna vozlišča (računalniki) v omrežju praviloma nimajo dovolj prostora,
 da bi hranila vse replike naenkrat. Zaradi te omejitve je potrebna
 strategija, na podlagi katere se odločimo, katere replike bomo hranili
-na katerih vozliščih --- seveda tako, da bo zadani cilj (TODO: številčna
-referenca prej opisanega cilja?) čim bolje izpolnjen.
+na katerih vozliščih --- seveda tako, da bo zadani cilj (\TODO{številčna
+referenca prej opisanega cilja?}) čim bolje izpolnjen.
 
 Replikacijske strategije ločimo v dve skupini, in sicer poznamo
 \newterm{statično replikacijo} in \newterm{dinamično replikacijo}
-(TODO: viri, kjer je to navedeno).
+(\TODO{viri, kjer je to navedeno}).
 
 \subsection{Statična replikacija}
 Povej, da vnaprej določiš, kaj bo kje shranjeno - prednost, da je enostavno,
 slabost, da se ne prilagaja morebitnim spremembam strukture zahtevkov
 
-TODO: referenca kakšnega članka, ki o tem govori
+\TODO{referenca kakšnega članka, ki o tem govori}
 
 \subsection{Dinamična replikacija}
 
-TODO: je boljša, ker se prilagaja spremembam vedenja uporabnikov (Čibej)
+\TODO{je boljša, ker se prilagaja spremembam vedenja uporabnikov (Čibej)}
 
 Vsako vozlišče je avtonomno in se sproti odloča, kopije katerih replik bo obdržalo, katerih pa ne. Algoritmi stremijo k temu, da poskušajo čim bolje
 oceniti, katere replike so bolj pomembne od drugih (te obdržimo), s ciljem
 minimizirati porabljeno pasovno širino in odzivni čas.
 
-TODO: referenca kakšnega članka, ki o tem govori
+\TODO{Referenca kakšnega članka, ki o tem govori}
 
 \section{Algoritem Fast Spread}
-TODO: kako deluje, kaj je ideja in problem - kako se odločiti, katere replike
-zamenjati, kadar ni dovolj prostora
+\TODO{kako deluje, kaj je ideja in problem - kako se odločiti, katere replike
+zamenjati, kadar ni dovolj prostora}
 
 tipično vozlišča nimajo prostora za vse
 
@@ -269,9 +276,9 @@ Različica Fast Spreada, kjer zamenjamo replike, ki so bile najmanj pogosto
 uporabljane/zahtevane
 
 \section{Trditev v člankih: izboljšava}
-TODO: 2-3 odstavke. Oba članka trdita, da sta Fast Spread izboljšala glede
+\TODO{2-3 odstavke. Oba članka trdita, da sta Fast Spread izboljšala glede
 na LRU in LFU strategiji in dosegla boljše rezultate, ker naj bi imela boljšo
-metriko za ocenjevanje vrednosti replik na nivoju posameznega vozlišča.
+metriko za ocenjevanje vrednosti replik na nivoju posameznega vozlišča.}
 
 Sumljivo je to, da sta članka zelo podobna, enaki odstavki, enaka slika,
 skratka sum, da gre za avtoplagiatorstvo (vstavi slike, dele besedila itd.)
@@ -309,14 +316,14 @@ uporabljena trategija.
 
 \subsection{Rezultati simulacij}
 
-TODO:
+\TODO{}
 
 Na koncu povej, da rezultatov iz člankov ni bilo možno ponoviti, zato potem
 obstaja sum, da niso nič pametnega naredili, več o tem v nadaljevanju.
 
 \chapter{Kritična presoja člankov}
 
-TODO: tu pa zdaj cel kup stvari
+\TODO{tu pa zdaj cel kup stvari}
 
 \begin{itemize}
 \item copy-paste (kako so si podobni ... tega zato zgoraj v uvodu ne pišeš, tam
@@ -332,12 +339,12 @@ division by zero itd.
 
 
 \chapter{Sklepne ugotovitve}
-TODO: nek zaključek (kakšni šalabajzerji da so) - morda kot zanimivost, da
-so pošiljali plagiatorske članke še naprej v recenzijo?
+\TODO{nek zaključek (kakšni šalabajzerji da so) - morda kot zanimivost, da
+so pošiljali plagiatorske članke še naprej v recenzijo?}
 
 
 
-\chapter*{Sklicevanje na besedilne konstrukte TODO: delete}
+\chapter*{Sklicevanje na besedilne konstrukte \TODO{delete}}
 
 
 \label{ch1}
@@ -366,7 +373,7 @@ Opazimo, da je \LaTeX\ številko izreka podredil številki poglavja.
 
 
 
-\chapter*{Plovke: slike in tabele TODO: delete}
+\chapter*{Plovke: slike in tabele \TODO{delete}}
 \label{ch2}
 Slike in daljše tabele praviloma vključujemo v dokument kot plovke. Pozicija plovke v končnem izdelku ni pogojena s tekom besedila, temveč z izgledom strani. \LaTeX\ bo skušal plovko postaviti samostojno, praviloma na vrh strani, na kateri se na takšno plovko prvič sklicujemo. Pri tem pa bo na vsako stran končnega izdelka želel postaviti tudi sorazmerno velik del besedila. V skrajnem primeru, če imamo res preveč plovk, se bo odločil za stran popolnoma zapolnjeno s plovkami.
 
@@ -416,8 +423,6 @@ Tudi njo lahko vključimo v dokument. Toda ne kot plovko.
 
 \begin{thebibliography}{99}
 \label{bibliografija}
-
-% TODO: naj se to prikaže v kazalu! ("Literatura")
 
 \bibitem{lf} L.\ Fortnow, ``Viewpoint: Time for computer science to grow up'',
 {\it Communications of the ACM}, št.\ 52, zv.\ 8, str.\ 33--35, 2009.
