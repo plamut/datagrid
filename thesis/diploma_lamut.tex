@@ -246,20 +246,32 @@ Replikacijske strategije ločimo v dve skupini, in sicer poznamo
 (\TODO{viri, kjer je to navedeno}).
 
 \subsection{Statična replikacija}
-Povej, da vnaprej določiš, kaj bo kje shranjeno - prednost, da je enostavno,
-slabost, da se ne prilagaja morebitnim spremembam strukture zahtevkov
 
-\TODO{referenca kakšnega članka, ki o tem govori}
+Pri statični replikaciji za vsako posamezno vozlišče že vnaprej določimo,
+katere replike bodo shranjene na njem. Problem, kako replike čim bolje
+razporediti po omrežju, lahko obravnavamo kot statičen optimizacijski
+problem. Zanj se sicer izkaže, da je tako NP-težek kot tudi
+neaproksimativen.
+
+\TODO{referenca kakšnega članka, ki o tem govori, npr. Čibej}
 
 \subsection{Dinamična replikacija}
 
-\TODO{je boljša, ker se prilagaja spremembam vedenja uporabnikov (Čibej)}
+Pri dinamični replikaciji se vsako vozlišče avtonomno odloča, katere
+replike bo hranilo, pri čemer se lahko množica shranjenih replik na
+posameznem vozlišču skozi čas spreminja. Če vozlišče na podlagi neke
+metrike oceni, da je pravkar zahtevana replika zanj bolj pomembna od ene
+ali več obstoječih shranjenih replik, lahko slednje izbriše in namesto
+njih shrani novo repliko.
 
-Vsako vozlišče je avtonomno in se sproti odloča, kopije katerih replik bo obdržalo, katerih pa ne. Algoritmi stremijo k temu, da poskušajo čim bolje
-oceniti, katere replike so bolj pomembne od drugih (te obdržimo), s ciljem
-minimizirati porabljeno pasovno širino in odzivni čas.
+Dinamična replikacija je boljša od statične, saj se lahko avtomatično
+prilagaja morebitnim spremembam v vzorcih uporabe podatkovnega omrežja
+\TODO{citat Čibej}. Poznamo veliko različnih dinamičnih replikacijskih
+strategij, pri čemer je ena izmed najbolj učinkovitih algoritem
+\newterm{Fast Spread} (\TODO{vir -- Ranganathan and Foster, 2001b?}).
 
-\TODO{Referenca kakšnega članka, ki o tem govori}
+\TODO{Fast spread prevedemo v slovenščino? "algoritem hitrega širjenja"?}
+
 
 \section{Algoritem Fast Spread}
 \TODO{kako deluje, kaj je ideja in problem - kako se odločiti, katere replike
