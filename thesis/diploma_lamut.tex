@@ -223,8 +223,8 @@ itd., sklicuj se pač na vire - odstavek ali dva max. (1 stran)
 \section{Replikacija podatkov v podatkovnih omrežjih}
 
 Ko uporabnik podatkovnega omrežja pošlje zahtevek za prejem neke datoteke
-ali skupine datotek, se lahko pri prenašanju podatkov od strežnika do
-odjemalca porabi veliko pasovne širine. Poleg tega je lahko tudi čas,
+ali skupine datotek, se lahko pri prenašanju podatkov od glavnega strežnika
+do odjemalca porabi veliko pasovne širine. Poleg tega je lahko tudi čas,
 potreben za prenos, dolg. Zaradi tega je morda smiselno za posamezno
 datoteko ustvariti več njenih kopij na različnih lokacijah v omrežju.
 Tovrstne kopije datotek imenujemo \newterm{replike}.
@@ -274,20 +274,42 @@ strategij, pri čemer je ena izmed najbolj učinkovitih algoritem
 
 
 \section{Algoritem Fast Spread}
-\TODO{kako deluje, kaj je ideja in problem - kako se odločiti, katere replike
-zamenjati, kadar ni dovolj prostora}
 
-tipično vozlišča nimajo prostora za vse
+Ko neko vozlišče v omrežju prejme zahtevek za določeno repliko in slednje
+nima shranjene lokalno, mora zahtevek posredovati enemu izmed sosednjih
+vozlišč. To lahko isti zahtevek posreduje še naprej svojim sosedom, dokler
+ga ne prejme vozlišče, ki repliko ima. Pri pošiljanju replike nazaj
+algoritem Fast Spread repliko shrani na vsakem izmed vozlišč na poti od
+ciljnega vozlišča do vozlišča, ki je zahtevek prvotno poslalo.
 
-\subsection{LRU}
-Ena varianta Fast Spreada, pri katerem zamenjamo replike, ki najdlje niso
-bile uporabljene (zahtevane)
+\TODO{kakšna lepa slikica?}
 
-\subsection{LFU}
-Različica Fast Spreada, kjer zamenjamo replike, ki so bile najmanj pogosto
-uporabljane/zahtevane
+Če določeno vozlišče nima dovolj prostora, da bi shranilo zahtevano repliko,
+mora predhodno izbrisati eno ali več obstoječih replik. Katere izmed
+obstoječih replik bodo zamenjane z novo repliko, je odvisno od tega, katero
+strategijo zamenjave uporabimo.
 
-\section{Trditev v člankih: izboljšava}
+\subsection{Strategija zamenjave LRU}
+
+Pri strategiji \newterm{LRU} (\newterm{``Least Recently Used"}) vozlišče
+zamenja tisto repliko (ali skupino replik), pri kateri je preteklo največ
+časa od prejema zadnjega zahtevka zanjo --- torej tisto, ki najdlje časa
+ni bila uporabljena.
+
+\subsection{Strategija zamenjave LFU}
+
+Pri strategiji \newterm{LFU} (\newterm{``Least Frequently Used"}) vozlišče
+zamenja tisto repliko (ali skupino replik), ki je bila v preteklosti
+najmanjkrat zahtevana. Strategija torej upošteva vse pretekle zahtevke za
+posamezno repliko in ne zgolj zadnjega, kot je to pri strategiji LRU.
+
+\section{Trditev v člankih: izboljšava algoritma Fast Spread}
+
+Dva članka iz 2011 in 2012, eden predlaga Algoritem EFS, drugi MFS.
+V obeh je opisana po ena strategija zamenjave, ki domnevno dosega boljše
+rezultate kot pa strategiji zamenjave LRU in LFU. \TODO{sklicevanje
+na kakšno oštevilčeno sekcijo/odstavek?}
+
 \TODO{2-3 odstavke. Oba članka trdita, da sta Fast Spread izboljšala glede
 na LRU in LFU strategiji in dosegla boljše rezultate, ker naj bi imela boljšo
 metriko za ocenjevanje vrednosti replik na nivoju posameznega vozlišča.}
@@ -304,7 +326,7 @@ zelo podobna, neposredne medsebojne primerjave v članku 2012 pa ni.\\
 
 \chapter{Implementacija strategij iz člankov}
 
-\section{Opis strategij}
+\section{Opis strategij zamenjave}
 \subsection{Enhanced Fast Spread (EFS)}
 To je članek 2011 ...
 
