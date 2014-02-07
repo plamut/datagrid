@@ -305,32 +305,49 @@ posamezno repliko in ne zgolj zadnjega, kot je to pri strategiji LRU.
 
 \section{Trditev v člankih: izboljšava algoritma Fast Spread}
 
-Dva članka iz 2011 in 2012, eden predlaga Algoritem EFS, drugi MFS.
-V obeh je opisana po ena strategija zamenjave, ki domnevno dosega boljše
-rezultate kot pa strategiji zamenjave LRU in LFU. \TODO{sklicevanje
-na kakšno oštevilčeno sekcijo/odstavek?}
+Leta 2011 in 2012 sta bila v dveh različnih strokovnih revijah objavljena
+dva članka istih avtorjev, v katerih so slednji predstavili dve novi
+strategiji zamenjave, ki naj bi po njihovih trditvah dosegali dosti boljše
+rezultate od strategij LRU in LFU. Strategiji
+so poimenovali \newterm{EFS} (\newterm{``Enhanced Fast Spread''}) in
+\newterm{MFS} (\newterm{``Modified Fast Spread''})
+\TODO{vir oz. omemba člankov}.
 
-\TODO{2-3 odstavke. Oba članka trdita, da sta Fast Spread izboljšala glede
-na LRU in LFU strategiji in dosegla boljše rezultate, ker naj bi imela boljšo
-metriko za ocenjevanje vrednosti replik na nivoju posameznega vozlišča.}
+\TODO{oštevilči članka? Da se kasneje v besedilu sklicuješ nanj? Kako se
+to ponavadi dela?}
 
-Sumljivo je to, da sta članka zelo podobna, enaki odstavki, enaka slika,
-skratka sum, da gre za avtoplagiatorstvo (vstavi slike, dele besedila itd.)
+Članka sta si med seboj že na prvi pogled zelo podobna. Oba imata identično
+strukturo (identične naslove posameznih delov članka), vsebujeta številne
+identične odseke besedila, identične diagrame in tudi opisa obeh strategij
+v psevdokodi sta v veliki meri enaka. Na podlagi naštetega se je pojavil
+resen sum na recikliranje člankov (avtoplagiatorstvo).
 
-Motivacija: implementirati opisano ter primerjati rezultate, še posebej pa
-strategiji 2011 in 2012 med seboj (ker tega v članku ni bilo) - da vidimo:\\
-a) ali s strategijama dobimo opisane rezultate\\
-b) neposredno primerjati obe strategiji med seboj. Članka sta si namreč
-zelo podobna, neposredne medsebojne primerjave v članku 2012 pa ni.\\
+\TODO{vstavi slike, dele besedila itd. za primerjavo pa to omeni v tekstu}
+
+V okviru diplomskega dela sem z implementacijo strategij, opisanih v
+člankih, želel doseči predvsem naslednje cilje:
+\label{cilji}
+
+\begin{enumerate}
+\item Preveriti rezultate, ki so jih dosegli avtorji člankov.
+
+\item Neposredno primerjati strategiji iz člankov \TODO{2011} in
+\TODO{2012} med seboj. V obeh člankih namreč avtorji v njih opisani
+strategiji primerjajo zgolj s strategijama LRU in LFU, medsebojne
+primerjave pa v novejšem članku (\TODO{2012}) niso naredili.
+
+\item Na podlagi primerjave obeh opisanih strategij ugotoviti, ali med
+člankoma sploh obstaja kakšna bistvena vsebinska razlika.
+\end{enumerate}
 
 
 \chapter{Implementacija strategij iz člankov}
 
 \section{Opis strategij zamenjave}
-\subsection{Enhanced Fast Spread (EFS)}
+\subsection{Strategija EFS}
 To je članek 2011 ...
 
-\subsection{Modified Fast Spread (MFS)}
+\subsection{Strategija MFS}
 To je pa članek 2012 ...
 
 \section{Implementacija}
