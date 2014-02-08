@@ -8,9 +8,11 @@
 \usepackage[pdftex]{graphicx}  % omogoča vlaganje slik različnih formatov 
 \usepackage{fancyhdr}          % poskrbi, na primer, za glave strani
 \usepackage{amssymb}           % dodatni simboli
-\usepackage{amsmath}           % eqref, npr.
+\usepackage{amsmath}
 \usepackage{fixltx2e}          % textsubscript etc. (XXX: used anywhere here?)
 \usepackage{color}
+
+\usepackage[lined,plain,linesnumbered]{algorithm2e}
 
 
 \renewcommand*{\familydefault}{\rmdefault}  % default font family (roman)
@@ -370,8 +372,84 @@ nadaljevanju.
 
 \subsection{Strategija EFS}
 
+pri ocenjevanju replik upošteva štiri stvari (poglej iz članka)...
+
+These factors are the number of
+requests, the frequency of requests, the size of the replica, and the
+last time the replica was requested. The number of requests,
+the frequency of requests, and the last time the replica was
+requested are important factors because they give an indication
+of the probability of requesting the replica again. Because Client
+nodes have limited storage space, the size of replicas is an
+important factor as well.
+
+{\linespread{1.0}
+\begin{algorithm}[]
+  \label{alg:EFS}
+  \caption{Algoritem EFS (\TODO{preimenuj bold oznako})}
+
+  \SetKwComment{blankln}{}{}
+
+  Initialize SOS to $0$\;
+  \eIf{RR exists on RN}{
+      UseRR\;
+  }{
+      \For{$i = 2$ \KwTo NSPList.size}{
+          \If{RR exists on NSPList(i)}{
+              \For{$j = \mathit{NSPList}(i - 1)$ \KwTo $1$}{
+                  \eIf{CNFSS $\geq$ RR.Size}{
+                      Copy RR\;
+                  }{
+                      \For{$x = 1$ \KwTo ReplicaList.size}{
+                          \eIf{$\mathit{SOS} + \mathit{CNFSS} <$ RR.Size}{
+                              SOS = SOS + SizeList(x)\;
+                          }{
+                              Break\;
+                          }
+                      }
+
+\blankln{}
+
+                      $GV = \frac{\sum\limits_{y=1}^{x-1} NORList(y)}{
+                                  \sum\limits_{y=1}^{x-1} SizeList(y)} +
+                            \frac{\sum\limits_{y=1}^{x-1}
+                              \mathit{NORFSTIList(y)}}{\mathit{FSTI}} +
+                            \frac{1}{CT - \frac{\sum\limits_{y=1}^{x-1}
+                              LRTList(y)}{x-1}}$
+
+\blankln{}
+
+                      $RV_{RR} = \frac{\mathit{NORRR}}{\mathit{SRR}} +
+                                 \frac{\mathit{NORRRFSTI}}{\mathit{FSTI}} +
+                                 \frac{1}{\mathit{CT} - \mathit{LRTRR}}$
+
+\blankln{}
+
+                      \If{$\mathit{GV} < \mathit{RV_{RR}}$} {
+                          \For{$y = 1$ \KwTo $x-1$}{
+                            Delete ReplicaList(y), NORList(y), SizeList(y),
+                            NORFSTIList(y), LRTList(y)\;
+                          }
+                          Copy RR;
+                      }
+                  }
+              }
+          }
+      }
+  }
+\end{algorithm}
+}
+
+\TODO{tabela kratic iz psevdokode, kaj kaj pomeni}
+
 tukaj opiši, kako izračunamo group value in kako replica value
-(iz članka 2011)
+(iz članka 2011) GV, RV, pomen, interpretacija, tabela pojmov (kratic) v
+formuli itd.
+
+pa kako so replike urejene po RV in v skupino replik dodajamo replike,
+od najmanj pomembne do najbolj (kar sklicuj se na številke vrstic)
+
+pa kar sliko algoritma?
 
 \subsection{Strategija MFS}
 To je pa članek 2012 ...
@@ -387,7 +465,7 @@ z različnim MWG probability. V posameznem scenariju poženemo vsako izmed
 štirih opisanih strategij in jih med seboj primerjamo, skupaj 12 poganjanj
 (3 scenariji X 4 sstrategije)
 
-Potem na kncu še povej, kakšni so parametri (koliko vozlišč itd. ... neka
+Potem na koncu še povej, kakšni so parametri (koliko vozlišč itd. ... neka
 tabela). V vsaki rundi seveda enako, razlikuje se le scenarij in pa
 uporabljena trategija.
 
