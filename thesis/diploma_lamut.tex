@@ -214,8 +214,8 @@ povezanih računalnikov na različnih geografskih lokacijah, ki uporabnikom
 omogočajo nalaganje, hranjenje in medsebojno izmenjavanje datotek.
 (TODO: vir definicije / ustrezno prilagodi definicijo)
 
-Omeni, da imaš različne topologije, da je cilj robustnost, redundanca,
-itd., sklicuj se pač na vire - odstavek ali dva max. (1 stran)
+\TODO{Omeni, da imaš različne topologije, da je cilj robustnost, redundanca,
+itd., sklicuj se pač na vire - odstavek ali dva max. (1 stran)}
 
 \TODO{Pa morda še kakšna slika kot primer (nariši npr. z LaTeXom - kar tako,
  za vajo)}
@@ -274,6 +274,10 @@ strategij, pri čemer je ena izmed najbolj učinkovitih algoritem
 
 
 \section{Algoritem Fast Spread}
+
+\TODO{opiši hierarhijo, obstaja najkrajša pot od lista do strežnika in
+vsako vozlišče zahteva repliko od starša - do glavnega strežnika, ki
+ima dovolj prostora, da hrani vse replike}
 
 Ko neko vozlišče v omrežju prejme zahtevek za določeno repliko in slednje
 nima shranjene lokalno, mora zahtevek posredovati enemu izmed sosednjih
@@ -344,8 +348,30 @@ primerjave pa v novejšem članku (\TODO{2012}) niso naredili.
 \chapter{Implementacija strategij iz člankov}
 
 \section{Opis strategij zamenjave}
+Kot je že bilo omenjeno (\TODO{v poglacju XYZ?}), algoritem Fast Spread
+shrani zahtevano repliko na vsakem vozlišču na poti od vozlišča, kjer je
+bila zahtevana replika najdena, do vozlišča, ki je repliko prvotno
+zahtevalo. Če določeno vozlišče nima dovolj razpoložljivega prostora,
+da bi zahtevano repliko shranilo, mora najprej izbrisati eno ali več
+obstoječih replik.
+
+Avtorji člankov (\TODO{št. oznaka člankov?}) opozarjajo, da je lahko
+skupina replik, ki jih je potrebno izbrisati, ``bolj pomembna" od
+nove replike. Izpostavljajo, da algoritem Fast Spread tega ne upošteva in
+da zamenjavo skupine obstoječih replik z novo repliko vedno
+izvede ne glede na morebitno večjo vrednost skupine replik
+(\TODO{sklic na ustrezen del članka - oz. v obeh}).
+
+Avtorji v obeh člankih predlagajo nekoliko spremenjeni različici algoritma
+Fast Spread, ki izvedeta zamenjavo le v primerih, ko je vrednost skupine
+replik strogo manjša od vrednosti nove replike. Pri tem algoritma za
+ocenjevanje vrednosti (skupin) replik uporabljata metrike, opisane v
+nadaljevanju.
+
 \subsection{Strategija EFS}
-To je članek 2011 ...
+
+tukaj opiši, kako izračunamo group value in kako replica value
+(iz članka 2011)
 
 \subsection{Strategija MFS}
 To je pa članek 2012 ...
