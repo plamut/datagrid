@@ -17,7 +17,7 @@
 
 % reduce line spacing for algorithms to save space
 \usepackage{etoolbox}
-\AtBeginEnvironment{algorithm}{\setstretch{1.05}}
+\AtBeginEnvironment{algorithm}{\setstretch{1.05}\small}
 
 
 
@@ -393,12 +393,11 @@ important factor as well.
   \label{alg:EFS}
   \caption{Algoritem EFS (\TODO{preimenuj bold oznako})}
 
-  \setstretch{1.05}
   \SetKwComment{blankln}{}{}
 
   Initialize SOS to $0$\;
   \eIf{RR exists on RN}{
-      UseRR\;
+      Use RR\;
   }{
       \For{$i = 2$ \KwTo NSPList.size}{
           \If{RR exists on NSPList(i)}{
@@ -408,7 +407,7 @@ important factor as well.
                   }{
                       \For{$x = 1$ \KwTo ReplicaList.size}{
                           \eIf{$\mathit{SOS} + \mathit{CNFSS} <$ RR.Size}{
-                              SOS = SOS + SizeList(x)\;
+                              SOS = SOS + \textit{SizeList(x)}\;
                           }{
                               Break\;
                           }
@@ -416,16 +415,16 @@ important factor as well.
 
 \blankln{}
 
-                      $GV = \frac{\sum\limits_{y=1}^{x-1} NORList(y)}{
-                                  \sum\limits_{y=1}^{x-1} SizeList(y)} +
-                            \frac{\sum\limits_{y=1}^{x-1}
+                      $\mathit{GV} = \frac{\sum_{y=1}^{x-1} \mathit{NORList(y)}}{
+                                  \sum_{y=1}^{x-1} \mathit{SizeList(y)}} +
+                            \frac{\sum_{y=1}^{x-1}
                               \mathit{NORFSTIList(y)}}{\mathit{FSTI}} +
-                            \frac{1}{CT - \frac{\sum\limits_{y=1}^{x-1}
-                              LRTList(y)}{x-1}}$
+                            \frac{1}{\mathit{CT} - \frac{\sum_{y=1}^{x-1}
+                              \mathit{LRTList(y)}}{x-1}}$
 
 \blankln{}
 
-                      $RV_{RR} = \frac{\mathit{NORRR}}{\mathit{SRR}} +
+                      $\mathit{RV_{RR}} = \frac{\mathit{NORRR}}{\mathit{SRR}} +
                                  \frac{\mathit{NORRRFSTI}}{\mathit{FSTI}} +
                                  \frac{1}{\mathit{CT} - \mathit{LRTRR}}$
 
@@ -433,8 +432,9 @@ important factor as well.
 
                       \If{$\mathit{GV} < \mathit{RV_{RR}}$} {
                           \For{$y = 1$ \KwTo $x-1$}{
-                            Delete ReplicaList(y), NORList(y), SizeList(y),
-                            NORFSTIList(y), LRTList(y)\;
+                            Delete \textit{ReplicaList(y)}, \textit{NORList(y)},
+                            \textit{SizeList(y)}, \textit{NORFSTIList(y)},
+                            \textit{LRTList(y)}\;
                           }
                           Copy RR;
                       }
@@ -445,7 +445,6 @@ important factor as well.
   }
 \end{algorithm}
 
-%\TODO{vse variable italic, kjer niso! Npr. ReplicaList - define \Var{name}}
 
 \TODO{tabela kratic iz psevdokode, kaj kaj pomeni}
 
@@ -456,7 +455,6 @@ formuli itd.
 pa kako so replike urejene po RV in v skupino replik dodajamo replike,
 od najmanj pomembne do najbolj (kar sklicuj se na številke vrstic)
 
-pa kar sliko algoritma?
 
 \subsection{Strategija MFS}
 To je pa članek 2012 ...
