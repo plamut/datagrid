@@ -11,6 +11,8 @@
 \usepackage{amsmath}
 \usepackage{fixltx2e}          % textsubscript etc. (XXX: used anywhere here?)
 \usepackage{color}
+\usepackage{array}
+\usepackage{tabulary}
 
 \usepackage[lined,plain,linesnumbered]{algorithm2e}
 \usepackage{setspace}
@@ -21,8 +23,12 @@
 
 
 
+
 \renewcommand*{\familydefault}{\rmdefault}  % default font family (roman)
 \renewcommand{\baselinestretch}{1.3}  % ustrezen razmik med vrsticami
+
+\renewcommand{\arraystretch}{1.3}  % razmik med vrsticami tabel
+\AtBeginEnvironment{tabular}{\small}
 
 %oznake strani
 \renewcommand{\chaptermark}[1]%
@@ -391,7 +397,7 @@ important factor as well.
 
 \begin{algorithm}[H]
   \label{alg:EFS}
-  \caption{Algoritem EFS (\TODO{preimenuj bold oznako})}
+  \caption{Algoritem EFS (\TODO{preimenuj bold oznako + referenca na članek})}
 
   \SetKwComment{blankln}{}{}
 
@@ -445,8 +451,49 @@ important factor as well.
   }
 \end{algorithm}
 
+Pomen posameznih spremenljivk v algoritmu XYZ prikazuje tabela XYZ
 
-\TODO{tabela kratic iz psevdokode, kaj kaj pomeni}
+\begin{table}
+\small
+  \begin{center}
+    \begin{tabulary}{1.0\textwidth}{ >{\itshape}p{7em} J}
+      \textnormal{Spremenljivka} & Pomen \\
+      \hline
+      RR & zahtevana replika \\
+      RN &  vozlišče, ki zahteva repliko \\
+      CNFSS & nezaseden prostor na trenutno opazovanem vozlišču \\
+      FSTI & frekvenčno-specifičen časovni razpon \TODO{prevod???} \\
+      NORRR & število zahtevkov za \textit{RR} \\
+      SRR & velikost \textit{RR} \\
+      NORRRFSTI & število zahtevkov za zahtevano repliko
+          v \textit{FSTI} \\
+      CT & trenutni čas \\
+      LRTRR & čas zadnjega zahtevka za zahtevano repliko \\
+      SOS & spremenljivka, ki predstavlja vsoto velikosti skupine replik na
+          trenutno opazovanem vozlišču \\
+      NSPList & seznam vozlišča na najkrajši poti od \textit{RN} do
+          glavnega strežnika \\
+      ReplicaList & seznam obstoječih replik na trenutno opazovanem vozlišču,
+          urejenih po naraščajočem vrstnem redu glede na njihovo vrednost
+          \textit{RV}. Če ima več replik enako vrednost \textit{RV}, so med
+          seboj urejene naključno. \\
+      NORList & seznam, ki vsebuje vrednosti, kolikokrat so bile istoležne
+          replike s seznama \textit{ReplicaList} zahtevane s strani
+          trenutno opazovanega vozlišča. \\
+      SizeList & seznam, ki vsebuje velikosti istoležnih replik s seznama
+          \textit{ReplicaList} \\
+      NORFSTIList & seznam, ki vsebuje vrednosti, kolikokrat so bile istoležne
+          replike s seznama \textit{ReplicaList} zahtevane v \textit{FSTI} s
+          strani trenutno opazovanega vozlišča \\
+      LRTList & seznam, ki vsebuje čase zadnjega zahtevka za istoležne
+          replike s seznama \textit{ReplicaList}
+    \end{tabulary}
+  \end{center}
+
+  \caption{Pomen spremenljivk v psevdokodi algoritma EFS.}
+  \label{tbl:1}
+\end{table}
+
 
 tukaj opiši, kako izračunamo group value in kako replica value
 (iz članka 2011) GV, RV, pomen, interpretacija, tabela pojmov (kratic) v
@@ -462,7 +509,7 @@ To je pa članek 2012 ...
 
 \begin{algorithm}[H]
   \label{alg:MFS}
-  \caption{Algoritem MFS (\TODO{preimenuj bold oznako})}
+  \caption{Algoritem MFS (\TODO{preimenuj bold oznako + referenca na članek})}
 
   \SetKwComment{blankln}{}{}
 
