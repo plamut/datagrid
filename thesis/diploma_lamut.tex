@@ -13,6 +13,12 @@
 \usepackage{color}
 
 \usepackage[lined,plain,linesnumbered]{algorithm2e}
+\usepackage{setspace}
+
+% reduce line spacing for algorithms to save space
+\usepackage{etoolbox}
+\AtBeginEnvironment{algorithm}{\setstretch{1.05}}
+
 
 
 \renewcommand*{\familydefault}{\rmdefault}  % default font family (roman)
@@ -49,7 +55,7 @@
 \selectlanguage{slovene}
 \frontmatter
 \setcounter{page}{1} %
-\renewcommand{\thepage}{}       % preprecimo težave s številkami strani v kazalu 
+\renewcommand{\thepage}{}       % preprecimo težave s številkami strani v kazalu
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -383,11 +389,11 @@ of the probability of requesting the replica again. Because Client
 nodes have limited storage space, the size of replicas is an
 important factor as well.
 
-{\linespread{1.0}
-\begin{algorithm}[]
+\begin{algorithm}[H]
   \label{alg:EFS}
   \caption{Algoritem EFS (\TODO{preimenuj bold oznako})}
 
+  \setstretch{1.05}
   \SetKwComment{blankln}{}{}
 
   Initialize SOS to $0$\;
@@ -438,7 +444,8 @@ important factor as well.
       }
   }
 \end{algorithm}
-}
+
+%\TODO{vse variable italic, kjer niso! Npr. ReplicaList - define \Var{name}}
 
 \TODO{tabela kratic iz psevdokode, kaj kaj pomeni}
 
