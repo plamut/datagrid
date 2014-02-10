@@ -459,6 +459,49 @@ od najmanj pomembne do najbolj (kar sklicuj se na številke vrstic)
 \subsection{Strategija MFS}
 To je pa članek 2012 ...
 
+
+\begin{algorithm}[H]
+  \label{alg:MFS}
+  \caption{Algoritem MFS (\TODO{preimenuj bold oznako})}
+
+  \SetKwComment{blankln}{}{}
+
+  Initialize SOS to $0$\;
+  \eIf{RR exists on RN}{
+      Use RR\;
+  }{
+      \For{$i = 2$ \KwTo NSPList.size}{
+          \If{RR exists on NSPList(i)}{
+              \For{$j = \mathit{NSPList}(i - 1)$ \KwTo $1$}{
+                  \eIf{CNFSS $\geq$ RR.Size}{
+                      Copy RR\;
+                  }{
+                      $\mathit{PNOR} =
+                          \mathit{NOR} \times
+                          \tfrac{\mathit{RR.Size} - \mathit{CNFSS}}{
+                                 \mathit{ RR.Size}}$
+                      \For{$x = 1$ \KwTo ReplicaList.size}{
+                          \eIf{SOS $<$ RR.Size $- \mathit{CNFSS}$}{
+                              SOS = SOS + \textit{SizeList(x)}\;
+                          }{
+                              Break\;
+                          }
+                      }
+
+                      \If{$\sum_{y=1}^{x-1} \mathit{NORList(y)} < \mathit{PNOR}$} {
+                          \For{$y = 1$ \KwTo $x-1$}{
+                              Delete \textit{ReplicaList(y)}, \textit{SizeList(y)},
+                              \textit{NORList(y)}\;
+                          }
+                          Copy RR;
+                      }
+                  }
+              }
+          }
+      }
+  }
+\end{algorithm}
+
 \section{Implementacija}
 Povej, kako si naredil Python simulacijo, event SendReplica, ReceiveReplica,
 vsak node je neodvisen, kako na začetku poženeš Dijsktro ...
