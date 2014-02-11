@@ -471,7 +471,7 @@ Pomen posameznih spremenljivk v algoritmu XYZ prikazuje tabela XYZ
       LRTRR & čas zadnjega zahtevka za zahtevano repliko \\
       SOS & spremenljivka, ki predstavlja vsoto velikosti skupine replik na
           trenutno opazovanem vozlišču \\
-      NSPList & seznam vozlišča na najkrajši poti od \textit{RN} do
+      NSPList & seznam vozlišč na najkrajši poti od \textit{RN} do
           glavnega strežnika \\
       ReplicaList & seznam obstoječih replik na trenutno opazovanem vozlišču,
           urejenih po naraščajočem vrstnem redu glede na njihovo vrednost
@@ -548,6 +548,43 @@ To je pa članek 2012 ...
       }
   }
 \end{algorithm}
+
+Pa še tabela spremenljivk iz psevdokode za MFS
+
+\begin{table}
+\small
+  \begin{center}
+    \begin{tabulary}{1.0\textwidth}{ >{\itshape}p{7em} J}
+      \textnormal{Spremenljivka} & Pomen \\
+      \hline
+      RR & zahtevana replika \\
+      RN &  vozlišče, ki zahteva repliko \\
+      CNFSS & nezaseden prostor na trenutno opazovanem vozlišču \\
+      NOR & število zahtevkov za \textit{RR} \\
+      PNOR & delno število zahtevkov za \textit{RR} \\
+      SOS & spremenljivka, ki predstavlja vsoto velikosti skupine replik na
+          trenutno opazovanem vozlišču \\
+      NSPList & seznam vozlišč na najkrajši poti od \textit{RN} do
+          glavnega strežnika \\
+      ReplicaList & seznam obstoječih replik na trenutno opazovanem vozlišču,
+          urejenih po naraščajočem vrstnem redu glede na njihovo vrednost
+          \textit{NOR}.
+          Če ima več replik enako vrednost \textit{NOR}, so slednje med seboj
+          urejene v padajočem vrstnem redu glede na njihovo velikost. Če so
+          tudi velikosti enake, je medsebojni vrstni red teh replik
+          naključen. \\
+      SizeList & seznam, ki vsebuje velikosti istoležnih replik s seznama
+          \textit{ReplicaList} \\
+      NORList & seznam, ki vsebuje vrednosti, kolikokrat so bile istoležne
+          replike s seznama \textit{ReplicaList} zahtevane s strani
+          trenutno opazovanega vozlišča. \\
+    \end{tabulary}
+  \end{center}
+
+  \caption{Pomen spremenljivk v psevdokodi algoritma MFS.}
+  \label{tbl:2}
+\end{table}
+
 
 \section{Implementacija}
 Povej, kako si naredil Python simulacijo, event SendReplica, ReceiveReplica,
