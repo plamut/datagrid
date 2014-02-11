@@ -438,13 +438,34 @@ class NodeLFU(Node):
         """
         stats = self._replica_stats.get(replica.name)
         if stats is None:
-            stats = _ReplicaStats()    # XXX: NOR is 1 instead of zero?
+            # stats = _ReplicaStats(nor=1)    # XXX: NOR is 1 instead of zero?
+            rv = 1
+        else:
+            rv = stats.nor
 
-        return stats.nor
+        return rv
 
 
 class NodeMFS(Node):
     """Node that uses MFS strategy (modified fast spread)."""
+
+    def _sort_key(self, replica):
+        """A sort method for replicas.
+
+        Replicas are first ordered by their NOR value (ascending), then
+        by their size (descending).
+
+        :param replica: a replica for which the sorting key is calculated
+        :type replica: :py:class:`~models.replica.Replica` instance
+        """
+        return (self._replica_stats[replica.name].nor, -replica.size)
+
+    def _reorder_replicas(self):
+        """Order replicas by custom comparison method."""
+        self._replicas = OrderedDict(
+            sorted(self._replicas.items(),
+                key=lambda x: self._sort_key(x[1]))
+        )
 
     def _GV(self, replicas):
         """Calculate value of a group of replicas.

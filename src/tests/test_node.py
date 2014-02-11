@@ -978,6 +978,41 @@ class TestNodeMFS(unittest.TestCase):
         from models.node import Node
         self.assertTrue(issubclass(self._get_target_class(), Node))
 
+    def test_reorder_replicas(self):
+        """Test that _reorder_replicas correctly sorts the replica list."""
+        sim = Mock(spec=self._make_sim())
+        node = self._make_instance('node_1', 5000, sim)
+
+        replica_list = [
+            self._make_replica('replica_1', size=500),
+            self._make_replica('replica_2', size=400),
+            self._make_replica('replica_3', size=200),
+            self._make_replica('replica_4', size=300),
+            self._make_replica('replica_5', size=600),
+        ]
+
+        for i, replica in enumerate(replica_list):
+            node._replicas['replica_{}'.format(i + 1)] = replica
+
+        stats_list = [
+            Mock(nor=7),
+            Mock(nor=9),
+            Mock(nor=7),
+            Mock(nor=2),
+            Mock(nor=7),
+        ]
+
+        for i, stats in enumerate(stats_list):
+            node._replica_stats['replica_{}'.format(i + 1)] = stats
+
+        node._reorder_replicas()
+
+        sorted_keys = list(node._replicas.keys())
+        self.assertEqual(
+            sorted_keys,
+            ['replica_4', 'replica_5', 'replica_1', 'replica_3', 'replica_2']
+        )
+
     def test_group_value(self):
         """Test that the value of a replica group is calculated correctly.
 
