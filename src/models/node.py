@@ -355,7 +355,7 @@ class NodeEFS(Node):
 
         stats = self._replica_stats.get(replica.name)
         if stats is None:
-            stats = _ReplicaStats()  # XXX: LRT is sim.now instead of zero?
+            stats = _ReplicaStats()
 
         if ct == stats.lrt:
             rv = float('inf')
@@ -397,13 +397,7 @@ class NodeLRU(Node):
         :rtype: float
         """
         stats = self._replica_stats.get(replica.name)
-        if stats is None:
-            stats = _ReplicaStats()    # XXX: LRT is sim.now instead of zero?
-            rv = self._sim.now
-        else:
-            rv = stats.lrt
-
-        return rv
+        return stats.lrt if stats is not None else self._sim.now
 
 
 class NodeLFU(Node):
@@ -437,14 +431,30 @@ class NodeLFU(Node):
         :rtype: float
         """
         stats = self._replica_stats.get(replica.name)
-        if stats is None:
-            stats = _ReplicaStats()    # XXX: NOR is 1 instead of zero?
-
-        return stats.nor
+        return stats.nor if stats is not None else 0
 
 
 class NodeMFS(Node):
     """Node that uses MFS strategy (modified fast spread)."""
+
+    def _sort_key(self, replica):
+        """A sort method for replicas.
+
+        Replicas are first ordered by their NOR value (ascending), then
+        by their size (descending).
+
+        :param replica: a replica for which the sorting key is calculated
+        :type replica: :py:class:`~models.replica.Replica` instance
+        """
+        return (self._replica_stats[replica.name].nor, -replica.size)
+
+    def _reorder_replicas(self):
+        """Order replicas by custom comparison method."""
+        self._replicas = OrderedDict(
+            sorted(
+                self._replicas.items(),
+                key=lambda x: self._sort_key(x[1]))
+        )
 
     def _GV(self, replicas):
         """Calculate value of a group of replicas.
@@ -467,7 +477,6 @@ class NodeMFS(Node):
         :rtype: float
         """
         stats = self._replica_stats.get(replica.name)
-        if stats is None:
-            stats = _ReplicaStats()
+        nor = stats.nor if stats is not None else 0
 
-        return stats.nor * (1 - self._free_capacity / replica.size)
+        return nor * (1 - self._free_capacity / replica.size)
