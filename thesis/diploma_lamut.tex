@@ -384,20 +384,12 @@ nadaljevanju.
 
 \subsection{Strategija EFS}
 
-pri ocenjevanju replik upošteva štiri stvari (poglej iz članka)...
+Psevdokoda strategije EFS je prikazana na sliki \TODO{referenca}, pri čemer
+je pomen posameznih spremenljivk pojasnjen v tabeli \TODO{referenca}.
 
-These factors are the number of
-requests, the frequency of requests, the size of the replica, and the
-last time the replica was requested. The number of requests,
-the frequency of requests, and the last time the replica was
-requested are important factors because they give an indication
-of the probability of requesting the replica again. Because Client
-nodes have limited storage space, the size of replicas is an
-important factor as well.
-
-\begin{algorithm}[H]
+\begin{algorithm}
   \label{alg:EFS}
-  \caption{Algoritem EFS (\TODO{preimenuj bold oznako + referenca na članek})}
+  \caption{Strategija EFS (\TODO{preimenuj bold oznako + referenca na članek})}
 
   \SetKwComment{blankln}{}{}
 
@@ -451,8 +443,6 @@ important factor as well.
   }
 \end{algorithm}
 
-Pomen posameznih spremenljivk v algoritmu XYZ prikazuje tabela XYZ
-
 \begin{table}
 \small
   \begin{center}
@@ -491,16 +481,62 @@ Pomen posameznih spremenljivk v algoritmu XYZ prikazuje tabela XYZ
   \end{center}
 
   \caption{Pomen spremenljivk v psevdokodi algoritma EFS.}
-  \label{tbl:1}
+  \label{tbl:EFS_vars}
 \end{table}
 
+\TODO{kratka pojasnitev algoritma oz. konkretno strategijo menjave
+Ko prejme repliko, za shranitev katere nima dovolj prostega prostora, najprej
+nabere toliko replik (kandidatk za izbris), da bi brisanje njih sprostilo
+dovolj prostora. To je potem skupina replik.
+Pri nabiranju kandidatk gre po vrsti od najmanj pomembnih - replike v
+ReplicaList so namreč urejene po vrednosti (najmanj pomembne najprej).
+\\
+Potem pa to naveži naprej, kako EFS oceni vrednost replik in kako skupin replik
+- interpretacija formul. pa GV je isto kot RV, samo da vzame povprečja
+skupine.
+}
 
-tukaj opiši, kako izračunamo group value in kako replica value
-(iz članka 2011) GV, RV, pomen, interpretacija, tabela pojmov (kratic) v
-formuli itd.
+Strategija EFS pri ocenjevanju vrednosti posamezne replike upošteva naslednje
+štiri stvari:
 
-pa kako so replike urejene po RV in v skupino replik dodajamo replike,
-od najmanj pomembne do najbolj (kar sklicuj se na številke vrstic)
+\begin{itemize}
+  \item število zahtevkov za repliko,
+  \item pogostost zahtevkov,
+  \item velikost replike,
+  \item čas od zadnjega zahtevka za repliko.
+\end{itemize}
+
+\TODO{item spacing too big}
+
+Število zahtevkov, njihova pogostost in čas od zadnjega zahtevka so pomembni
+dejavniki, saj z njihovo pomočjo lahko ocenimo verjetnost, da bo replika
+v prihodnosti ponovno zahtevana. Ker imajo vozlišča omejen prostor za
+shranjevanje replik, je pomembna tudi velikost slednjih
+\TODO{referenca na članek 2011}.
+
+\begin{samepage}
+Iz vrstice XY (\TODO{referenca}) psevdokode \TODO{sklic} je razvidna formula
+za izračun vrednosti replike:
+\begin{equation}
+  \mathit{RV} = \frac{\mathit{NORRR}}{\mathit{SRR}} +
+                      \frac{\mathit{NORRRFSTI}}{\mathit{FSTI}} +
+                      \frac{1}{\mathit{CT} - \mathit{LRTRR}}
+  \label{eq:EFS_RV}
+\end{equation}
+pri čemer je pomen posameznih spremenljivk pojasnjen v
+Tabeli~\ref{tbl:EFS_vars}.
+\end{samepage}
+
+Iz prvega in drugega člena enačbe~\eqref{eq:EFS_RV} je razvidno, da imajo
+višjo vrednost tiste replike, ki so bile večkrat zahtevane (večje število
+zahtevkov), pri čemer drugi člen upošteva zgolj zahtevke iz nedavne zgodovine,
+torej znotraj intervala FSTI, ki jih dodatno normira z velikostjo tega
+intervala. Iz prvega člena je tudi razvidno, da je vrednost replik obratno
+sorazmerna z njihovo velikostjo. Večje replike so vrednotene niže, saj
+zasedajo več prostora na vozlišču. Zadnji člen daje višjo vrednost replikam,
+katerih čas od njihovega zadnjega zahtevka je manjši.
+
+\TODO{zdaj pa še group value pojasni}
 
 
 \subsection{Strategija MFS}
@@ -509,7 +545,7 @@ To je pa članek 2012 ...
 
 \begin{algorithm}[H]
   \label{alg:MFS}
-  \caption{Algoritem MFS (\TODO{preimenuj bold oznako + referenca na članek})}
+  \caption{Strategija MFS (\TODO{preimenuj bold oznako + referenca na članek})}
 
   \SetKwComment{blankln}{}{}
 
