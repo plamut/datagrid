@@ -515,15 +515,15 @@ shranjevanje replik, je pomembna tudi velikost slednjih
 \TODO{referenca na članek 2011}.
 
 \begin{samepage}
-Iz vrstice XY (\TODO{referenca}) psevdokode \TODO{sklic} je razvidna formula
-za izračun vrednosti replike:
+Iz vrstice 19 (\TODO{referenca}) psevdokode \TODO{sklic} lahko razberemo
+formulo za izračun vrednosti replike:
 \begin{equation}
   \mathit{RV} = \frac{\mathit{NORRR}}{\mathit{SRR}} +
                       \frac{\mathit{NORRRFSTI}}{\mathit{FSTI}} +
                       \frac{1}{\mathit{CT} - \mathit{LRTRR}}
   \label{eq:EFS_RV}
 \end{equation}
-pri čemer je pomen posameznih spremenljivk pojasnjen v
+pri čemer je pomen posameznih spremenljivk enačbe pojasnjen v
 Tabeli~\ref{tbl:EFS_vars}.
 \end{samepage}
 
@@ -538,6 +538,35 @@ katerih čas od njihovega zadnjega zahtevka je manjši.
 
 \TODO{zdaj pa še group value pojasni}
 
+\begin{samepage}
+Podobno kot vrednost posamezne replike se izračuna tudi vrednost skupine
+replik, in sicer po formuli iz vrstice 18 \TODO{} v
+\TODO{EFS psevdokoda referenca}:
+\begin{equation}
+  \mathit{GV} = \frac{\sum_{y=1}^{x-1} \mathit{NORList(y)}}{
+                      \sum_{y=1}^{x-1} \mathit{SizeList(y)}} +
+                \frac{\sum_{y=1}^{x-1} \mathit{NORFSTIList(y)}}{
+                      \mathit{FSTI}} +
+                \frac{1}{\mathit{CT} - \frac{\sum_{y=1}^{x-1}
+                         \mathit{LRTList(y)}}{x-1}}
+  \label{eq:EFS_GV}
+\end{equation}
+pri čemer je pomen posameznih spremenljivk enačbe pojasnjen v
+Tabeli~\ref{tbl:EFS_vars}.
+\end{samepage}
+
+Enačbi~\eqref{eq:EFS_RV}~in~\eqref{eq:EFS_GV} sta vsebinsko gledano
+pravzaprav enaki. Edina razlika je, da so posamezni členi iz
+enačbe~\eqref{eq:EFS_RV} v enačbi~\eqref{eq:EFS_GV} namesto za posamezno
+repliko izračunani na ravni celotne skupine replik.
+Tako je med drugim v prvem členu enačbe~\eqref{eq:EFS_GV} izračunano razmerje
+med skupnim številom zahtevkov in skupno velikostjo \textit{vseh replik} iz
+skupine, v tretjem členu pa je uporabljen \textit{povprečen čas} od zadnjega
+zahtevka za posamezno repliko v skupini.
+
+\TODO{a bi v GV morali deliti 2. člen še s številom replik v skupini?
+Konceptualno gledano verjetno da, ampak v članku to ni tako navedeno) ---
+na to opozori pri razpravi o članku}
 
 \subsection{Strategija MFS}
 To je pa članek 2012 ...
