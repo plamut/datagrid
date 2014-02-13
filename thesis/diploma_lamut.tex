@@ -21,6 +21,9 @@
 \usepackage{etoolbox}
 \AtBeginEnvironment{algorithm}{\setstretch{1.05}\small}
 
+% change algorithm label name
+\renewcommand{\algorithmcfname}{Psevdokoda}
+
 
 
 
@@ -44,7 +47,7 @@
 \newcommand{\newterm}{\textit}
 
 %\newcommand{\TODO}{\textcolor{red}}
-\newcommand{\TODO}[1]{\textcolor{red}{TODO: #1}}
+\newcommand{\TODO}[1]{\textcolor{red}{(TODO: #1)}}
 
 \newcommand{\clearemptydoublepage}{\newpage{\pagestyle{empty}\cleardoublepage}}
 \setcounter{tocdepth}{2}	      % globina kazala
