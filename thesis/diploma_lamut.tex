@@ -384,8 +384,8 @@ nadaljevanju.
 
 \subsection{Strategija EFS}
 
-Psevdokoda strategije EFS je prikazana na sliki \TODO{referenca}, pri čemer
-je pomen posameznih spremenljivk pojasnjen v tabeli \TODO{referenca}.
+Psevdokoda strategije EFS je prikazana na Sliki~\ref{alg:EFS}, pri čemer
+je pomen posameznih spremenljivk pojasnjen v Tabeli~\ref{tbl:EFS_vars}.
 
 \begin{algorithm}
   \label{alg:EFS}
@@ -478,26 +478,28 @@ je pomen posameznih spremenljivk pojasnjen v tabeli \TODO{referenca}.
       LRTList & seznam, ki vsebuje čase zadnjega zahtevka za istoležne
           replike s seznama \textit{ReplicaList}
     \end{tabulary}
-  \end{center}
+ \end{center}
 
   \caption{Pomen spremenljivk v psevdokodi algoritma EFS.}
   \label{tbl:EFS_vars}
 \end{table}
 
-\TODO{kratka pojasnitev algoritma oz. konkretno strategijo menjave
-Ko prejme repliko, za shranitev katere nima dovolj prostega prostora, najprej
-nabere toliko replik (kandidatk za izbris), da bi brisanje njih sprostilo
-dovolj prostora. To je potem skupina replik.
-Pri nabiranju kandidatk gre po vrsti od najmanj pomembnih - replike v
-ReplicaList so namreč urejene po vrednosti (najmanj pomembne najprej).
-\\
-Potem pa to naveži naprej, kako EFS oceni vrednost replik in kako skupin replik
-- interpretacija formul. pa GV je isto kot RV, samo da vzame povprečja
-skupine.
-}
+Kadar neko vozlišče prejme zahtevano repliko, za shranitev katere nima dovolj
+nezasedenega prostora (\TODO{ref. vrstica 10}), pogleda, koliko
+obstoječih replik bi zaradi tega moralo predhodno izbrisati. Sprehodi se skozi
+seznam~\textit{\mbox{ReplicaList}}, dokler vsota velikosti obiskanih replik in
+velikosti nezasedenega prostora ne doseže (ali preseže) velikosti nove replike
+(\TODO{referenca vrstice 11--17}). Vse obiskane replike nato implicitno
+tvorijo skupino replik, ki bodo potencialno izbrisane.
 
-Strategija EFS pri ocenjevanju vrednosti posamezne replike upošteva naslednje
-štiri stvari:
+Vozlišče v nadaljevanju izračuna vrednosti nove replike in skupine replik
+(vrstici 18 in 19 \TODO{ref.}) ter ju med seboj primerja. V primeru, da je
+vrednost skupine manjša (vrstica 20 \TODO{}), vozlišče izbriše vse replike
+iz skupine in njihove statistike ter jih nadomesti z novo repliko
+(vrstice 21--24 \TODO{ref.}).
+
+Strategija EFS pri ocenjevanju vrednosti replik upošteva naslednje štiri
+stvari:
 
 \begin{itemize}
   \item število zahtevkov za repliko,
@@ -516,7 +518,7 @@ shranjevanje replik, je pomembna tudi velikost slednjih
 
 \begin{samepage}
 Iz vrstice 19 (\TODO{referenca}) psevdokode \TODO{sklic} lahko razberemo
-formulo za izračun vrednosti replike:
+formulo za izračun vrednosti posamezne replike:
 \begin{equation}
   \mathit{RV} = \frac{\mathit{NORRR}}{\mathit{SRR}} +
                       \frac{\mathit{NORRRFSTI}}{\mathit{FSTI}} +
