@@ -329,7 +329,7 @@ strategiji zamenjave, ki naj bi po njihovih trditvah dosegali dosti boljše
 rezultate od strategij LRU in LFU. Strategiji
 so poimenovali \newterm{EFS} (\newterm{``Enhanced Fast Spread''}) in
 \newterm{MFS} (\newterm{``Modified Fast Spread''})
-\TODO{vir oz. omemba člankov}.
+\TODO{vir oz. referenca člankov}.
 
 \TODO{oštevilči članka? Da se kasneje v besedilu sklicuješ nanj? Kako se
 to ponavadi dela?}
@@ -525,7 +525,7 @@ formulo za izračun vrednosti posamezne replike:
                       \frac{1}{\mathit{CT} - \mathit{LRTRR}}
   \label{eq:EFS_RV}
 \end{equation}
-pri čemer je pomen posameznih spremenljivk enačbe pojasnjen v
+pri čemer je pomen posameznih spremenljivk pojasnjen v
 Tabeli~\ref{tbl:EFS_vars}.
 \end{samepage}
 
@@ -553,7 +553,7 @@ replik, in sicer po formuli iz vrstice 18 \TODO{} v
                          \mathit{LRTList(y)}}{x-1}}
   \label{eq:EFS_GV}
 \end{equation}
-pri čemer je pomen posameznih spremenljivk enačbe pojasnjen v
+pri čemer je pomen posameznih spremenljivk pojasnjen v
 Tabeli~\ref{tbl:EFS_vars}.
 \end{samepage}
 
@@ -570,8 +570,60 @@ zahtevka za posamezno repliko v skupini.
 Konceptualno gledano verjetno da, ampak v članku to ni tako navedeno) ---
 na to opozori pri razpravi o članku}
 
+
 \subsection{Strategija MFS}
-To je pa članek 2012 ...
+
+Strategija MFS (psevdokoda na Sliki~\ref{alg:MFS})
+je konceptualno popolnoma enaka strategiji EFS. Od nje se razlikuje
+zgolj v formulah za izračun vrednosti replike in vrednosti skupine replik
+ter v načinu, na katerega so replike urejene v seznamu \textit{ReplicaList}.
+
+\begin{samepage}
+Vrednost replike se izračuna po naslednji formuli iz vrstice 11
+(\TODO{ref.}) psevdokode s Slike~\ref{alg:MFS}:
+\begin{equation}
+  \mathit{PNOR} = \mathit{NOR} \times
+                  \frac{\mathit{RR.Size} - \mathit{CNFSS}}{
+                        \mathit{ RR.Size}}
+  \label{eq:MFS_RV}
+\end{equation}
+pri čemer je pomen posameznih spremenljivk pojasnjen v
+Tabeli~\ref{tbl:MFS_vars}.
+\end{samepage}
+
+Vrednost replike je PNOR oziroma ``delno število zahtevkov''. Izračuna
+se kot skupno število zahtevkov za repliko (NOR), prilagojeno za
+korekcijski faktor. Slednji je odvisen od razmerja med velikostjo replike
+in velikostjo nezasedenega prostora na vozlišču. V robnem primeru,
+ko je ves razpoložljiv prostor na vozlišču zaseden (CNFSS je enak 0), sta
+vrednosti PNOR in NOR enaki. PNOR ni nikoli negativno število.%
+\footnote{Ulomek v enačbi~\eqref{eq:MFS_RV} je vedno pozitiven, saj
+je njegov imenovalec pozitiven -- velikost replike \textit{RR.Size} je
+namreč strogo večja od velikosti nezasedenega prostora \textit{CNFSS}. Če
+bi bilo obratno, bi namreč vozlišče repliko takoj shranilo in niti ne bi
+šlo računati njene vrednosti, kar je razvidno iz vrstic 8 in 9
+ \TODO{(ref.)} v Psevdokodi~\ref{alg:MFS}.}
+
+
+
+\begin{samepage}
+Formulo za izračun vrednosti skupine replik najdemo na levi strani
+neenakosti v vrstici 18 (\TODO{ref.}):
+\begin{equation}
+	\sum_{y=1}^{x-1} \mathit{NORList(y)}
+  \label{eq:MFS_GV}
+\end{equation}
+pri čemer je pomen posameznih spremenljivk pojasnjen v
+Tabeli~\ref{tbl:MFS_vars}.
+\end{samepage}
+
+\TODO{komentar - pač seštevek NOR in to je to}
+
+
+
+\TODO{kot opombo pa omeni urejenost replik v ReplicaList, da niso urejene
+po RV, ampak
+malenkost drugače (referenca na članek)}
 
 
 \begin{algorithm}[H]
@@ -616,7 +668,6 @@ To je pa članek 2012 ...
   }
 \end{algorithm}
 
-Pa še tabela spremenljivk iz psevdokode za MFS
 
 \begin{table}
 \small
@@ -649,9 +700,11 @@ Pa še tabela spremenljivk iz psevdokode za MFS
   \end{center}
 
   \caption{Pomen spremenljivk v psevdokodi algoritma MFS.}
-  \label{tbl:2}
+  \label{tbl:MFS_vars}
 \end{table}
 
+\TODO{force table and to be under the Strategija MFS
+section?}
 
 \section{Implementacija}
 Povej, kako si naredil Python simulacijo, event SendReplica, ReceiveReplica,
