@@ -583,7 +583,7 @@ ter v načinu, na katerega so replike urejene v seznamu \textit{ReplicaList}.
 
 \begin{samepage}
 Vrednost replike se izračuna po naslednji formuli iz vrstice 11
-(\TODO{ref.}) psevdokode s Slike~\ref{alg:MFS}:
+(\TODO{ref.}) v Psevdokodi~\ref{alg:MFS}:
 \begin{equation}
   \mathit{PNOR} = \mathit{NOR} \times
                   \frac{\mathit{RR.Size} - \mathit{CNFSS}}{
@@ -610,8 +610,8 @@ bi bilo obratno, bi namreč vozlišče repliko takoj shranilo in niti ne bi
 
 
 \begin{samepage}
-Formulo za izračun vrednosti skupine replik najdemo na levi strani
-neenakosti v vrstici 18 (\TODO{ref.}):
+Vrednost skupine replik se izračuna po formuli, ki se nahaja na levi strani
+neenakosti v vrstici 18 (\TODO{ref.}) Psevdokode~\ref{alg:MFS}:
 \begin{equation}
 	\sum_{y=1}^{x-1} \mathit{NORList(y)}
   \label{eq:MFS_GV}
@@ -620,14 +620,19 @@ pri čemer je pomen posameznih spremenljivk pojasnjen v
 Tabeli~\ref{tbl:MFS_vars}.
 \end{samepage}
 
-\TODO{komentar - pač seštevek NOR in to je to}
+Formula~\eqref{eq:MFS_GV} je zelo enostavna, saj zgolj sešteje število
+zahtevkov (NOR) za vse replike, ki sestavljajo skupino.
 
+Kot že omenjeno se strategija MFS od strategije EFS nekoliko razlikuje
+tudi v tem, iz katerih replik vozlišče sestavi skupino replik, ki bodo morda
+zamenjane. Razlog za to je različna urejenost replik v seznamu
+\textit{ReplicaList}. Medtem ko strategija EFS replike uredi glede na
+njihovo vrednost (RV), jih strategija MFS uredi glede na
+število zahtevkov zanje, v primeru enakih vrednosti pa še dodatno
+glede na njihovo velikost. Urejenosti seznama \textit{ReplicaList} je
+sicer opisana tudi v Tabelah~\ref{tbl:EFS_vars}~oziroma~\ref{tbl:MFS_vars}.
 
-
-\TODO{kot opombo pa omeni urejenost replik v ReplicaList, da niso urejene
-po RV, ampak
-malenkost drugače (referenca na članek)}
-
+\TODO{pseudocote vertical spacing?}
 
 \begin{algorithm}[H]
   \label{alg:MFS}
