@@ -2,9 +2,9 @@
 \documentclass[a4paper, 12pt]{book}
 
 % XXX: why utf8x and not utf8?
-\usepackage[utf8x]{inputenc}   % omogoča uporabo slovenskih črk kodiranih v formatu UTF-8 
+\usepackage[utf8x]{inputenc}   % omogoča uporabo slovenskih črk v UTF-8
 
-\usepackage[slovene,english]{babel}  % naloži, med drugim, slovenske delilne vzorce
+\usepackage[slovene,english]{babel}  % slovenski delilni vzorci ipd.
 \usepackage[pdftex]{graphicx}  % omogoča vlaganje slik različnih formatov 
 \usepackage{fancyhdr}          % poskrbi, na primer, za glave strani
 \usepackage{amssymb}           % dodatni simboli
@@ -35,10 +35,13 @@
 
 %oznake strani
 \renewcommand{\chaptermark}[1]%
-{\markboth{\MakeUppercase{\thechapter.\ #1}}{}} \renewcommand{\sectionmark}[1]%
-{\markright{\MakeUppercase{\thesection.\ #1}}} \renewcommand{\headrulewidth}{0.5pt} \renewcommand{\footrulewidth}{0pt} 
+{\markboth{\MakeUppercase{\thechapter.\ #1}}{}}
+\renewcommand{\sectionmark}[1]%
+{\markright{\MakeUppercase{\thesection.\ #1}}}
+\renewcommand{\headrulewidth}{0.5pt} \renewcommand{\footrulewidth}{0pt}
 \fancyhf{}
-\fancyhead[LE,RO]{\sl \thepage} \fancyhead[LO]{\sl \rightmark} \fancyhead[RE]{\sl \leftmark}
+\fancyhead[LE,RO]{\sl \thepage} \fancyhead[LO]{\sl \rightmark}
+\fancyhead[RE]{\sl \leftmark}
 
 \newcommand{\BibTeX}{{\sc Bib}\TeX}
 
@@ -49,7 +52,8 @@
 %\newcommand{\TODO}{\textcolor{red}}
 \newcommand{\TODO}[1]{\textcolor{red}{(TODO: #1)}}
 
-\newcommand{\clearemptydoublepage}{\newpage{\pagestyle{empty}\cleardoublepage}}
+\newcommand{\clearemptydoublepage}{
+	\newpage{\pagestyle{empty}\cleardoublepage}}
 \setcounter{tocdepth}{2}	      % globina kazala
 
 % konstrukti
@@ -64,7 +68,7 @@
 \selectlanguage{slovene}
 \frontmatter
 \setcounter{page}{1} %
-\renewcommand{\thepage}{}       % preprecimo težave s številkami strani v kazalu
+\renewcommand{\thepage}{}  % preprecimo težave s številkami strani v kazalu
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -95,10 +99,15 @@
 \vspace*{8cm}
 
 {\small \noindent
-Rezultati diplomskega dela so intelektualna lastnina avtorja in Fakultete za ra\-ču\-nal\-niš\-tvo in informatiko Univerze v Ljubljani. 
-Za objavljanje ali izkoriščanje rezultatov di\-plom\-ske\-ga dela je potrebno pisno soglasje avtorja, Fakultete za ra\-ču\-nal\-niš\-tvo in 
+Rezultati diplomskega dela so intelektualna lastnina avtorja in Fakultete za
+ra\-ču\-nal\-niš\-tvo in informatiko Univerze v Ljubljani.
+Za objavljanje ali izkoriščanje rezultatov di\-plom\-ske\-ga dela je potrebno
+pisno soglasje avtorja, Fakultete za ra\-ču\-nal\-niš\-tvo in
 informatiko ter mentorja.}%
-\footnote{V dogovoru z mentorjem lahko kandidat diplomsko delo s pripadajočo izvorno kodo izda tudi pod katero izmed alternativnih licenc, ki ponuja določen del pravic vsem: npr. Creative Commons, GNU GPL. V tem primeru na to mesto vstavite opis licence, na primer tekst \cite{licence}
+\footnote{V dogovoru z mentorjem lahko kandidat diplomsko delo s pripadajočo
+izvorno kodo izda tudi pod katero izmed alternativnih licenc, ki ponuja
+določen del pravic vsem: npr. Creative Commons, GNU GPL. V tem primeru na to
+mesto vstavite opis licence, na primer tekst \cite{licence}
 
  \TODO{Morda pa res raje izdaj pod katero izmed prostih licenc?}
 }
@@ -150,14 +159,18 @@ z vpisno številko \textbf{63000200}, sem avtor diplomskega dela z naslovom:
 	\item sem diplomsko delo izdelal samostojno pod mentorstvom 
 		doc.\ dr.\ Boštjana Slivnika,
 
-	\item so elektronska oblika diplomskega dela, naslov (slov., angl.), povzetek (slov., angl.) ter ključne besede (slov., angl.) identični s tiskano obliko diplomskega dela,
+	\item so elektronska oblika diplomskega dela, naslov (slov., angl.),
+	 povzetek (slov., angl.) ter ključne besede (slov., angl.) identični
+	 s tiskano obliko diplomskega dela,
 	
-	\item soglašam z javno objavo elektronske oblike diplomskega dela v zbirki ``Dela FRI''.
+	\item soglašam z javno objavo elektronske oblike diplomskega dela
+	v zbirki ``Dela FRI''.
 \end{itemize}
 
 \vspace{1cm}
 
-\noindent V Ljubljani, dne \TODO{datum, npr. 1. aprila 2014} \hfill Podpis avtorja:
+\noindent V Ljubljani, dne \TODO{datum, npr. 1. aprila 2014} \hfill
+Podpis avtorja:
 
 % prazna stran
 \clearemptydoublepage
@@ -168,7 +181,9 @@ z vpisno številko \textbf{63000200}, sem avtor diplomskega dela z naslovom:
 
 \label{zahvala}
 \thispagestyle{empty}\mbox{}\vfill\null\it%
-\TODO{Na tem mestu zapišite, komu se zahvaljujete za izdelavo diplomske naloge. Pazite, da ne boste koga pozabili. Utegnil vam bo zameriti. Temu se da izogniti tako, da pozabite na celo zahvalo.}
+\TODO{Na tem mestu zapišite, komu se zahvaljujete za izdelavo diplomske
+naloge. Pazite, da ne boste koga pozabili. Utegnil vam bo zameriti. Temu
+se da izogniti tako, da pozabite na celo zahvalo.}
 \rm\normalfont
 
 % prazna stran
@@ -194,7 +209,10 @@ z vpisno številko \textbf{63000200}, sem avtor diplomskega dela z naslovom:
 
 \TODO{Ključne besede:}%
 
-\TODO{V vzorcu je predstavljen postopek priprave diplomskega dela z uporabo okolja \LaTeX. Vaš povzetek mora sicer vsebovati približno 100 besed, ta tukaj je odločno prekratek.}
+\TODO{V vzorcu je predstavljen postopek priprave diplomskega dela z uporabo
+okolja \LaTeX. Vaš povzetek mora sicer vsebovati približno 100 besed, ta
+tukaj je odločno prekratek.}
+
 % prazna stran
 \clearemptydoublepage
 
@@ -207,7 +225,9 @@ z vpisno številko \textbf{63000200}, sem avtor diplomskega dela z naslovom:
 
 \TODO{Keywords:}
 
-\TODO{This sample document presents an approach to typesetting your BSc thesis using \LaTeX. A proper abstract should contain around 100 words which makes this one way too short.}
+\TODO{This sample document presents an approach to typesetting your BSc
+thesis using \LaTeX. A proper abstract should contain around 100 words which
+makes this one way too short.}
 
 \selectlanguage{slovene}
 
@@ -392,7 +412,8 @@ je pomen posameznih spremenljivk pojasnjen v Tabeli~\ref{tbl:EFS_vars}.
 
 \begin{algorithm}
   \label{alg:EFS}
-  \caption{Strategija EFS (\TODO{preimenuj bold oznako + referenca na članek})}
+  \caption{Strategija EFS (\TODO{preimenuj bold oznako + referenca
+  na članek})}
 
   \SetKwComment{blankln}{}{}
 
@@ -416,26 +437,29 @@ je pomen posameznih spremenljivk pojasnjen v Tabeli~\ref{tbl:EFS_vars}.
 
 \blankln{}
 
-                      $\mathit{GV} = \frac{\sum_{y=1}^{x-1} \mathit{NORList(y)}}{
+                      $\mathit{GV} = \frac{\sum_{y=1}^{x-1}
+                          \mathit{NORList(y)}}{
                                   \sum_{y=1}^{x-1} \mathit{SizeList(y)}} +
-                            \frac{\sum_{y=1}^{x-1}
+                          \frac{\sum_{y=1}^{x-1}
                               \mathit{NORFSTIList(y)}}{\mathit{FSTI}} +
-                            \frac{1}{\mathit{CT} - \frac{\sum_{y=1}^{x-1}
+                          \frac{1}{\mathit{CT} - \frac{\sum_{y=1}^{x-1}
                               \mathit{LRTList(y)}}{x-1}}$
 
 \blankln{}
 
-                      $\mathit{RV_{RR}} = \frac{\mathit{NORRR}}{\mathit{SRR}} +
-                                 \frac{\mathit{NORRRFSTI}}{\mathit{FSTI}} +
-                                 \frac{1}{\mathit{CT} - \mathit{LRTRR}}$
+                      $\mathit{RV_{RR}} =
+                          \frac{\mathit{NORRR}}{\mathit{SRR}} +
+                          \frac{\mathit{NORRRFSTI}}{\mathit{FSTI}} +
+                          \frac{1}{\mathit{CT} - \mathit{LRTRR}}$
 
 \blankln{}
 
                       \If{$\mathit{GV} < \mathit{RV_{RR}}$} {
                           \For{$y = 1$ \KwTo $x-1$}{
-                            Delete \textit{ReplicaList(y)}, \textit{NORList(y)},
-                            \textit{SizeList(y)}, \textit{NORFSTIList(y)},
-                            \textit{LRTList(y)}\;
+                            Delete \textit{ReplicaList(y)},
+							  \textit{NORList(y)},
+							  \textit{SizeList(y)}, \textit{NORFSTIList(y)},
+							  \textit{LRTList(y)}\;
                           }
                           Copy RR;
                       }
@@ -636,7 +660,8 @@ sicer opisana tudi v Tabelah~\ref{tbl:EFS_vars}~oziroma~\ref{tbl:MFS_vars}.
 
 \begin{algorithm}[H]
   \label{alg:MFS}
-  \caption{Strategija MFS (\TODO{preimenuj bold oznako + referenca na članek})}
+  \caption{Strategija MFS (\TODO{preimenuj bold oznako + referenca
+  na članek})}
 
   \SetKwComment{blankln}{}{}
 
@@ -662,10 +687,11 @@ sicer opisana tudi v Tabelah~\ref{tbl:EFS_vars}~oziroma~\ref{tbl:MFS_vars}.
                           }
                       }
 
-                      \If{$\sum_{y=1}^{x-1} \mathit{NORList(y)} < \mathit{PNOR}$} {
+                      \If{$\sum_{y=1}^{x-1} \mathit{NORList(y)} <
+                          \mathit{PNOR}$} {
                           \For{$y = 1$ \KwTo $x-1$}{
-                              Delete \textit{ReplicaList(y)}, \textit{SizeList(y)},
-                              \textit{NORList(y)}\;
+                              Delete \textit{ReplicaList(y)},
+                              \textit{SizeList(y)}, \textit{NORList(y)}\;
                           }
                           Copy RR;
                       }
@@ -773,15 +799,21 @@ n < 2^n.
 \end{equation}
 \end{izrek}
 \begin{dokaz}
-Dokazovanje z indukcijo zahteva, da neenakost~\eqref{eq:1} najprej preverimo za najmanjše naravno število --- $0$. Res, ker je $0 < 1 = 2^0$, je neenačba~\eqref{eq:1} za $n=0$ izpolnjena.
+Dokazovanje z indukcijo zahteva, da neenakost~\eqref{eq:1} najprej preverimo
+za najmanjše naravno število --- $0$. Res, ker je $0 < 1 = 2^0$, je
+neenačba~\eqref{eq:1} za $n=0$ izpolnjena.
 
-Sledi indukcijski korak. S predpostavko, da je neenakost~\eqref{eq:1} veljavna pri nekem naravnem številu $n$, je potrebno pokazati, da je ista neenakost v veljavi tudi pri njegovem nasledniku --- naravnem številu $n+1$. Računajmo.
+Sledi indukcijski korak. S predpostavko, da je neenakost~\eqref{eq:1} veljavna
+pri nekem naravnem številu $n$, je potrebno pokazati, da je ista neenakost v
+veljavi tudi pri njegovem nasledniku --- naravnem številu $n+1$. Računajmo.
 \begin{align}
 n+1 &< 2^n + 1  \label{eq:2}\\
     &\le 2^n + 2^n \label{eq:3}\\
     &= 2^{n+1} \nonumber
 \end{align} 
-Neenakost~\eqref{eq:2} je posledica indukcijske predpostavke, neenakost~\eqref{eq:3} pa enostavno dejstvo, da je za vsako naravno število $n$ izraz $2^n$ vsaj tako velik kot 1. S tem je dokaz Izreka~\ref{iz:1} zaključen.
+Neenakost~\eqref{eq:2} je posledica indukcijske predpostavke,
+neenakost~\eqref{eq:3} pa enostavno dejstvo, da je za vsako naravno število $n$
+izraz $2^n$ vsaj tako velik kot 1. S tem je dokaz Izreka~\ref{iz:1} zaključen.
 \end{dokaz}
 
 Opazimo, da je \LaTeX\ številko izreka podredil številki poglavja.
