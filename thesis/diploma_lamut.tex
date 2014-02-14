@@ -548,11 +548,11 @@ Podobno kot vrednost posamezne replike se izračuna tudi vrednost skupine
 replik, in sicer po formuli iz vrstice 18 \TODO{} v
 \TODO{EFS psevdokoda referenca}:
 \begin{equation}
-  \mathit{GV} = \frac{\sum_{y=1}^{x-1} \mathit{NORList(y)}}{
-                      \sum_{y=1}^{x-1} \mathit{SizeList(y)}} +
-                \frac{\sum_{y=1}^{x-1} \mathit{NORFSTIList(y)}}{
+  \mathit{GV} = \frac{\sum\limits_{y=1}^{x-1} \mathit{NORList(y)}}{
+                      \sum\limits_{y=1}^{x-1} \mathit{SizeList(y)}} +
+                \frac{\sum\limits_{y=1}^{x-1} \mathit{NORFSTIList(y)}}{
                       \mathit{FSTI}} +
-                \frac{1}{\mathit{CT} - \frac{\sum_{y=1}^{x-1}
+                \frac{1}{\mathit{CT} - \frac{\sum\limits_{y=1}^{x-1}
                          \mathit{LRTList(y)}}{x-1}}
   \label{eq:EFS_GV}
 \end{equation}
@@ -613,7 +613,7 @@ bi bilo obratno, bi namreč vozlišče repliko takoj shranilo in niti ne bi
 Vrednost skupine replik se izračuna po formuli, ki se nahaja na levi strani
 neenakosti v vrstici 18 (\TODO{ref.}) Psevdokode~\ref{alg:MFS}:
 \begin{equation}
-	\sum_{y=1}^{x-1} \mathit{NORList(y)}
+	\sum\limits_{y=1}^{x-1} \mathit{NORList(y)}
   \label{eq:MFS_GV}
 \end{equation}
 pri čemer je pomen posameznih spremenljivk pojasnjen v
@@ -632,7 +632,7 @@ njihovo vrednost (RV), jih strategija MFS uredi glede na
 glede na njihovo velikost. Urejenosti seznama \textit{ReplicaList} je
 sicer opisana tudi v Tabelah~\ref{tbl:EFS_vars}~oziroma~\ref{tbl:MFS_vars}.
 
-\TODO{pseudocote vertical spacing?}
+\TODO{pseudocode vertical spacing?}
 
 \begin{algorithm}[H]
   \label{alg:MFS}
