@@ -51,6 +51,7 @@
 
 %\newcommand{\TODO}{\textcolor{red}}
 \newcommand{\TODO}[1]{\textcolor{red}{(TODO: #1)}}
+\newcommand{\sub}{\textsubscript}
 
 \newcommand{\clearemptydoublepage}{
 	\newpage{\pagestyle{empty}\cleardoublepage}}
@@ -397,7 +398,7 @@ primerjave pa v novejšem članku (\TODO{2012}) niso naredili.
 \end{enumerate}
 
 
-\chapter{Implementacija strategij iz člankov}
+\chapter{Primerjava strategij iz člankov}
 
 \section{Opis strategij zamenjave}
 Kot je že bilo omenjeno (\TODO{v poglacju XYZ?}), algoritem Fast Spread
@@ -755,9 +756,83 @@ sicer opisana tudi v Tabelah~\ref{tbl:EFS_vars}~oziroma~\ref{tbl:MFS_vars}.
 \TODO{force table and to be under the Strategija MFS
 section?}
 
-\section{Implementacija}
-Povej, kako si naredil Python simulacijo, event SendReplica, ReceiveReplica,
-vsak node je neodvisen, kako na začetku poženeš Dijsktro ...
+
+\section{Implementacija diskretne simulacije}
+
+Za preizkus strategij, opisanih v člankih, sem v programskem jeziku Python
+(različica 3.3) napisal diskretno simulacijo. S poganjanjem slednje z
+različnimi parametri sem lahko primerjal, kako se obnesejo posamezne strategije
+zamenjave. Glavni sestavni deli simulacije so vozlišča, replike, dogodki v
+simulaciji in sámo izvajalno okolje simulacije.
+\TODO{link na Github, kjer je koda? morda koda kot priloga diplome?}
+
+Topologija podatkovnega omrežja, ki sem jo uporabil, je polni graf, saj so
+takšno topologijo izbrali tudi avtorji člankov \TODO{referenca obeh čl.}.
+Povezave med vsakim parom vozlišč so simetrične, njihove dolžine pa se v fazi
+inicializacije simulacije naključno določijo. V isti fazi se generirajo tudi
+replike naključnih velikosti.
+
+Ko so dolžine povezav med vozlišči določene, se na grafu, ki predstavlja
+podatkovno omrežje, izvede algoritem Dijkstra, ki poišče najkrajše poti med
+glavnim strežnikom in vsemi ostalimi vozlišči. Po izvedbi algoritma vsakemu
+vozlišču določimo, kdo je njegov starš na najkrajši poti do glavnega strežnika%
+\footnote{Sam glavni strežnik je pri tem seveda izjema, saj se nahaja povsem
+na vrhu hierarhije in starša nima.}.
+
+Med izvajanjem simulacije je vsako vozlišče avtonomno in se samo odloča, katere
+replike bo hranilo pri sebi, pri čemer sledi vnaprej določeni strategiji
+zamenjave. V posamezni izvedbi simulacije vsa vozlišča uporabljajo enako
+strategijo in je med izvajanjem ne spreminjajo.
+
+\subsection{Vrste dogodkov v simulaciji}
+V okviru simulacije so definirane naslednje štiri vrste dogodkov, ki se lahko
+pojavijo v njej:
+\begin{itemize}
+  \item \textit{Pošlji zahtevek za repliko} -- Vozlišče svojemu staršu pošlje
+  zahtevek za repliko, ki je sámo nima. Posledično se za starša po določeni
+  zakasnitvi sproži dogodek \textit{prejmi zahtevek za repliko}.
+
+  \item \textit{Prejmi zahtevek za repliko} -- Vozlišče prejme zahtevo za
+  določeno repliko bodisi od enega izmed svojih sinov bodisi od zunanjega
+  uporabnika podatkovnega omrežja. Če repliko ima, sproži dogodek
+  \textit{pošlji repliko}, sicer pa posreduje zahtevo za isto repliko
+  naprej svojemu staršu in s tem sproži dogodek \textit{pošlji zahtevek za
+  repliko}.
+
+  \item \textit{Pošlji repliko} -- Vozlišče začne pošiljati repliko tja, od
+  koder je bila od njega zahtevana. Po določeni zakasnitvi se sproži ustrezen
+  dogodek \textit{prejmi repliko}.
+
+  \item \textit{Prejmi repliko} -- Zahtevana replika prispe na mesto, od
+  koder je izviral zahtevek zanjo. Če je to mesto izvora izven podatkovnega
+  omrežja, se ne zgodi nič več, saj je bil zahtevek zgolj uspešno izpolnjen.
+  Če pa gre za vozlišče v omrežju, mora slednje prejeto repliko naprej
+  posredovati tja, od koder je bila od njega zahtevana. V tem primeru se
+  sproži nov dogodek \textit{pošlji repliko}.
+\end{itemize}
+
+Pri dogodku \textit{prejmi zahtevek za repliko} je potrebno omeniti, da se
+lahko pojavi tudi takrat, ko je vozlišče isto repliko že zahtevalo in trenutno
+čaka, da jo prejme od starša. Ne glede na to vozlišče tudi v tem primeru staršu
+pošlje nov zahtevek za isto repliko. Strategiji \ref{alg:EFS} in \ref{alg:MFS}
+namreč ne predvidevata, da vozlišče vodi seznam replik, na prejem katerih
+že čaka, temveč se vozlišče odloča zgolj na podlagi tega, ali v določenem
+trenutku zahtevano repliko ima pri sebi ali ne.
+
+Med izvajanjem simulacije posamezna vozlišča naključno in neodvisno drugo od
+drugega sprožajo nove zahtevke za replike. Vse skupaj poteka v izvajalnem
+okolju simulacije, ki skrbi za generiranje teh naključnih dogodkov, za
+pravilno razporejanje dogodkov v časovni vrsti, za procesiranje dogodkov,
+ko pridejo na vrsto, in za beleženje različnih statistik.
+
+Izvajalno okolje skrbi tudi za pravilne zakasnitve dogodkov, ki so že uvrščeni
+v časovno vrsto, kadar je to potrebno. Primer tega je dogodek
+\textit{pošlji repliko}, ki povzroči, da se trajanje prenosov replik, ki
+jih vozlišče že pošilja, podaljša. Replike se namreč pošiljajo sočasno in si
+enakomerno delijo pasovno širino, ki je vozlišču na voljo. Posledično mora
+izvajalno okolje ob začetku pošiljanja nove replike ustrezno zakasniti vse
+dogodke tipa \textit{prejmi repliko}, na katere to vpliva.
+
 
 \section{Meritve}
 \subsection{Priprava simulacije}
@@ -769,6 +844,10 @@ z različnim MWG probability. V posameznem scenariju poženemo vsako izmed
 Potem na koncu še povej, kakšni so parametri (koliko vozlišč itd. ... neka
 tabela). V vsaki rundi seveda enako, razlikuje se le scenarij in pa
 uporabljena trategija.
+
+isti seed ...
+
+\TODO{metrike, ki so bile uporabljene}
 
 \subsection{Rezultati simulacij}
 
