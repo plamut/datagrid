@@ -307,28 +307,43 @@ prilagaja morebitnim spremembam v vzorcih uporabe podatkovnega omrežja
 strategij, pri čemer je ena izmed najbolj učinkovitih algoritem
 \newterm{Fast Spread} (\TODO{vir -- Ranganathan and Foster, 2001b?}).
 
-\TODO{Fast spread prevedemo v slovenščino? "algoritem hitrega širjenja"?}
+\TODO{Fast spread prevedemo v slovenščino? ``algoritem hitrega širjenja''?}
 
 
 \section{Algoritem Fast Spread}
 
-\TODO{opiši hierarhijo, obstaja najkrajša pot od lista do strežnika in
-vsako vozlišče zahteva repliko od starša - do glavnega strežnika, ki
-ima dovolj prostora, da hrani vse replike}
+Algoritem Fast Spread se uporablja v hierarhično urejenih podatkovnih omrežjih.
+Na vrhu hierarhije je glavni strežnik, ki ima dovolj prostora, da vedno hrani
+vse replike, ki obstajajo v omrežju. V primerjavi z njim je prostor na vseh
+ostalih vozliščih relativno majhen, tako da lahko slednja naenkrat hranijo
+zgolj omejeno podmnožico replik. Vozlišča so lahko poljubno povezana med seboj
+in ni nujno, da ima vsako izmed njih neposredno povezavo z glavnim strežnikom
+-- z njim so lahko povezana tudi zgolj posredno preko drugih vozlišč.
 
-Ko neko vozlišče v omrežju prejme zahtevek za določeno repliko in slednje
-nima shranjene lokalno, mora zahtevek posredovati enemu izmed sosednjih
-vozlišč. To lahko isti zahtevek posreduje še naprej svojim sosedom, dokler
-ga ne prejme vozlišče, ki repliko ima. Pri pošiljanju replike nazaj
-algoritem Fast Spread repliko shrani na vsakem izmed vozlišč na poti od
-ciljnega vozlišča do vozlišča, ki je zahtevek prvotno poslalo.
+Za vsako vozlišče v omrežju obstaja najkrajša pot do strežnika in vsako izmed
+njih ve, katero vozlišče je njihov starš na tej poti. Kadar vozlišče prejme
+zahtevek za določeno repliko in slednje nima shranjene lokalno, zahtevek
+posreduje svojemu staršu, ta pa lahko isti zahtevek posreduje še naprej
+navzgor po hierarhiji, dokler ga ne prejme vozlišče, ki repliko ima. Če ne
+prej, se to zgodi takrat, ko zahtevek prispe do glavnega strežnika.
 
 \TODO{kakšna lepa slikica?}
 
-Če določeno vozlišče nima dovolj prostora, da bi shranilo zahtevano repliko,
-mora predhodno izbrisati eno ali več obstoječih replik. Katere izmed
-obstoječih replik bodo zamenjane z novo repliko, je odvisno od tega, katero
-strategijo zamenjave uporabimo.
+Prvo vozlišče v verigi, ki najde zahtevano repliko pri sebi, le-to pošlje
+vozlišču, ki jo je od njega zahtevalo. Slednje jo nato posreduje še naprej
+navzdol po hierarhiji, dokler replika ne prispe do vozlišča, ki je poslalo
+prvotni zahtevek zanjo. Pri tem vsako izmed vozlišč na poti repliko tudi
+lokalno shrani.
+
+V primeru, da določeno vozlišče nima dovolj prostora, da bi shranilo repliko,
+mora predhodno izbrisati eno ali več obstoječih replik. Katere izmed njih bodo
+zamenjane z novo repliko, je odvisno od tega, katero strategijo zamenjave
+uporablja vozlišče. Poznamo veliko različnih strategij, npr.
+\TODO{morda naštej nekaj?}. Izmed njih bom opisal dve, ki so jih avtorji
+člankov \TODO{referenca?} uporabili za primerjavo s strategijama, ki so ju
+predlagali sami.
+
+\TODO{kakšna referenca na vir, ki Fast Spread opisuje?}
 
 \subsection{Strategija zamenjave LRU}
 
