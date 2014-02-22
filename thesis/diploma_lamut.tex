@@ -791,22 +791,22 @@ strategijo in je med izvajanjem ne spreminjajo.
 V okviru simulacije so definirane naslednje štiri vrste dogodkov, ki se lahko
 pojavijo v njej:
 \begin{itemize}
-  \item \textit{Pošlji zahtevek za repliko} -- Vozlišče svojemu staršu pošlje
+  \item \textbf{Pošlji zahtevek za repliko:} Vozlišče svojemu staršu pošlje
   zahtevek za repliko, ki je sámo nima. Posledično se za starša po določeni
   zakasnitvi sproži dogodek \textit{prejmi zahtevek za repliko}.
 
-  \item \textit{Prejmi zahtevek za repliko} -- Vozlišče prejme zahtevo za
+  \item \textbf{Prejmi zahtevek za repliko:} Vozlišče prejme zahtevo za
   določeno repliko bodisi od enega izmed svojih sinov bodisi od zunanjega
   uporabnika podatkovnega omrežja. Če repliko ima, sproži dogodek
   \textit{pošlji repliko}, sicer pa posreduje zahtevo za isto repliko
   naprej svojemu staršu in s tem sproži dogodek \textit{pošlji zahtevek za
   repliko}.
 
-  \item \textit{Pošlji repliko} -- Vozlišče začne pošiljati repliko tja, od
+  \item \textbf{Pošlji repliko:} Vozlišče začne pošiljati repliko tja, od
   koder je bila od njega zahtevana. Po določeni zakasnitvi se sproži ustrezen
   dogodek \textit{prejmi repliko}.
 
-  \item \textit{Prejmi repliko} -- Zahtevana replika prispe na mesto, od
+  \item \textbf{Prejmi repliko:} Zahtevana replika prispe na mesto, od
   koder je izviral zahtevek zanjo. Če je to mesto izvora izven podatkovnega
   omrežja, se ne zgodi nič več, saj je bil zahtevek zgolj uspešno izpolnjen.
   Če pa gre za vozlišče v omrežju, mora slednje prejeto repliko naprej
@@ -839,16 +839,128 @@ dogodke tipa \textit{prejmi repliko}, na katere to vpliva.
 
 \section{Meritve}
 \subsection{Priprava simulacije}
-Povej, da imaš štiri strategije (EFS, MFS, LRU, LFU). Pa povej tri scenarije,
-z različnim MWG probability. V posameznem scenariju poženemo vsako izmed
-štirih opisanih strategij in jih med seboj primerjamo, skupaj 12 poganjanj
-(3 scenariji X 4 sstrategije)
 
-Potem na koncu še povej, kakšni so parametri (koliko vozlišč itd. ... neka
-tabela). V vsaki rundi seveda enako, razlikuje se le scenarij in pa
-uporabljena trategija.
+Simulacijo sem pripravil na enak način, kot je opisan v obeh člankih
+\TODO{referenca?}, in v njej med seboj primerjal štiri strategije zamenjave --
+LRU, LFU, EFS in MFS. Za ocenjevanje strategij sem uporabil predlagani
+metriki, in sicer skupen odzivni čas in skupno porabo pasovne širine
+(Tabela~\ref{tbl:sim_metrics}). Dobra strategija obe metriki minimizira.
 
-isti seed ...
+Odzivni čas je definiran kot čas, ki preteče od trenutka, ko vozlišče pošlje
+zahtevek za repliko, do trenutka, ko zahtevano repliko prejme. Če vozlišče
+repliko že ima pri sebi, se smatra, da je odzivni čas enak nič -- čas samega
+obdelovanja zahtevka se torej zanemari.
+
+Porabljena pasovna širina je količina podatkov, ki jih je potrebno prenesti
+takrat, kadar vozlišče zahteva repliko, ki je nima shranjene lokalno. Pri
+tem se smatra, da je ta količina kar enaka velikosti zahtevane replike.
+
+Ker sta pričakovani vsoti vseh odzivnih časov in velikosti vseh prenešenih
+replik zelo veliki, sta obe metriki pomnoženi s konstantama $C_1$ in $C_2$,
+ki zmanjšata njuni vrednosti. Vrednost obeh konstant je nastavljena na
+$0,001$.
+\TODO{dopovej LaTeX-u, da vejica (in ne pika) pomeni decimalno mesto, da bo
+pravilno renderiral}
+
+\begin{table}
+\small
+  \begin{center}
+    \begin{tabulary}{1.0\textwidth}{ >{\itshape}p{9em} J}
+      \textnormal{Metrika} & Opombe \\
+      \hline
+      $M_1 = \mathit{TRT} \times C_1$ &
+        \textit{TRT}: skupen odzivni čas, $C_1$: konstanta \\
+      $M_2 = \mathit{TBC} \times C_2$ &
+        \textit{TBC}: skupna porabljena pasovna širina, $C_2$: konstanta
+    \end{tabulary}
+  \end{center}
+
+  \caption{Metriki za ocenjevanje uspešnosti strategij.%
+    \TODO{vir oba članka}}
+  \label{tbl:sim_metrics}
+\end{table}
+\TODO{črta zgoraj nad tabelo? da se bolje ločijo od besedila?}
+
+
+Replike so kategorizirane v skupine, in sicer tako, da je v vsaki skupini
+enako število replik in da vsaka replika pripada zgolj eni skupini.%
+\footnote{Kategorizacija replik v skupine ni v nobeni povezavi s tisto skupino
+replik, ki jo določeno vozlišče tvori vsakokrat, ko se med izvajanjem
+simulacije odloča, katere replike bo morda zamenjalo.}
+Število vseh skupin je deset, tako da vsaka izmed njih vsebuje 10~\% replik.
+
+Vsako vozlišče ima svojo ti.~\textit{najbolj želeno skupino} (MWG). Verjetnost,
+da vozlišče zahteva določeno repliko, ki pripada njegovi skupini MWG, je višja
+od verjetnosti, da zahteva določeno drugo repliko, ki pripada eni izmed
+ostalih skupin. To je namreč boljši približek situacijam v praksi,
+kjer se dostikrat zgodi, da se določena podmnožica podatkov (replik) v
+primerjavi z ostalimi podatki veliko bolj pogosto uporablja.
+\TODO{referenca na članek, kjer je to napisano oz. v obeh}
+
+Strategije sem med seboj primerjal v treh različnih scenarijih:
+\begin{itemize}
+  \item \textbf{Scenarij 1:} Vozlišče zahteva vse replike z
+    enako verjetnostjo. To pomeni, da je verjetnost, da zahteva repliko iz
+    svoje skupine MWG, zgolj 10~\% -- torej enaka, kot verjetnost za
+    katerekoli drugo skupino replik.
+
+  \item \textbf{Scenarij 2:} Vozlišče zahteva eno izmed replik iz svoje
+    skupine MWG z verjetnostjo 30~\%. To pomeni, da je verjetnost, da
+    zahteva repliko iz ene izmed ostalih skupin, enaka 70~\%.
+
+  \item \textbf{Scenarij 3:} Vozlišče zahteva eno izmed replik iz svoje
+    skupine MWG z verjetnostjo 50~\%, z enako verjetnostjo pa tudi repliko
+    iz ene izmed ostalih skupin.
+\end{itemize}
+V vsakem izmed naštetih scenarijev simulacijo poženemo enkrat za vsako
+strategijo, kar skupaj znese 12 izvedb simulacije
+(3 scenariji $\times$ 4 strategije). V posamezni izvedbi vsa vozlišča
+uporabljajo enako strategijo -- tisto, ki jo takrat preizkušamo.
+
+Nastavitve simulacije se med izvedbami ne spreminjajo. Uporabljene vrednosti
+parametrov prikazuje Tabela~\ref{tbl:sim_params}.
+
+
+\begin{table}
+\small
+  \begin{center}
+    \begin{tabulary}{1.0\textwidth}{ >{}p{20em} J}
+      \textnormal{Parameter} & Vrednost \\
+      \hline
+      Število vozlišč & 20 \\
+      Število replik & 1000 \\
+      Velikost vsake replike & med 100 in 1000 Mbit \\
+      Število generiranih zahtevkov & 100.000 \\
+      Čas med prihodi zahtevkov vozlišč & med 0 in 99 s \\
+      Število skupin replik & 10 \\
+      Diskovni prostor na vozliščih (razen glavnega strežnika) & 50.000 Mbit \\
+      Diskovni prostor na glavnem strežniku & dovolj velik, da lahko naenkrat
+          hrani vse replike podatkovnega omrežja
+          \TODO{multiline}\\
+      Število replik v vsaki skupini & 100 \\
+      Pasovna širina omrežja & 10 Mbit/s \\
+      Razdalja med vsakim parom neposredno povezanih vozlišč &
+        med 1 in 1000 km \\
+      Hitrost širjenja signala po mrežnih povezavah & $6 \times 10^3$ km/s \\
+      Frequency specific time interval \TODO{prevod?} & 10.000 \\
+      C1 & 0,001 \\
+      C2 & 0,001
+    \end{tabulary}
+  \end{center}
+
+  \caption{Parametri simulacije in njihove vrednosti.%
+    \TODO{vir oba članka}}
+  \label{tbl:sim_params}
+\end{table}
+
+povej, kakšen je communicaiton latency ... pa random seed ... pa topologija
+(razdalje med vozlišči, kakšno drevo dobiš) - mogoče v prilogi?
+
+
+The inter-arrival times of nodes’ requests and replicas’ sizes
+follow uniform distribution.
+čas za zamenjavo rpelik je zanemarljivo majhen (nič)
+
 
 \TODO{metrike, ki so bile uporabljene}
 
@@ -871,7 +983,7 @@ le omeniš "sum plagiatorstva", tu pa potem razdelaš)
 Povej, zakaj ... kje je spodnja meja ... kritiziraj metrike ...
 
 \item problemi: nejasnosti, slaba metrika (razdelaj), nappake v algoritmih,
-division by zero itd.
+division by zero itd. (pa za čas ni enot ipd. in smo predpostavili sekunde)
 
 \end{itemize}
 
