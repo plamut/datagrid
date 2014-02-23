@@ -847,9 +847,10 @@ metriki, in sicer skupen odzivni čas in skupno porabo pasovne širine
 (Tabela~\ref{tbl:sim_metrics}). Dobra strategija obe metriki minimizira.
 
 Odzivni čas je definiran kot čas, ki preteče od trenutka, ko vozlišče pošlje
-zahtevek za repliko, do trenutka, ko zahtevano repliko prejme. Če vozlišče
-repliko že ima pri sebi, se smatra, da je odzivni čas enak nič -- čas samega
-obdelovanja zahtevka se torej zanemari.
+zahtevek za repliko, do trenutka, ko zahtevano repliko prejme. Pri tem
+predpostavimo, da je čas, potreben za obdelovanje zahtevka in morebitno
+zamenjavo replik, zanemarljivo majhen. Če ima vozlišče želeno repliko že
+pri sebi, je odzivni čas enak nič.
 
 Porabljena pasovna širina je količina podatkov, ki jih je potrebno prenesti
 takrat, kadar vozlišče zahteva repliko, ki je nima shranjene lokalno. Pri
@@ -919,6 +920,9 @@ uporabljajo enako strategijo -- tisto, ki jo takrat preizkušamo.
 
 Nastavitve simulacije se med izvedbami ne spreminjajo. Uporabljene vrednosti
 parametrov prikazuje Tabela~\ref{tbl:sim_params}.
+Velikosti replik, časi med prihodi zahtevkov vozlišč in oddaljenosti med
+vozlišči imajo enakomerno diskretno porazdelitev. Zavzamejo lahko katerokoli
+celoštevilčno vrednost znotraj njihovega intervala možnih vrednosti.
 
 
 \begin{table}
@@ -953,16 +957,15 @@ parametrov prikazuje Tabela~\ref{tbl:sim_params}.
   \label{tbl:sim_params}
 \end{table}
 
-povej, kakšen je communicaiton latency ... pa random seed ... pa topologija
-(razdalje med vozlišči, kakšno drevo dobiš) - mogoče v prilogi?
+
+\TODO{mogoče tukajali v prilogi v prilogi topologija mreže? torej kakšno drevo
+dobimo, kakšne so razdalje med vozlišči}
+
+\TODO{Časovna enota za "inter-arrival times" v člankih ni navedena,
+predpostavil sem, da je sekunda.}
 
 
-The inter-arrival times of nodes’ requests and replicas’ sizes
-follow uniform distribution.
-čas za zamenjavo rpelik je zanemarljivo majhen (nič)
 
-
-\TODO{metrike, ki so bile uporabljene}
 
 \subsection{Rezultati simulacij}
 
