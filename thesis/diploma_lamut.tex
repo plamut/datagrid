@@ -13,6 +13,10 @@
 \usepackage{color}
 \usepackage{array}
 \usepackage{tabulary}
+\usepackage{icomma}            % comma as a decimal separator
+
+\usepackage{numprint}          % number formating
+\npthousandsep{.}\npthousandthpartsep{}\npdecimalsign{,}
 
 \usepackage[lined,plain,linesnumbered]{algorithm2e}
 \usepackage{setspace}
@@ -934,10 +938,11 @@ celoštevilčno vrednost znotraj njihovega intervala možnih vrednosti.
       Število vozlišč & 20 \\
       Število replik & 1000 \\
       Velikost vsake replike & med 100 in 1000 Mbit \\
-      Število generiranih zahtevkov & 100.000 \\
+      Število generiranih zahtevkov & \numprint{100000} \\
       Čas med prihodi zahtevkov vozlišč & med 0 in 99 s \\
       Število skupin replik & 10 \\
-      Diskovni prostor na vozliščih (razen glavnega strežnika) & 50.000 Mbit \\
+      Diskovni prostor na vozliščih (razen glavnega strežnika) &
+          \numprint{50000} Mbit \\
       Diskovni prostor na glavnem strežniku & dovolj velik, da lahko naenkrat
           hrani vse replike podatkovnega omrežja
           \TODO{multiline}\\
@@ -946,7 +951,7 @@ celoštevilčno vrednost znotraj njihovega intervala možnih vrednosti.
       Razdalja med vsakim parom neposredno povezanih vozlišč &
         med 1 in 1000 km \\
       Hitrost širjenja signala po mrežnih povezavah & $6 \times 10^3$ km/s \\
-      Frequency specific time interval \TODO{prevod?} & 10.000 \\
+      Frequency specific time interval \TODO{prevod?} & \numprint{10000} \\
       C1 & 0,001 \\
       C2 & 0,001
     \end{tabulary}
@@ -962,17 +967,73 @@ celoštevilčno vrednost znotraj njihovega intervala možnih vrednosti.
 dobimo, kakšne so razdalje med vozlišči}
 
 \TODO{Časovna enota za "inter-arrival times" v člankih ni navedena,
-predpostavil sem, da je sekunda.}
+predpostavil sem, da je sekunda. - uporabi "tabu" okolje, ki zna
+delati s footnote-i v tabelah? Čeprav nj bi sicer to bila slaba praksa ...
+(footnotes v tabelah)}
 
 
 
 
 \subsection{Rezultati simulacij}
 
-\TODO{}
+Rezultati simulacije so zbrani v Tabeli~\ref{tbl:sim_results}.
+
+\begin{table}
+\small
+  \begin{center}
+    \begin{tabulary}{1.0\textwidth}{ | C | C | C | }
+      \hline
+      \multicolumn{3}{|>{\bf}c|}{
+        Scenarij 1 (P(MWG) = 0.1)
+      } \\
+      \hline
+      Strategija & Skupen odzivni čas [s] & Porabljena pasovna širina [Mbit] \\
+      \hline
+      LRU & \numprint{55910,66} & \numprint{116780,38} \\
+      LFU & \numprint{41760,98} & \numprint{114953,38} \\
+      EFS & \numprint{53383,87} & \numprint{116574,68} \\
+      MFS & \numprint{53383,87} & \numprint{116574,68} \\
+      \hline \hline
+      
+      \multicolumn{3}{|>{\bf}c|}{
+        Scenarij 2 (P(MWG) = 0.3)
+      } \\
+      \hline
+      Strategija & Skupen odzivni čas [s] & Porabljena pasovna širina [Mbit] \\
+      \hline
+      LRU & \numprint{41550,05} & \numprint{114216,31} \\
+      LFU & \numprint{28372,55} & \numprint{109710,82} \\
+      EFS & \numprint{39236,63} & \numprint{113760,48} \\
+      MFS & \numprint{39236,63} & \numprint{113760,48} \\
+      \hline \hline
+
+      \multicolumn{3}{|>{\bf}c|}{
+        Scenarij 3 (P(MWG) = 0.5)
+      } \\
+      \hline
+      Strategija & Skupen odzivni čas [s] & Porabljena pasovna širina [Mbit] \\
+      \hline
+      LRU & \numprint{25356,10} & \numprint{108200,84} \\
+      LFU & \numprint{16949,96} & \numprint{98400,73} \\
+      EFS & \numprint{24393,25} & \numprint{107298,33} \\
+      MFS & \numprint{24393,25} & \numprint{107298,33} \\
+      \hline
+    \end{tabulary}
+    
+  \end{center}
+
+  \caption{Rezultati simulacije.%
+    \TODO{vir: lastni?}}
+  \label{tbl:sim_results}
+\end{table}
+
+\TODO{namesto tabele daj raje graf? bo bolj pregledno}
 
 Na koncu povej, da rezultatov iz člankov ni bilo možno ponoviti, zato potem
 obstaja sum, da niso nič pametnega naredili, več o tem v nadaljevanju.
+
+Pa kakšen komentar, kaj si ugotovil? padajoči trend is dobil, kar je ok,
+ampak predlagani strategiji sta bolj kot LRU, ne pa nekaj izdatno boljšega
 
 \chapter{Kritična presoja člankov}
 
