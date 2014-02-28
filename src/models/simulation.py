@@ -581,9 +581,14 @@ class Simulation(object):
             self._schedule_event(returned_event, self.now)
 
         elif type(returned_event) == SendReplica:
-            # pass generators from preceding ReceiveReplicaRequest event
-            returned_event._generators = event._generators.copy()
-            self._schedule_event(returned_event, self.now)
+            if (returned_event.target is None):
+                # node requested to replica by itself, so we don't need to
+                # send the replica further down the hierarchy
+                return
+            else:
+                # pass generators from preceding ReceiveReplicaRequest event
+                returned_event._generators = event._generators.copy()
+                self._schedule_event(returned_event, self.now)
         else:
             raise TypeError(
                 "Node returned unexpected event", returned_event)

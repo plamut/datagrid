@@ -1080,6 +1080,33 @@ class TestSimulation(unittest.TestCase):
         self.assertIs(next_event.replica, replica)
         self.assertEqual(next_event._generators, event._generators)
 
+    def test_process_receive_replica_request_replica_found_no_target(self):
+        """Test that _process_receive_replica_request correctly processes
+        ReceiveReplicaRequest events when target node has a copy of the
+        requested replica, but the requester is None (meaning node itself
+        has requested the replica).
+        """
+        from models.node import NodeEFS
+        from models.event import ReceiveReplicaRequest
+
+        settings = self._get_settings()
+        sim = self._make_instance(**settings)
+        sim._clock._time = 2.55
+
+        replica = Mock()
+        replica.name = 'replica_X'
+
+        target = NodeEFS('target', 10000, sim)
+        target._replicas[replica.name] = replica
+        target._replica_stats[replica.name] = Mock()
+
+        event = ReceiveReplicaRequest(None, target, 'replica_X')
+        sim._process_receive_replica_request(event)
+
+        # there should not be any new events in event queue, we don't
+        # schedule a SendReplica event whose target would be None
+        self.assertEqual(len(sim._event_queue), 0)
+
     @patch('builtins.next', lambda g: object())
     def test_process_receive_replica_request_unknown_event_yielded(self):
         """Test that _process_receive_replica_request raises an error when
