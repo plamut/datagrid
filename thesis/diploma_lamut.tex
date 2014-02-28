@@ -15,6 +15,8 @@
 \usepackage{tabulary}
 \usepackage{icomma}            % comma as a decimal separator
 
+\usepackage{pgfplots}
+
 \usepackage{numprint}          % number formating
 \npthousandsep{.}\npthousandthpartsep{}\npdecimalsign{,}
 
@@ -27,7 +29,6 @@
 
 % change algorithm label name
 \renewcommand{\algorithmcfname}{Psevdokoda}
-
 
 
 
@@ -976,7 +977,7 @@ delati s footnote-i v tabelah? Čeprav nj bi sicer to bila slaba praksa ...
 
 \subsection{Rezultati simulacij}
 
-Rezultati simulacije so zbrani v Tabeli~\ref{tbl:sim_results}.
+Rezultati simulacij so zbrani v Tabeli~\ref{tbl:sim_results}.
 
 \begin{table}
 \small
@@ -1028,6 +1029,104 @@ Rezultati simulacije so zbrani v Tabeli~\ref{tbl:sim_results}.
 \end{table}
 
 \TODO{namesto tabele daj raje graf? bo bolj pregledno}
+
+
+
+\begin{tikzpicture}[scale=1.2]
+  \begin{axis}[
+    ybar,
+    ylabel={Skupen odzivni čas [s]},
+    enlarge x limits=0.3,
+    try min ticks=7,
+    ytick pos=left,
+    scaled y ticks = false,
+    ymin = 0,
+    y label style={
+        at={(-0.1,0.5)}
+    },
+    yticklabel style={%
+        /pgf/number format/fixed
+    }, 
+    xtick style={white},  % efectively remove the tick marks
+    xtick=data,
+    xticklabels={Scenarij 1, Scenarij 2, Scenarij 3},
+    xtick align=inside,  % TODO: how to remove ticks?
+    bar width=10pt,
+    area legend,
+    legend style={
+        draw=none    % remove the box around the legend
+    }
+  ]
+
+    \addplot[fill=gray!40] coordinates {  % LRU
+      (1, 55910.66) (2, 41550.05) (3, 25356.10)
+    };
+    \addplot[fill=gray] coordinates {  % LFU  
+      (1, 41760.98) (2, 28372.55) (3, 16949.96)
+    };
+    \addplot[fill=black] coordinates {  % EFS 
+      (1, 53383.87) (2, 39236.63) (3, 24393.25)
+    };    
+    \addplot[fill=white] coordinates {  % MFS
+      (1, 53383.87) (2, 39236.63) (3, 24393.25)
+    };
+        
+    \legend{LRU, LFU, EFS, MFS}
+
+  \end{axis}
+\end{tikzpicture}
+
+
+
+
+\begin{tikzpicture}[scale=1.2]
+  \begin{axis}[
+    ybar,
+    ylabel={Porabljena pasovna širina [Mbit]},
+    enlarge x limits=0.3,
+    try min ticks=7,
+    ytick pos=left,
+    scaled y ticks=false,
+    ymin = 0,
+    y label style={
+        at={(-0.1,0.5)}
+    },
+    yticklabel style={%
+        /pgf/number format/fixed
+    },    
+    xtick style={white},  % efectively remove the tick marks
+    xtick=data,
+    xticklabels={Scenarij 1, Scenarij 2, Scenarij 3},
+    xtick align=inside,  % TODO: how to remove ticks?
+    bar width=10pt,
+    area legend,
+    legend style={
+        pos=outer north east,
+        draw=none    % remove the box around the legend
+    }
+  ]
+
+    \addplot[fill=gray!40] coordinates {  % LRU
+      (1, 116780.38) (2, 114216.31) (3, 108200.84)
+    };
+    \addplot[fill=gray] coordinates {  % LFU  
+      (1, 114953.38) (2, 109710.82) (3, 98400.73)
+    };
+    \addplot[fill=black] coordinates {  % EFS 
+      (1, 116574.68) (2, 113760.48) (3, 107298.33)
+    };    
+    \addplot[fill=white] coordinates {  % MFS
+      (1, 116574.68) (2, 113760.48) (3, 107298.33)
+    };
+        
+    \legend{LRU, LFU, EFS, MFS}
+
+  \end{axis}
+\end{tikzpicture}
+
+\TODO{to je sumljivo, zakaj je total BW used skoraj enak, odzivni čas
+pa OBČUTNO manjši glede na scenarije? glede na to, da odzivni čas v
+največji meri determinira prav bandwidth used ...}
 
 Na koncu povej, da rezultatov iz člankov ni bilo možno ponoviti, zato potem
 obstaja sum, da niso nič pametnega naredili, več o tem v nadaljevanju.
