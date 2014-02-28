@@ -990,10 +990,10 @@ Rezultati simulacij so zbrani v Tabeli~\ref{tbl:sim_results}.
       \hline
       Strategija & Skupen odzivni čas [s] & Porabljena pasovna širina [Mbit] \\
       \hline
-      LRU & \numprint{55910,66} & \numprint{116780,38} \\
-      LFU & \numprint{41760,98} & \numprint{114953,38} \\
-      EFS & \numprint{53383,87} & \numprint{116574,68} \\
-      MFS & \numprint{53383,87} & \numprint{116574,68} \\
+      LRU & \numprint{55268,55} & \numprint{111905,38} \\
+      LFU & \numprint{41110,83} & \numprint{109987,49} \\
+      EFS & \numprint{52726,21} & \numprint{111580,25} \\
+      MFS & \numprint{52726,21} & \numprint{111580,25} \\
       \hline \hline
       
       \multicolumn{3}{|>{\bf}c|}{
@@ -1002,10 +1002,10 @@ Rezultati simulacij so zbrani v Tabeli~\ref{tbl:sim_results}.
       \hline
       Strategija & Skupen odzivni čas [s] & Porabljena pasovna širina [Mbit] \\
       \hline
-      LRU & \numprint{41550,05} & \numprint{114216,31} \\
-      LFU & \numprint{28372,55} & \numprint{109710,82} \\
-      EFS & \numprint{39236,63} & \numprint{113760,48} \\
-      MFS & \numprint{39236,63} & \numprint{113760,48} \\
+      LRU & \numprint{40752,71} & \numprint{107773,46} \\
+      LFU & \numprint{27399,93} & \numprint{101329,39} \\
+      EFS & \numprint{38396,94} & \numprint{106975,95} \\
+      MFS & \numprint{38396,94} & \numprint{106975,95} \\
       \hline \hline
 
       \multicolumn{3}{|>{\bf}c|}{
@@ -1014,10 +1014,10 @@ Rezultati simulacij so zbrani v Tabeli~\ref{tbl:sim_results}.
       \hline
       Strategija & Skupen odzivni čas [s] & Porabljena pasovna širina [Mbit] \\
       \hline
-      LRU & \numprint{25356,10} & \numprint{108200,84} \\
-      LFU & \numprint{16949,96} & \numprint{98400,73} \\
-      EFS & \numprint{24393,25} & \numprint{107298,33} \\
-      MFS & \numprint{24393,25} & \numprint{107298,33} \\
+      LRU & \numprint{24122,26} & \numprint{97338,32} \\
+      LFU & \numprint{15091,31} & \numprint{81382,90} \\
+      EFS & \numprint{23142,42} & \numprint{96241,67} \\
+      MFS & \numprint{23142,42} & \numprint{96241,67} \\
       \hline
     \end{tabulary}
     
@@ -1059,16 +1059,16 @@ Rezultati simulacij so zbrani v Tabeli~\ref{tbl:sim_results}.
   ]
 
     \addplot[fill=gray!40] coordinates {  % LRU
-      (1, 55910.66) (2, 41550.05) (3, 25356.10)
+      (1, 55268.55) (2, 40752.71) (3, 24122.26)
     };
     \addplot[fill=gray] coordinates {  % LFU  
-      (1, 41760.98) (2, 28372.55) (3, 16949.96)
+      (1, 41110.83) (2, 27399.93) (3, 15091.31)
     };
     \addplot[fill=black] coordinates {  % EFS 
-      (1, 53383.87) (2, 39236.63) (3, 24393.25)
+      (1, 52726.21) (2, 38396.94) (3, 23142.42)
     };    
     \addplot[fill=white] coordinates {  % MFS
-      (1, 53383.87) (2, 39236.63) (3, 24393.25)
+      (1, 52726.21) (2, 38396.94) (3, 23142.42)
     };
         
     \legend{LRU, LFU, EFS, MFS}
@@ -1107,16 +1107,16 @@ Rezultati simulacij so zbrani v Tabeli~\ref{tbl:sim_results}.
   ]
 
     \addplot[fill=gray!40] coordinates {  % LRU
-      (1, 116780.38) (2, 114216.31) (3, 108200.84)
+      (1, 111905.38) (2, 107773.46) (3, 97338.32)
     };
     \addplot[fill=gray] coordinates {  % LFU  
-      (1, 114953.38) (2, 109710.82) (3, 98400.73)
+      (1, 109987.49) (2, 101329.39) (3, 81382.90)
     };
     \addplot[fill=black] coordinates {  % EFS 
-      (1, 116574.68) (2, 113760.48) (3, 107298.33)
+      (1, 111580.25) (2, 106975.95) (3, 96241.67)
     };    
     \addplot[fill=white] coordinates {  % MFS
-      (1, 116574.68) (2, 113760.48) (3, 107298.33)
+      (1, 111580.25) (2, 106975.95) (3, 96241.67)
     };
         
     \legend{LRU, LFU, EFS, MFS}
