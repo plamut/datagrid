@@ -800,23 +800,25 @@ pojavijo v njej:
   zahtevek za repliko, ki je sámo nima. Posledično se za starša po določeni
   zakasnitvi sproži dogodek \textit{prejmi zahtevek za repliko}.
 
-  \item \textbf{Prejmi zahtevek za repliko:} Vozlišče prejme zahtevo za
-  določeno repliko bodisi od enega izmed svojih sinov bodisi od zunanjega
-  uporabnika podatkovnega omrežja. Če repliko ima, sproži dogodek
-  \textit{pošlji repliko}, sicer pa posreduje zahtevo za isto repliko
+  \item \textbf{Prejmi zahtevek za repliko:} Vozlišče prejme zahtevek za
+  določeno repliko od enega izmed svojih sinov. Če repliko ima, sproži dogodek
+  \textit{pošlji repliko}, sicer pa posreduje zahtevek za isto repliko
   naprej svojemu staršu in s tem sproži dogodek \textit{pošlji zahtevek za
   repliko}.
+
+  Če vir zahtevka ni določen, to označuje, da je zahtevek ustvarilo kar
+  vozlišče sámo. Če zahtevano repliko že ima pri sebi, jo enostavno
+  uporabi in se v simulaciji zaradi tega ne zgodi nič, sicer pa repliko
+  zahteva od svojega starša.
 
   \item \textbf{Pošlji repliko:} Vozlišče začne pošiljati repliko tja, od
   koder je bila od njega zahtevana. Po določeni zakasnitvi se sproži ustrezen
   dogodek \textit{prejmi repliko}.
 
-  \item \textbf{Prejmi repliko:} Zahtevana replika prispe na mesto, od
-  koder je izviral zahtevek zanjo. Če je to mesto izvora izven podatkovnega
-  omrežja, se ne zgodi nič več, saj je bil zahtevek zgolj uspešno izpolnjen.
-  Če pa gre za vozlišče v omrežju, mora slednje prejeto repliko naprej
-  posredovati tja, od koder je bila od njega zahtevana. V tem primeru se
-  sproži nov dogodek \textit{pošlji repliko}.
+  \item \textbf{Prejmi repliko:} Replika prispe do vozlišča, ki je poslalo
+  zahtevek zanjo. Če je vozlišče repliko zahtevalo zato, ker jo je predhodno
+  od njega zahtevalo neko drugo vozlišče, jo temu vozlišču posreduje naprej.
+  V tem primeru se sproži nov dogodek \textit{pošlji repliko}.
 \end{itemize}
 
 Pri dogodku \textit{prejmi zahtevek za repliko} je potrebno omeniti, da se
