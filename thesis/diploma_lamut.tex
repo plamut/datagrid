@@ -979,58 +979,88 @@ delati s footnote-i v tabelah? Čeprav nj bi sicer to bila slaba praksa ...
 
 \subsection{Rezultati simulacij}
 
-Rezultati simulacij so zbrani v Tabeli~\ref{tbl:sim_results}.
+Rezultati simulacij so prikazani na slikah \TODO{označi}. Po pričakovanjih
+sta bila odzivni čas in porabljena pasovna širina manjša v scenarijih~2~in~3,
+saj tam vozlišča določene skupine replik bolj pogosto zahtevajo, zato so
+koristi od njihovega lokalnega hranjenja večje.
 
-\begin{table}
-\small
-  \begin{center}
-    \begin{tabulary}{1.0\textwidth}{ | C | C | C | }
-      \hline
-      \multicolumn{3}{|>{\bf}c|}{
-        Scenarij 1 (P(MWG) = 0.1)
-      } \\
-      \hline
-      Strategija & Skupen odzivni čas [s] & Porabljena pasovna širina [Mbit] \\
-      \hline
-      LRU & \numprint{55268,55} & \numprint{111905,38} \\
-      LFU & \numprint{41110,83} & \numprint{109987,49} \\
-      EFS & \numprint{52726,21} & \numprint{111580,25} \\
-      MFS & \numprint{52726,21} & \numprint{111580,25} \\
-      \hline \hline
-      
-      \multicolumn{3}{|>{\bf}c|}{
-        Scenarij 2 (P(MWG) = 0.3)
-      } \\
-      \hline
-      Strategija & Skupen odzivni čas [s] & Porabljena pasovna širina [Mbit] \\
-      \hline
-      LRU & \numprint{40752,71} & \numprint{107773,46} \\
-      LFU & \numprint{27399,93} & \numprint{101329,39} \\
-      EFS & \numprint{38396,94} & \numprint{106975,95} \\
-      MFS & \numprint{38396,94} & \numprint{106975,95} \\
-      \hline \hline
+Presenetljivo je dejstvo, da sta strategiji EFS in MFS dosegli
+\textit{identične} rezultate. Prva misel je seveda bila, da je šlo za napako v
+implementaciji, vendar pa se je z analizo, opisano v razdelku \TODO{ref.},
+izkazalo, da je vzrok že v sami zasnovi omenjenih strategij.
 
-      \multicolumn{3}{|>{\bf}c|}{
-        Scenarij 3 (P(MWG) = 0.5)
-      } \\
-      \hline
-      Strategija & Skupen odzivni čas [s] & Porabljena pasovna širina [Mbit] \\
-      \hline
-      LRU & \numprint{24122,26} & \numprint{97338,32} \\
-      LFU & \numprint{15091,31} & \numprint{81382,90} \\
-      EFS & \numprint{23142,42} & \numprint{96241,67} \\
-      MFS & \numprint{23142,42} & \numprint{96241,67} \\
-      \hline
-    \end{tabulary}
-    
-  \end{center}
+Dobljeni rezultati tudi močno odstopajo od tistih, ki jih v člankih
+navajajo avtorji \TODO{kakšen link do slike? ali pa samo referenca?}.
+Trend razlik med rezultati posameznih scenarijev je sicer podoben, vendar so
+izmerjene vrednosti občutno drugačne. Razvidno je tudi, da predlagani
+strategiji v nasprotju s trditvami avtorjev ne dosežeta praktično nobenega
+izboljšanja v primerjavi s strategijo~LRU in celo zaostajata za
+strategijo~LFU. Možne razlage za vse navedene razlike so opisane v
+poglavju \TODO{referenca}.
 
-  \caption{Rezultati simulacije.%
-    \TODO{vir: lastni?}}
-  \label{tbl:sim_results}
-\end{table}
+\TODO{zakaj je v scenariju 1 razlika $\sim$20\% med LRU in LFU? BW razlike
+so minimimalne ... izgleda, kot da se strežnik totalno zabaše, saj njegovo
+pošiljanje replik prispeva več kot 80\% k vsoti vseh zakasnitev\\
+pri bandwidthu 20 Mbit/s je razlika manj kot 3\%, torej je očitno vse skupaj
+zelo (preveč) odvisno od tega, kakšna vrsta se naredi na glavnem strežniku
+-- če se enkrat zabaše in zato prepočasi pošilja replike, novi requesti
+verjetno prehitevajo dostavljanje replik, kar še poveča vrsto in upočasni
+pošiljanje replik (in posledično poveča število zahtevkov tudi od podrejenih
+vozlišč, ki replik ne prejmejo pravočasno in potem iste replike večkrat
+zahtevajo (ker jih v času prejema zahtevka še nimajo)}
 
-\TODO{namesto tabele daj raje graf? bo bolj pregledno}
+
+%Rezultati simulacij so zbrani v Tabeli~\ref{tbl:sim_results}.
+%\begin{table}
+%\small
+%  \begin{center}
+%    \begin{tabulary}{1.0\textwidth}{ | C | C | C | }
+%      \hline
+%      \multicolumn{3}{|>{\bf}c|}{
+%        Scenarij 1 (P(MWG) = 0.1)
+%      } \\
+%      \hline
+%      Strategija & Skupen odzivni čas [s] & Porabljena pasovna širina [Mbit] \\
+%      \hline
+%      LRU & \numprint{55268,55} & \numprint{111905,38} \\
+%      LFU & \numprint{41110,83} & \numprint{109987,49} \\
+%      EFS & \numprint{52726,21} & \numprint{111580,25} \\
+%      MFS & \numprint{52726,21} & \numprint{111580,25} \\
+%      \hline \hline
+%      
+%      \multicolumn{3}{|>{\bf}c|}{
+%        Scenarij 2 (P(MWG) = 0.3)
+%      } \\
+%      \hline
+%      Strategija & Skupen odzivni čas [s] & Porabljena pasovna širina [Mbit] \\
+%      \hline
+%      LRU & \numprint{40752,71} & \numprint{107773,46} \\
+%      LFU & \numprint{27399,93} & \numprint{101329,39} \\
+%      EFS & \numprint{38396,94} & \numprint{106975,95} \\
+%      MFS & \numprint{38396,94} & \numprint{106975,95} \\
+%      \hline \hline
+%
+%      \multicolumn{3}{|>{\bf}c|}{
+%        Scenarij 3 (P(MWG) = 0.5)
+%      } \\
+%      \hline
+%      Strategija & Skupen odzivni čas [s] & Porabljena pasovna širina [Mbit] \\
+%      \hline
+%      LRU & \numprint{24122,26} & \numprint{97338,32} \\
+%      LFU & \numprint{15091,31} & \numprint{81382,90} \\
+%      EFS & \numprint{23142,42} & \numprint{96241,67} \\
+%      MFS & \numprint{23142,42} & \numprint{96241,67} \\
+%      \hline
+%    \end{tabulary}
+%    
+%  \end{center}
+%
+%  \caption{Rezultati simulacije.%
+%    \TODO{vir: lastni?}}
+%  \label{tbl:sim_results}
+%\end{table}
+%
+%\TODO{namesto tabele daj raje graf? bo bolj pregledno}
 
 
 
@@ -1126,15 +1156,6 @@ Rezultati simulacij so zbrani v Tabeli~\ref{tbl:sim_results}.
   \end{axis}
 \end{tikzpicture}
 
-\TODO{to je sumljivo, zakaj je total BW used skoraj enak, odzivni čas
-pa OBČUTNO manjši glede na scenarije? glede na to, da odzivni čas v
-največji meri determinira prav bandwidth used ...}
-
-Na koncu povej, da rezultatov iz člankov ni bilo možno ponoviti, zato potem
-obstaja sum, da niso nič pametnega naredili, več o tem v nadaljevanju.
-
-Pa kakšen komentar, kaj si ugotovil? padajoči trend is dobil, kar je ok,
-ampak predlagani strategiji sta bolj kot LRU, ne pa nekaj izdatno boljšega
 
 \chapter{Kritična presoja člankov}
 
@@ -1148,7 +1169,9 @@ le omeniš "sum plagiatorstva", tu pa potem razdelaš)
 Povej, zakaj ... kje je spodnja meja ... kritiziraj metrike ...
 
 \item problemi: nejasnosti, slaba metrika (razdelaj), nappake v algoritmih,
-division by zero itd. (pa za čas ni enot ipd. in smo predpostavili sekunde)
+division by zero itd. (pa za čas ni enot ipd. in smo predpostavili sekunde).
+kaj, če izbriše repliko, ki jo trenutno pošilja (ok, to se ne zgodi, ker je
+RV vedno manjši od GV - pač slab algoritem)
 
 \end{itemize}
 
