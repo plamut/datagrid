@@ -68,7 +68,9 @@
 %\newtheorem{trditev}{Trditev}[izrek]
 \newenvironment{dokaz}{\emph{Dokaz.}\ }{\hspace{\fill}{$\Box$}}
 
-
+\newenvironment{itquote}
+{\begin{quote}\itshape}
+{\end{quote}}
 
 \begin{document}
 \selectlanguage{slovene}
@@ -1160,19 +1162,127 @@ zahtevajo (ker jih v času prejema zahtevka še nimajo)}
 
 \chapter{Kritična presoja člankov}
 
+\section{Sum recikliranja}
+
+Članka sta si že na prvi pogled zelo podobna med seboj. Oba imata
+\textit{identično} strukturo, naslovi razdelkov in podrazdelkov so, razen
+imena opisane strategije, popolnoma enaki. V obeh člankih je uporabljena ista
+slika shema podatkovnega omrežja in tudi velik del besedila v člankih je
+skorajda popolnoma enak. Kot primer si poglejmo prvi odstavek drugega razdelka
+v članku \TODO{referenca na 2011}:
+
+\begin{itquote}
+The network structure consists of a Server node and a number of
+Client nodes that interact with each other. The Server node is the node
+with the main storage which contains all the data in the Data Grid. On
+the other hand, Client nodes are the nodes that issue requests. Each
+Client node has a storage that is small compared with that of a Server
+node and thus cannot accommodate all the requested replicas.
+Therefore, some of the replica requests are served non-locally.
+\end{itquote}
+
+Primerjajmo ga s prvim odstavkom drugega razdelka v članku
+\TODO{referenca na 2012}:
+
+\begin{itquote}
+The employed network structure consists of a Server node and a number of
+Client nodes that interact with each other as appears in Fig. 1. The Server
+node is the node with the main storage which contains all the data that
+belongs to the Data Grid. On the other hand, Client nodes are the nodes that
+create the requests. Each of these nodes includes a storage that is relatively
+small if compared with the Server node’s storage and cannot hold all the
+requested replicas. Thus, some of the requested replicas are brought from the
+other nodes.
+\end{itquote}
+
+Oba citirana odstavka vsebujeta skorajda enake stavčne strukture. Razlikujeta
+se zgolj v tem, da so nekatere besede in besedne zveze nadomeščene s
+sopomenkami oziroma z nekoliko drugačnimi besednimi zvezami, ki pa pomena
+stavkov ne spremenijo.
+
+Citirana odstavka še zdaleč nista edini primer, pravzaprav je skorajda
+celotno besedilo obeh člankov sestavljeno iz takšnih parov medsebojno podobnih
+odstavkov. Domnevamo lahko, da so avtorji vnesli določene spremembe v besedilo
+novejšega izmed člankov zgolj zato, da bi se izognili morebitni samodejni
+zaznavi podvojenih člankov s strani temu namenjenih programov.
+
+\section{Neujemanje rezultatov}
+
+Rezultati, pridobljeni s simulacijo, se močno razlikujejo od tistih,
+predstavljenih v člankih. Po trditvah avtorjev se strategiji EFS in MFS
+obneseta veliko bolje od strategij LRU in LFU, vendar pa tega ni bilo možno
+ponoviti.
+
+Vse opisane strategije se med seboj razlikujejo zgolj v metrikah,
+s katerimi ocenjujejo vrednosti replik in skupin replik. Za boljše razumevanje
+rezultatov simulacije si moramo zato te metrike pobliže ogledati.
+
+\subsection*{Metrike v strategiji EFS}
+
+\TODO{opiši}
+
+\subsection*{Metrike v strategiji MFS}
+
+Strategija MFS ocenjuje vrednosti replik po enačbi~\eqref{eq:MFS_RV}. Enačbo
+lahko zapišemo tudi nekoliko drugače, in sicer števec ulomka delimo z
+imenovalcem:
+
+\begin{equation}
+  \mathit{PNOR} = \mathit{NOR} \times
+                 \left(1 - \frac{\mathit{CNFSS}}{\mathit{ RR.Size}}\right)
+  \label{eq:MFS_RV_v2}
+\end{equation}
+
+Iz psevdokode~\ref{alg:MFS} je razvidno, da je velikost zahtevane replike
+\textit{RR.Size} vedno večja od velikosti nezasedenega prostora na vozlišču
+\textit{CNFSS} -- če to ne bi bilo res, bi vozlišče repliko enostavno shranilo
+in sploh ne bi šlo ocenjevati njene vrednosti. Ulomek v
+enačbi~\eqref{eq:MFS_RV_v2} je zato manjši od ena, s tem pa vrednost izraza v
+oklepaju zavzame vrednosti na intervalu (0,1].
+Ker je število zahtevkov NOR za novo repliko kvečjemu enako
+ena\footnote{Odvisno od tega, kako interpretiramo članek. Vrednost NOR za
+zahtevano repliko je namreč lahko tudi enaka nič. Več o tem v razdelku
+\TODO{referenca na tam, kjer opišeš probleme članka}},
+tudi največja možna vrednot replike po enačbi~\eqref{eq:MFS_RV_v2} ni
+nikoli večja od te meje.
+
+Strategija MFS ocenjuje vrednosti skupin replik tako, da sešteje število
+zahtevkov za vse replike v skupini (enačba~\eqref{eq:MFS_GV}). Ker je
+vsaka replika v skupini bila zahtevana vsaj enkrat (najmanj takrat, ko jo
+je vozlišče zahtevalo in potem shranilo pri sebi), je vrednost skupine replik
+vedno večja ali enaka ena.
+
+Na podlagi povedanega je očitno, da vrednost skupine replik ni nikoli manjša
+od vrednosti nove replike, s tem pa tudi pogoj za zamenjavo ni nikoli
+izpolnjen. Ko se na vozliščih zapolni ves razpoložljivi prostor, slednja
+prenehajo shranjevati nove replike. Celotna strategija se tako izrodi
+v nekakšno različico statične replikacije, pri čemer je razporeditev replik
+v podatkovnem omrežju bolj ali manj naključna. Odvisna je namreč zgolj od
+vrstnega reda pojavljanja zahtevkov za replike in ne sledi nobeni vnaprej
+določeni hevristiki.
+
+
+\TODO{omeni, kako se obe strategiji izrodita v nekaj nesmiselnega... oziroma
+razprava, da zakaj potem niti ni za pričakovati kakšnega posebnega izboljšanja
+glede na benchmark}
+
+
 \TODO{tu pa zdaj cel kup stvari}
 
 \begin{itemize}
-\item copy-paste (kako so si podobni ... tega zato zgoraj v uvodu ne pišeš, tam
-le omeniš "sum plagiatorstva", tu pa potem razdelaš)
 
-\item meritve se ne ujemajo
-Povej, zakaj ... kje je spodnja meja ... kritiziraj metrike ...
-
-\item problemi: nejasnosti, slaba metrika (razdelaj), nappake v algoritmih,
+\item (drugi) problemi v člankih: nejasnosti, , napake v algoritmih (že v
+sami zasnovi... ni realno, da mreža tako počasna... oz. prevelik vpliv mreže
+in da se potem vse zabaše..),
+- morda lagoritem ne konvergira? vsaka replika od vozlišča zahtevana zgolj
+nekajkrat ...
+- pa a cela mreža zahteva ali vsako vozlišče?
+(malo poglej v mailih, kaj si že pisal razne razprave)
 division by zero itd. (pa za čas ni enot ipd. in smo predpostavili sekunde).
-kaj, če izbriše repliko, ki jo trenutno pošilja (ok, to se ne zgodi, ker je
-RV vedno manjši od GV - pač slab algoritem)
+
+- povej, da je algoritem napisan v loopu, ne pa kot decentralizirana zadeva,
+ki bi tekla na vsakem vozlišču
+
 
 \end{itemize}
 
