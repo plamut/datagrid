@@ -1213,109 +1213,119 @@ predstavljenih v člankih. Po trditvah avtorjev se strategiji EFS in MFS
 obneseta veliko bolje od strategij LRU in LFU, vendar pa tega ni bilo možno
 ponoviti.
 
+\TODO{malo napiši o tem, da se trendi ujemajo ... padajoče glede na $$P_{mwg}$$
+pa to, ampak da MFS in EFS rezultati pa niso kul ... pa v subsekcijah
+$$A_{sdsd}$$razdelaj možne razloge, zakaj tako}
+
 Vse opisane strategije se med seboj razlikujejo zgolj v metrikah,
 s katerimi ocenjujejo vrednosti replik in skupin replik. Za boljše razumevanje
 rezultatov simulacije si moramo zato te metrike pobliže ogledati.
 
-\TODO{malo napiši o tem, da se trendi ujemajo ... padajoče glede na $$P_{mwg}$$
-pa to, ampak da MFS in EFS rezultati pa niso kul ... pa v subsekcijah
-$$A_{sdsd}$$razdelaj možne razloge, zakaj tako}
 
 \subsection{Slabosti metrik v strategiji EFS}
 
 \subsubsection{Vrednost replike}
 
-(ker je prvi člen imenovalec vsaj 0.001 (max size 1000, nor vsake replike
-vsaj 1)
-FSTI imenovalec 10000, torej irelevanten. zadnji člen pa povprečen zadnji čas
-... ampak ta je velik, ker replike tako redko prihajajo ... spiši
-torej je GV odvisen zgolj od $$S_{NOR} / S_{SIZE}$$
+Vrednost replike v strategiji EFS se izračuna po formuli~\eqref{eq:EFS_RV}.
+Prvi člen predstavlja razmerje med številom zahtevkov za repliko in velikostjo
+replike. Ker je število zahtevkov za vsako novo repliko enako nič\footnote{%
+Pojasnilo, zakaj vzamemo ravno vrednost nič, je v razdelku \TODO{sklic na
+št. razdelka}}, je tudi vrednost tega člena nič.
 
-RV pa od NOR / SIZE (dominanten člen) ... oziroma ne, zadnji člen je dominanten
-ker ker je LRT majhen ... 100 mbit / 10 mbit/s = 10 s minimalno, torej
-1 / 10 ... a potem to povzroča večjo?
+Drugi člen predstavlja razmerje med številom zahtevkov za repliko v zadnjem
+časovnem intervalu FSTI in velikostjo tega intervala. Ker število zahtevkov
+v intervalu seveda ne more biti večje od števila vseh zahtevkov,
+slednje pa je enako nič, je tudi vrednost drugega člena
+formule~\eqref{eq:EFS_RV} enaka nič.
 
-ampak potem si moraš zapomnit, kdaj si zahteval repliko, ki jo potem kasneje
-prejmeš, tega podatka pa ni (ker vodi statistike samo za replike, ki
-jih ima) ... morda pa še to implementiraj?  najbrž preveč dela ...
+Vrednost tretjega člena je odvisna od tega, koliko časa je minilo
+od zadnjega zahtevka za repliko. Manjši kot je ta čas, večja je vrednost člena.
+Ker pa vozlišče ne vodi statistik za tiste replike, katerih kopij nima
+shranjenih pri sebi, je ta čast enostavno najmanjši možen, torej nič (začetek
+simulacije). Iz tabele~\ref{tbl:sim_params} je razvidno, da so replike v
+povprečju velike približno 550 megabitov. Ker je kapaciteta vsakega vozlišča
+\numprint{50000}~Mb, lahko eno vozlišče v povprečju shrani približno 90
+replik, preden mu zmanjka razpoložljivega prostora.
 
-"In this strategy, each node stores the NOR of each replica resides
-on it."
-za replike, ki jih ni, tega ni (strogo po algoritmu) ...
-skratka kar obdrži NOR 0 pa v kritiki povej, kako degradira
-(da si še lstrogo po algoritmu in da nimaš statistik za replike)
-
----
-
-... tudi tukaj je zadnji člen zanemarljivo majhen ... šteje le nor
-in nor fsti
+V simulaciji se novi zahtevki v povprečju pojavljajo na približno vsakih
+50~sekund (razvidno iz tabele~\ref{tbl:sim_params}), kar pomeni, da mora
+najprej preteči vsaj 4500 sekund ($90 \times 50\:s$), preden vozlišče
+zahteva repliko, ki je ne more več shraniti brez zamenjave skupine
+že shranjenih replik. V praksi je ta čas še veliko večji, saj je statistično
+gledano praktično nemogoče, da bi vseh prvih 90 zahtevkov poslalo eno in isto
+vozlišče v podatkovnem omrežju. Pričakovana vrednost tretjega člena
+formule~\eqref{eq:EFS_RV} (in s tem tudi vrednost replike) je tako veliko
+manjša od $\frac{1}{\numprint{4500}}$.
 
 \subsubsection{Vrednost skupine replik}
 
-Vrednost skupine replik se izračuna po enačbi~\eqref{eq:EFS_GV}. Poglejmo si,
-kakšne vrednosti lahko zavzame vsak izmed njenih členov.
+Vrednost skupine replik se izračuna po formuli~\eqref{eq:EFS_GV}. Tudi tu si
+poglejmo, kakšne vrednosti lahko zavzame vsak izmed njenih členov.
 
 Prvi člen predstavlja povprečno vrednost razmerja med številom zahtevkov in
 velikostjo replike vseh replik v skupini. Vsaka replika v skupini je bila
 zahtevana najmanj enkrat (takrat, ko jo je vozlišče prvič zahtevalo in shranilo
 pri sebi), po drugi strani pa je njena največja velikost omejena na
 1000 megabitov (tabela~\ref{tbl:sim_params}). To pomeni, da je vrednost
-prvega člena enačbe~\eqref{eq:EFS_GV} najmanj 0,001.
+prvega člena formule~\eqref{eq:EFS_GV} najmanj \numprint{0.001}.
 
 Drugi člen predstavlja razmerje med skupnim številom zahtevkov za vse replike
 v skupini v zadnjem časovnem intervalu FSTI in velikostjo tega intervala.
 Skupno število zahtevkov v tem intervalu seveda ne more biti nikoli večje od
 skupnega števila vseh zahtevkov, po drugi strani pa velikost tega intervala,
 uporabljena v simulaciji, znaša \numprint{10000} (tabela~\ref{tbl:sim_params}).
-Navedeno pomeni, da je drugi člen enačbe~\eqref{eq:EFS_GV} od prvega manjši za
+Navedeno pomeni, da je drugi člen formule~\eqref{eq:EFS_GV} od prvega manjši za
 cel velikostni red in ima na končno vrednost skupine replik zanemarljivo
 majhen vpliv.
 
 Vrednost tretjega člena je odvisna od tega, koliko časa je v povprečju minilo
-od zadnjega zahtevka za vsako izmed replik v skupini. Manjši kot je ta čas,
-večja je vrednost člena in največja je pri skupinah replik, ki jih vozlišče
-v povprečju najbolj pogosto zahteva.
-
-V simulaciji je v scenariju~3 verjetnost, da vozlišče zahteva repliko iz svoje
+od zadnjega zahtevka za vsako izmed replik v skupini. V simulaciji je v
+scenariju~3 verjetnost, da vozlišče zahteva repliko iz svoje
 skupine MWG, enaka 50~\%. Ker je v vsaki skupini 100 replik, je za vsako
 izmed njih verjetnost, da jo vozlišče zahteva, enaka 0,50~\%, kar je v
 povprečju enkrat na vsakih 200 zahtevkov.
 
-Čas med dvema zahtevkoma je uniformno porazdeljen na intervalu [0, 99] sekund,
-torej v povprečju znaša slabih 50 sekund. To pomeni, da vozlišče posamezno
-repliko v povprečju zahteva zgolj na približno vsakih \numprint{10000} sekund
-($200 \times 50\:\text{s}$).
-Ker se ta vrednost nahaja v imenovalcu tretjega člena enačbe~\eqref{eq:EFS_GV},
-je očitno, da je tudi ta člen za red velikosti manjši od prvega člena iste
-enačbe in ima zato zanemarljiv vpliv na njeno končno vrednost.
+Čas med dvema zahtevkoma je enakomerno porazdeljen na intervalu [0, 99] sekund,
+torej v povprečju znaša slabih 50 sekund. To pomeni, da vozlišče določeno
+repliko iz skupine MWG v povprečju zahteva zgolj na približno vsakih
+\numprint{10000} sekund ($200 \times 50\:\text{s}$).
+Ker se ta vrednost nahaja v imenovalcu tretjega člena
+formule~\eqref{eq:EFS_RV}, je njegova pričakovana vrednost okoli $10^{-4}$ (za
+manj pogosto zahtevane replike pa še manjša), kar je za red velikosti manjše
+od prvega člena iste formule.
 
------
+\TODO{kakšen diskreten znak/simbol za end-of-section?}
 
-zdaj pa sklep: vrednosti replike in skupine replik sta odvisni skoraj izključno
-od prvega člena... pa ker je vrednost nove replike 0 (NOR = 0) - statistik se
- ne vodi, medtem ko NOR pri GV ima vsaj 1, pomeni, da je je GV vedno večji od
- RV in se strategija izrodi.
+Pri analizi obeh metrik v strategiji EFS sta pomemebni predvsem naslednji
+ugotovitvi:
+\begin{itemize}
+\item Pri obeh metrikah je samo en člen formule tisti, ki dejansko določa
+končno vrednost. Druga dva člena sta v primerjavi z njim zanemarljivo majhna.
 
-Ostane torej prvi člen, za nove replike pa je št. zahtevkov 0!
-(po psevdokodi ... oz sklicuj se na poglavje, kjer to pojasniš). Torej
-vrednost skupine je vedno večja od vrednosti replike, do menjave ne pride.
-In zdaj je jasno, zakaj se zadeva izrodi v neko statično replikacijo.
+\item Dominantni člen v formuli za izračun vrednosti replike je veliko manjši
+od dominantnega člena v formuli za izračun vrednosti skupine replik.
+\end{itemize}
 
+Prva ugotovitev kaže na to, da metriki nista najbolje izbrani oziroma da
+členi v njih morda niso ustrezno normirani. Druga ugotovitev pa razkriva še
+večjo pomanjkljivost -- vrednost skupine replik v strategiji~EFS je vedno
+večja od vrednosti nove replike!
 
-... GV degradira v nekaj, kar je odvisno le od NOR
-
-%            gv = s_nor / s_size + s_nor_fsti / fsti + \
-%                1 / (ct - s_lrt / len(replicas))
-
+Posledica je, da skupine obstoječih replik ne bodo nikoli zamenjane z novimi
+replikami, zaradi česar se celotna strategija izrodi v nekakšno različico
+statične replikacije. Pri tem je razporeditev replik v podatkovnem
+omrežju bolj ali manj naključna, odvisna je namreč zgolj od
+vrstnega reda pojavljanja zahtevkov za replike in ne sledi nobeni vnaprej
+določeni hevristiki.
 
 
 \subsection{Slabosti metrik v strategiji MFS}
 
 \subsubsection{Vrednost replike}
 
-Strategija MFS ocenjuje vrednosti replik po enačbi~\eqref{eq:MFS_RV}. Enačbo
-lahko zapišemo tudi nekoliko drugače, in sicer števec ulomka delimo z njegovim
-imenovalcem:
+Strategija MFS ocenjuje vrednosti replik po formuli~\eqref{eq:MFS_RV}.
+Formulo lahko zapišemo tudi nekoliko drugače, in sicer števec ulomka delimo z
+njegovim imenovalcem:
 
 \begin{equation}
   \mathit{PNOR} = \mathit{NOR} \times
@@ -1327,19 +1337,20 @@ Iz psevdokode~\ref{alg:MFS} je razvidno, da je velikost zahtevane replike
 \textit{RR.Size} vedno večja od velikosti nezasedenega prostora na vozlišču
 \textit{CNFSS} -- če to ne bi bilo res, bi vozlišče repliko enostavno shranilo
 in sploh ne bi šlo ocenjevati njene vrednosti. Ulomek v
-enačbi~\eqref{eq:MFS_RV_v2} je zato manjši od ena, s tem pa vrednost izraza v
+formuli~\eqref{eq:MFS_RV_v2} je zato manjši od ena, s tem pa vrednost izraza v
 oklepaju zavzame vrednosti na intervalu (0,1].
 Ker je število zahtevkov NOR za novo repliko kvečjemu enako
-ena\footnote{Odvisno od tega, kako interpretiramo članek. Vrednost NOR za
-zahtevano repliko je namreč lahko tudi enaka nič. Več o tem v razdelku
-\TODO{referenca na tam, kjer opišeš probleme članka}},
-tudi največja možna vrednot replike po enačbi~\eqref{eq:MFS_RV_v2} ni
+ena\footnote{Odvisno od tega, kako interpretiramo članek. V simulaciji sem
+sicer predpostavil, da je vrednost NOR za novo zahtevano repliko enaka nič.
+Več o tem je napisano v razdelku \TODO{referenca na tam, kjer opišeš
+probleme članka}},
+tudi največja možna vrednot replike po formuli~\eqref{eq:MFS_RV_v2} ni
 nikoli večja od te meje.
 
 \subsubsection{Vrednost skupine replik}
 
 Strategija MFS ocenjuje vrednosti skupin replik tako, da sešteje število
-zahtevkov za vse replike v skupini (enačba~\eqref{eq:MFS_GV}). Ker je
+zahtevkov za vse replike v skupini (formula~\eqref{eq:MFS_GV}). Ker je
 vsaka replika v skupini bila zahtevana vsaj enkrat (najmanj takrat, ko jo
 je vozlišče zahtevalo in potem shranilo pri sebi), je vrednost skupine replik
 vedno večja ali enaka ena.
@@ -1347,16 +1358,16 @@ vedno večja ali enaka ena.
 Na podlagi povedanega je očitno, da vrednost skupine replik ni nikoli manjša
 od vrednosti nove replike, s tem pa tudi pogoj za zamenjavo ni nikoli
 izpolnjen. Ko se na vozliščih zapolni ves razpoložljivi prostor, slednja
-prenehajo shranjevati nove replike. Celotna strategija se tako izrodi
-v nekakšno različico statične replikacije, pri čemer je razporeditev replik
-v podatkovnem omrežju bolj ali manj naključna. Odvisna je namreč zgolj od
-vrstnega reda pojavljanja zahtevkov za replike in ne sledi nobeni vnaprej
-določeni hevristiki.
-
+prenehajo shranjevati nove replike. Tudi strategija MFS se po določenem času
+izrodi v različico statične replikacije na popolnoma enak način, kot se
+izrodi tudi strategija EFS.
 
 \TODO{omeni, kako se obe strategiji izrodita v nekaj nesmiselnega... oziroma
 razprava, da zakaj potem niti ni za pričakovati kakšnega posebnega izboljšanja
-glede na benchmark}
+glede na benchmark ... pač komentar, zakaj so rezultati tako slabi, kot so
+pa zakaj dasta obe strategiji popolnoma enake rezultate - ker se na popolnoma
+enak način izrodita
+}
 
 
 \TODO{tu pa zdaj cel kup stvari}
@@ -1381,6 +1392,19 @@ je skupno, ker je nekako logično 10 mbit mreža (ker lahko potem npr.
 vzpostaviš 19 povezav in imaš nenadoma pasovno širino 190mbit, kar ni
 intuitivno)
 
+- utemeljitev, zakaj je št. zahtevkov za novo repliko enako nič
+(ker, strogo po algoritmu, vozlišče izbriše statistike za izbrisane replike,
+torej očitno ne vodi statistik za ostale replike.
+pa tudi če jih, kakšna je vrednost NOR? 1? kaj, če vmes med čakanjem pridejo
+novi zahtevki za to repliko? Tega enostavno ne vemo, ker za repliko
+ne vodimo statistik, dokler je ne shranimo (še enkrat, to je strogo po
+algoritmu)
+
+"In this strategy, each node stores the NOR of each replica resides
+on it."
+za replike, ki jih ni, tega ni (strogo po algoritmu) ...
+skratka kar obdrži NOR 0 pa v kritiki povej, kako degradira
+(da si še lstrogo po algoritmu in da nimaš statistik za replike)
 
 \end{itemize}
 
