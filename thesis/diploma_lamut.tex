@@ -1213,13 +1213,20 @@ predstavljenih v člankih. Po trditvah avtorjev se strategiji EFS in MFS
 obneseta veliko bolje od strategij LRU in LFU, vendar pa tega ni bilo možno
 ponoviti.
 
-\TODO{malo napiši o tem, da se trendi ujemajo ... padajoče glede na $$P_{mwg}$$
-pa to, ampak da MFS in EFS rezultati pa niso kul ... pa v subsekcijah
-$$A_{sdsd}$$razdelaj možne razloge, zakaj tako}
+Splošni trendi med posameznimi scenariji se sicer ujemajo. Večja kot je
+verjetnost, da vozlišče zahteva eno izmed replik iz svoje skupine MWG, manjši
+je skupen odzivni čas in porabljena pasovna širina, kar velja za vse štiri
+preizkušene strategije. Slednje je nenazadnje tudi pričakovano, saj so v teh
+primerih posamezne skupine replik bolj pogosto zahtevane in to dejstvo lahko
+vozlišča s pridom izkoristijo pri odločanju, katere skupine replik je bolj
+smiselno shraniti (in obdržati) tudi lokalno.
 
-Vse opisane strategije se med seboj razlikujejo zgolj v metrikah,
-s katerimi ocenjujejo vrednosti replik in skupin replik. Za boljše razumevanje
-rezultatov simulacije si moramo zato te metrike pobliže ogledati.
+Po drugi strani pa je iz rezultatov očitno, da strategiji EFS in MFS ne
+prineseta nobenega pravega izboljšanja glede na referenčni strategiji LRU in
+LFU. Ker so vse obravnavane strategije med seboj v zasnovi enake in se med
+seboj razlikujejo zgolj v metrikah za ocenjevanje vrednosti replik in skupin
+replik, leži ključ do razumevanja dobljenih rezultatov simulacije ravno v
+podrobni analizi teh metrik.
 
 
 \subsection{Slabosti metrik v strategiji EFS}
@@ -1294,8 +1301,6 @@ formule~\eqref{eq:EFS_RV}, je njegova pričakovana vrednost okoli $10^{-4}$ (za
 manj pogosto zahtevane replike pa še manjša), kar je za red velikosti manjše
 od prvega člena iste formule.
 
-\TODO{kakšen diskreten znak/simbol za end-of-section?}
-
 Pri analizi obeh metrik v strategiji EFS sta pomemebni predvsem naslednji
 ugotovitvi:
 \begin{itemize}
@@ -1358,19 +1363,13 @@ vedno večja ali enaka ena.
 Na podlagi povedanega je očitno, da vrednost skupine replik ni nikoli manjša
 od vrednosti nove replike, s tem pa tudi pogoj za zamenjavo ni nikoli
 izpolnjen. Ko se na vozliščih zapolni ves razpoložljivi prostor, slednja
-prenehajo shranjevati nove replike. Tudi strategija MFS se po določenem času
-izrodi v različico statične replikacije na popolnoma enak način, kot se
-izrodi tudi strategija EFS.
-
-\TODO{omeni, kako se obe strategiji izrodita v nekaj nesmiselnega... oziroma
-razprava, da zakaj potem niti ni za pričakovati kakšnega posebnega izboljšanja
-glede na benchmark ... pač komentar, zakaj so rezultati tako slabi, kot so
-pa zakaj dasta obe strategiji popolnoma enake rezultate - ker se na popolnoma
-enak način izrodita
-}
+prenehajo shranjevati nove replike. Strategija MFS se po določenem času
+izrodi v različico statične replikacije na enak način, kot se izrodi
+tudi strategija EFS. Zdaj je tudi razumljivo, zakaj sta obe strategiji v
+simulaciji dosegli popolnoma enake rezultate.
 
 
-\TODO{tu pa zdaj cel kup stvari}
+\section{Nejasnosti in druge napake v člankih}
 
 \begin{itemize}
 
