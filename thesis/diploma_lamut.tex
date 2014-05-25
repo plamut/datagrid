@@ -975,7 +975,7 @@ dobimo, kakšne so razdalje med vozlišči}
 \TODO{Časovna enota za "inter-arrival times" v člankih ni navedena,
 predpostavil sem, da je sekunda. - uporabi "tabu" okolje, ki zna
 delati s footnote-i v tabelah? Čeprav nj bi sicer to bila slaba praksa ...
-(footnotes v tabelah)}
+(footnotes v tabelah)}w
 
 
 
@@ -1371,6 +1371,40 @@ simulaciji dosegli popolnoma enake rezultate.
 
 \section{Nejasnosti in druge napake v člankih}
 
+Med razvojem simulacije se je izkazalo, da imata oba članka poleg vprašljivo
+zastavljenih metrik tudi veliko drugih pomanjkljivosti. Ker določene stvari
+niso dovolj podrobno opisane, se je bilo na nekaterih mestih
+potrebno zanašati na določene predpostavke, ki pa so seveda lahko bile
+drugačne od predpostavk avtorjev člankov.
+
+Dvomljiva je tudi sama zasnova simulacije, kar velja tako za izbrane
+vrednosti njenih parametrov, kot tudi za izbiro topologije podatkovnega
+omrežja, ki ne odraža nujno strukture tovrstnih omrežij v praksi.
+
+Vse omenjene in še nekatere druge pomanjkljivosti so opisane v naslednjih
+razdelkih.
+
+\subsection{Pomanjkljiv opis parametrov simulacije}
+
+V tabeli, ki v člankih navaja vrednosti parametrov simulacije, ni podana
+enota za čas med prihodi zahtevkov vozlišč in dolžino časovnega intervala
+FTSI. Predpostavil sem, da gre verjetno za sekunde, saj je med drugim pasovna
+širina omrežja podana v enoti \textit{Mbit/s}.
+
+Avtorji v člankih ne pojasnijo dovolj podrobno, na kakšni topologiji
+podatkovnega omrežja so izvedli simulacijo. Navajajo zgolj to, da so uporabili
+polni graf, v katerem vsako vozlišče pozna svojo najkrajšo pot do glavnega
+strežnika in po tej poti tudi pošilja zahtevke za replike, ki jih nima lokalno
+shranjenih.
+
+Po drugi strani pa nič ne povedo o tem, kakšne so bile dejanske
+razdalje med vozlišči. Zaradi tega ni možno izračunati omenjenih
+najkrajših poti in posledično tudi ne določiti dejanske strukture omrežja.
+Slednja seveda vpliva na rezultate simulacije, saj ni vseeno, ali je veliko
+vozlišč neposredno povezanih z glavnim strežnikom ali pa morajo replike
+zahtevati posredno preko drugih vozlišč v omrežju.
+
+
 \begin{itemize}
 
 \item (drugi) problemi v člankih: nejasnosti, , napake v algoritmih (že v
@@ -1380,7 +1414,17 @@ in da se potem vse zabaše..),
 nekajkrat ...
 - pa a cela mreža zahteva ali vsako vozlišče?
 (malo poglej v mailih, kaj si že pisal razne razprave)
-division by zero itd. (pa za čas ni enot ipd. in smo predpostavili sekunde).
+division by zero itd.
+
+
+- pa a je topologija sploh realna? v praksi vozlišča načeloma lahko
+ zahtevajo replike tudi po drugih poteh, če je ena zasedena... pa redundanca
+ recimo zdaj, če eno vozlišče pade, celo vejo odreže, ker je najkrajša pot do
+ strežnika statična, se ne spreminja glede na (ne)dosegljivost vozlišč in
+ obremenitve posameznih vozlišč.
+\TODO{vstavi sliko, da se bolje vidi drevesna struktura
+... morda naredi kar vektorsko? - če bo čas}
+
 
 - povej, da je algoritem napisan v loopu, ne pa kot decentralizirana zadeva,
 ki bi tekla na vsakem vozlišču
