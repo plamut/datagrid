@@ -1384,12 +1384,17 @@ omrežja, ki ne odraža nujno strukture tovrstnih omrežij v praksi.
 Vse omenjene in še nekatere druge pomanjkljivosti so opisane v naslednjih
 razdelkih.
 
-\subsection{Pomanjkljiv opis parametrov simulacije}
+\subsection{Pomanjkljiv opis zasnove simulacije}
+
+\subsubsection{Manjkajoče enote nekaterih parametrov}
 
 V tabeli, ki v člankih navaja vrednosti parametrov simulacije, ni podana
-enota za čas med prihodi zahtevkov vozlišč in dolžino časovnega intervala
-FTSI. Predpostavil sem, da gre verjetno za sekunde, saj je med drugim pasovna
-širina omrežja podana v enoti \textit{Mbit/s}.
+niti enota za čas med prihodi zahtevkov vozlišč niti enota za dolžino
+časovnega intervala FTSI. Predpostavil sem, da gre v obeh primerih za sekunde,
+saj je pasovna širina omrežja podana v količini prenešenih podatkov
+\textit{na sekundo} (enota~\textit{Mbit/s}).
+
+\subsubsection{Nepopoln opis uporabljene topologije omrežja}
 
 Avtorji v člankih ne pojasnijo dovolj podrobno, na kakšni topologiji
 podatkovnega omrežja so izvedli simulacijo. Navajajo zgolj to, da so uporabili
@@ -1404,6 +1409,33 @@ Slednja seveda vpliva na rezultate simulacije, saj ni vseeno, ali je veliko
 vozlišč neposredno povezanih z glavnim strežnikom ali pa morajo replike
 zahtevati posredno preko drugih vozlišč v omrežju.
 
+\subsubsection{Dvoumen opis ..... TODO}
+
+Avtorji pri opisu parametrov simulacije navajajo, da znaša čas med prihodi
+zahtevkov vozlišč med 0 in 99 sekund, vendar pa ni jasno, ali se to nanaša
+na celotno omrežje ali na vsako posamezno vozlišče posebej. Pri implementaciji
+simulacije sem predpostavil, da gre za čas med prihodi zahtevkov na ravni
+celotnega omrežja.
+
+--- pa a si replike delijo posavno širino vozlišča (kao ruter - 10 mbit), ali
+si delijo vsako povezavo posebej (da je vsaka povezava 10 mbit). V simulaciji
+je skupno, ker je nekako logično 10 mbit mreža (ker lahko potem npr.
+vzpostaviš 19 povezav in imaš nenadoma pasovno širino 190mbit, kar ni
+intuitivno)
+
+--- utemeljitev, zakaj je št. zahtevkov za novo repliko enako nič
+(ker, strogo po algoritmu, vozlišče izbriše statistike za izbrisane replike,
+torej očitno ne vodi statistik za ostale replike.
+pa tudi če jih, kakšna je vrednost NOR? 1? kaj, če vmes med čakanjem pridejo
+novi zahtevki za to repliko? Tega enostavno ne vemo, ker za repliko
+ne vodimo statistik, dokler je ne shranimo (še enkrat, to je strogo po
+algoritmu)
+"In this strategy, each node stores the NOR of each replica resides
+on it."
+za replike, ki jih ni, tega ni (strogo po algoritmu) ...
+skratka kar obdrži NOR 0 pa v kritiki povej, kako degradira
+(da si še lstrogo po algoritmu in da nimaš statistik za replike)
+
 
 \begin{itemize}
 
@@ -1412,7 +1444,7 @@ sami zasnovi... ni realno, da mreža tako počasna... oz. prevelik vpliv mreže
 in da se potem vse zabaše..),
 - morda lagoritem ne konvergira? vsaka replika od vozlišča zahtevana zgolj
 nekajkrat ...
-- pa a cela mreža zahteva ali vsako vozlišče?
+
 (malo poglej v mailih, kaj si že pisal razne razprave)
 division by zero itd.
 
@@ -1428,26 +1460,6 @@ division by zero itd.
 
 - povej, da je algoritem napisan v loopu, ne pa kot decentralizirana zadeva,
 ki bi tekla na vsakem vozlišču
-
-- pa a si replike delijo posavno širino vozlišča (kao ruter - 10 mbit), ali
-si delijo vsako povezavo posebej (da je vsaka povezava 10 mbit). V simulaciji
-je skupno, ker je nekako logično 10 mbit mreža (ker lahko potem npr.
-vzpostaviš 19 povezav in imaš nenadoma pasovno širino 190mbit, kar ni
-intuitivno)
-
-- utemeljitev, zakaj je št. zahtevkov za novo repliko enako nič
-(ker, strogo po algoritmu, vozlišče izbriše statistike za izbrisane replike,
-torej očitno ne vodi statistik za ostale replike.
-pa tudi če jih, kakšna je vrednost NOR? 1? kaj, če vmes med čakanjem pridejo
-novi zahtevki za to repliko? Tega enostavno ne vemo, ker za repliko
-ne vodimo statistik, dokler je ne shranimo (še enkrat, to je strogo po
-algoritmu)
-
-"In this strategy, each node stores the NOR of each replica resides
-on it."
-za replike, ki jih ni, tega ni (strogo po algoritmu) ...
-skratka kar obdrži NOR 0 pa v kritiki povej, kako degradira
-(da si še lstrogo po algoritmu in da nimaš statistik za replike)
 
 \end{itemize}
 
