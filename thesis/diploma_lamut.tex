@@ -313,7 +313,7 @@ Dinamična replikacija je boljša od statične, saj se lahko avtomatično
 prilagaja morebitnim spremembam v vzorcih uporabe podatkovnega omrežja
 \TODO{citat Čibej}. Poznamo veliko različnih dinamičnih replikacijskih
 strategij, pri čemer je ena izmed najbolj učinkovitih algoritem
-\newterm{Fast Spread} (\TODO{vir -- Ranganathan and Foster, 2001b?}).
+\newterm{Fast Spread} (\TODO{vir --- Ranganathan and Foster, 2001b?}).
 
 \TODO{Fast spread prevedemo v slovenščino? ``algoritem hitrega širjenja''?}
 
@@ -326,7 +326,7 @@ vse replike, ki obstajajo v omrežju. V primerjavi z njim je prostor na vseh
 ostalih vozliščih relativno majhen, tako da lahko slednja naenkrat hranijo
 zgolj omejeno podmnožico replik. Vozlišča so lahko poljubno povezana med seboj
 in ni nujno, da ima vsako izmed njih neposredno povezavo z glavnim strežnikom
--- z njim so lahko povezana tudi zgolj posredno preko drugih vozlišč.
+- z njim so lahko povezana tudi zgolj posredno preko drugih vozlišč.
 
 Za vsako vozlišče v omrežju obstaja najkrajša pot do strežnika in vsako izmed
 njih ve, katero vozlišče je njihov starš na tej poti. Kadar vozlišče prejme
@@ -648,7 +648,7 @@ in velikostjo nezasedenega prostora na vozlišču. V robnem primeru,
 ko je ves razpoložljiv prostor na vozlišču zaseden (CNFSS je enak 0), sta
 vrednosti PNOR in NOR enaki. PNOR ni nikoli negativno število.%
 \footnote{Ulomek v enačbi~\eqref{eq:MFS_RV} je vedno pozitiven, saj
-je njegov imenovalec pozitiven -- velikost replike \textit{RR.Size} je
+je njegov imenovalec pozitiven~---~velikost replike \textit{RR.Size} je
 namreč strogo večja od velikosti nezasedenega prostora \textit{CNFSS}. Če
 bi bilo obratno, bi namreč vozlišče repliko takoj shranilo in niti ne bi
 šlo računati njene vrednosti, kar je razvidno iz vrstic 8 in 9
@@ -851,7 +851,7 @@ dogodke tipa \textit{prejmi repliko}, na katere to vpliva.
 \subsection{Priprava simulacije}
 
 Simulacijo sem pripravil na enak način, kot je opisan v obeh člankih
-\TODO{referenca?}, in v njej med seboj primerjal štiri strategije zamenjave --
+\TODO{referenca?}, in v njej med seboj primerjal štiri strategije zamenjave ---
 LRU, LFU, EFS in MFS. Za ocenjevanje strategij sem uporabil predlagani
 metriki, in sicer skupen odzivni čas in skupno porabo pasovne širine
 (Tabela~\ref{tbl:sim_metrics}). Dobra strategija obe metriki minimizira.
@@ -912,7 +912,7 @@ Strategije sem med seboj primerjal v treh različnih scenarijih:
 \begin{itemize}
   \item \textbf{Scenarij 1:} Vozlišče zahteva vse replike z
     enako verjetnostjo. To pomeni, da je verjetnost, da zahteva repliko iz
-    svoje skupine MWG, zgolj 10~\% -- torej enaka, kot verjetnost za
+    svoje skupine MWG, zgolj 10~\% --- torej enaka, kot verjetnost za
     katerekoli drugo skupino replik.
 
   \item \textbf{Scenarij 2:} Vozlišče zahteva eno izmed replik iz svoje
@@ -926,7 +926,7 @@ Strategije sem med seboj primerjal v treh različnih scenarijih:
 V vsakem izmed naštetih scenarijev simulacijo poženemo enkrat za vsako
 strategijo, kar skupaj znese 12 izvedb simulacije
 (3 scenariji $\times$ 4 strategije). V posamezni izvedbi vsa vozlišča
-uporabljajo enako strategijo -- tisto, ki jo takrat preizkušamo.
+uporabljajo enako strategijo --- tisto, ki jo takrat preizkušamo.
 
 Nastavitve simulacije se med izvedbami ne spreminjajo. Uporabljene vrednosti
 parametrov prikazuje Tabela~\ref{tbl:sim_params}.
@@ -1006,7 +1006,7 @@ so minimimalne ... izgleda, kot da se strežnik totalno zabaše, saj njegovo
 pošiljanje replik prispeva več kot 80\% k vsoti vseh zakasnitev\\
 pri bandwidthu 20 Mbit/s je razlika manj kot 3\%, torej je očitno vse skupaj
 zelo (preveč) odvisno od tega, kakšna vrsta se naredi na glavnem strežniku
--- če se enkrat zabaše in zato prepočasi pošilja replike, novi requesti
+--- če se enkrat zabaše in zato prepočasi pošilja replike, novi requesti
 verjetno prehitevajo dostavljanje replik, kar še poveča vrsto in upočasni
 pošiljanje replik (in posledično poveča število zahtevkov tudi od podrejenih
 vozlišč, ki replik ne prejmejo pravočasno in potem iste replike večkrat
@@ -1313,7 +1313,7 @@ od dominantnega člena v formuli za izračun vrednosti skupine replik.
 
 Prva ugotovitev kaže na to, da metriki nista najbolje izbrani oziroma da
 členi v njih morda niso ustrezno normirani. Druga ugotovitev pa razkriva še
-večjo pomanjkljivost -- vrednost skupine replik v strategiji~EFS je vedno
+večjo pomanjkljivost --- vrednost skupine replik v strategiji~EFS je vedno
 večja od vrednosti nove replike!
 
 Posledica je, da skupine obstoječih replik ne bodo nikoli zamenjane z novimi
@@ -1323,6 +1323,9 @@ omrežju bolj ali manj naključna, odvisna je namreč zgolj od
 vrstnega reda pojavljanja zahtevkov za replike in ne sledi nobeni vnaprej
 določeni hevristiki.
 
+
+\TODO{neadaptivnost ... ko enkrat NOR postane prevelik, ga NOR/FSTI in LRT
+ne dosežeta več in se stare replike "usidrajo"}
 
 \subsection{Slabosti metrik v strategiji MFS}
 
@@ -1340,7 +1343,7 @@ njegovim imenovalcem:
 
 Iz psevdokode~\ref{alg:MFS} je razvidno, da je velikost zahtevane replike
 \textit{RR.Size} vedno večja od velikosti nezasedenega prostora na vozlišču
-\textit{CNFSS} -- če to ne bi bilo res, bi vozlišče repliko enostavno shranilo
+\textit{CNFSS} --- če to ne bi bilo res, bi vozlišče repliko enostavno shranilo
 in sploh ne bi šlo ocenjevati njene vrednosti. Ulomek v
 formuli~\eqref{eq:MFS_RV_v2} je zato manjši od ena, s tem pa vrednost izraza v
 oklepaju zavzame vrednosti na intervalu (0,1].
@@ -1384,7 +1387,7 @@ omrežja, ki ne odraža nujno strukture tovrstnih omrežij v praksi.
 Vse omenjene in še nekatere druge pomanjkljivosti so opisane v naslednjih
 razdelkih.
 
-\subsection{Pomanjkljiv opis zasnove simulacije}
+\subsection{Pomanjkljiv opis posameznih delov simulacije}
 
 \subsubsection{Manjkajoče enote nekaterih parametrov}
 
@@ -1409,7 +1412,7 @@ Slednja seveda vpliva na rezultate simulacije, saj ni vseeno, ali je veliko
 vozlišč neposredno povezanih z glavnim strežnikom ali pa morajo replike
 zahtevati posredno preko drugih vozlišč v omrežju.
 
-\subsubsection{Dvoumen opis ..... TODO}
+\subsubsection{Dvoumen opis časa med prihodi zahtevkov in pasovne širine omrežja}
 
 Avtorji pri opisu parametrov simulacije navajajo, da znaša čas med prihodi
 zahtevkov vozlišč med 0 in 99 sekund, vendar pa ni jasno, ali se to nanaša
@@ -1417,37 +1420,79 @@ na celotno omrežje ali na vsako posamezno vozlišče posebej. Pri implementacij
 simulacije sem predpostavil, da gre za čas med prihodi zahtevkov na ravni
 celotnega omrežja.
 
---- pa a si replike delijo posavno širino vozlišča (kao ruter - 10 mbit), ali
-si delijo vsako povezavo posebej (da je vsaka povezava 10 mbit). V simulaciji
-je skupno, ker je nekako logično 10 mbit mreža (ker lahko potem npr.
-vzpostaviš 19 povezav in imaš nenadoma pasovno širino 190mbit, kar ni
-intuitivno)
+Tudi pri navedeni pasovni širini omrežja sta možni dve interpretaciji. Ena je,
+da ima vsaka povezava med dvema vozliščema pasovno širino 10~\textit{Mbit/s},
+druga pa, da je to celotna pasovna širina, ki jo ima posamezno vozlišče na
+voljo in se enakomerno deli med vsemi njegovimi povezavami s soležnimi
+vozlišči. Pri implementaciji simulacije sem predpostavil slednjo možnost.
 
---- utemeljitev, zakaj je št. zahtevkov za novo repliko enako nič
-(ker, strogo po algoritmu, vozlišče izbriše statistike za izbrisane replike,
-torej očitno ne vodi statistik za ostale replike.
-pa tudi če jih, kakšna je vrednost NOR? 1? kaj, če vmes med čakanjem pridejo
-novi zahtevki za to repliko? Tega enostavno ne vemo, ker za repliko
-ne vodimo statistik, dokler je ne shranimo (še enkrat, to je strogo po
-algoritmu)
-"In this strategy, each node stores the NOR of each replica resides
-on it."
-za replike, ki jih ni, tega ni (strogo po algoritmu) ...
-skratka kar obdrži NOR 0 pa v kritiki povej, kako degradira
-(da si še lstrogo po algoritmu in da nimaš statistik za replike)
+\subsubsection{Vrednosti statistik novih replik}
 
+Članka v razdelku~3 (\TODO{ref.?}) navajata, da vsako vozlišče vodi statistiko
+števila zahtevkov za vse replike, ki se nahajajo na njem. Po drugi strani nikjer
+ne omenjata, ali in kako vozlišča vodijo statistike za replike, ki jih
+prejmejo in jih še nimajo lokalno shranjenih.
+Pri ocenjevanju vrednosti nove replike se pojavi vprašanje, katero vrednost
+uporabiti za število zahtevkov zanjo. Možne so vsaj tri interpretacije:
 
 \begin{itemize}
+\item Število zahtevkov je enako nič, saj vozlišče o novi repliki nima nobenih
+statistik.
+\item Število zahtevkov je enako ena, saj je bila nova replika zagotovo vsaj
+enkrat zahtevana s strani vozlišča (sicer je vozlišče niti ne bi prejelo).
+\item Število zahtevkov je lahko večje od ena, če je vozlišče zahtevalo novo
+repliko, med čakanjem nanjo pa jo je zaradi zahtevkov sosednjih vozlišč
+še nekajkrat ponovno zahtevalo.
+\end{itemize}
 
-\item (drugi) problemi v člankih: nejasnosti, , napake v algoritmih (že v
-sami zasnovi... ni realno, da mreža tako počasna... oz. prevelik vpliv mreže
-in da se potem vse zabaše..),
-- morda lagoritem ne konvergira? vsaka replika od vozlišča zahtevana zgolj
-nekajkrat ...
+Iz psevdokode~\ref{alg:EFS} (vrstica~22) in psevdokode~\ref{alg:MFS} (vrstica 21)
+lahko sicer razberemo, da vozlišče ob brisanju skupine replik izbriše tudi vse
+pripadajoče statistike izbrisanih replik, po drugi strani pa ni nikjer razvidno,
+da bi vozlišče že ob zahtevku za novo repliko osvežilo tudi statistike zanjo.
+Statistike verjetno ustvari takrat, ko repliko dejansko lokalno shrani
+(funkcija \textit{Copy RR}). \TODO{referenca direktno na vrstico v psevdokodi?}
+Na podlagi opisa strategij v psevdokodi sem zato predpostavil, da je število
+zahtevkov za nove replike enako nič.
 
-(malo poglej v mailih, kaj si že pisal razne razprave)
-division by zero itd.
 
+\subsection{Pomanjkljivosti v opisih strategij (psevdokoda)}
+
+\subsubsection{Deljenje z nič}
+
+V strategiji EFS se vrednost replike izračuna po formuli~\eqref{eq:EFS_RV}.
+Vrednost imenovalca tretjega člena je razlika med trenutnim časom in časom
+zadnjega zahtevka za repliko. V robnem primeru se lahko zgodi, da sta oba časa
+enaka~---~na primer takrat, ko vozlišče istočasno prejme zahtevek za repliko,
+obenem pa to isto repliko tudi prejme kot odziv na enega izmed prejšnjih
+zahtevkov. V tem primeru je imenovalca enaka nič, rezultat operacije pa
+nedefiniran.
+
+Med izvajanjem simulacije je dejansko prišlo do omenjenega robnega primera,
+zato sem moral izračun vrednosti replike v strategiji EFS prilagoditi tako,
+da je v tem primeru ocenjena vrednost replike kar $\infty$ (neskončno).
+
+\subsubsection{Manjkajoči ``break''}
+
+(tukaj komentar, da to sicer ni "napaka", kaže pa na površnost.
+... oziroma ne, je napaka (ampak tega ne omenjaj), povej pač, da gre za
+površnost
+v opisu piše, da jo zahteva od starša, dokler je ne najde, tukaj pa gre vse
+do glavnega strežnika.
+
+"3. Na koncu if-a v vrstici 6 manjka en "break"? Namreč če repliko na poti do
+strežnika že nekje najdemo in jo pripeljemo navzdol, nima več smisla, da
+nadaljujemo tisti "for i = 2 ..." iz vrstice 5.
+Skratka ne gledamo več po hierarhiji navzgor, ker smo vmes na poti že našli "bolj
+lokalno" kopijo replike in nas ne zanima, ali se replika morda nahaja še kje nad
+tem."
+
+\subsubsection{Opis strategije na ne-porazdeljen način}
+
+- povej, da je algoritem napisan v loopu, ne pa kot decentralizirana zadeva,
+ki bi tekla na vsakem vozlišču... da sem v simulaciji napravil tako
+
+
+\subsection{Vprašljiva zasnova simulacije}
 
 - pa a je topologija sploh realna? v praksi vozlišča načeloma lahko
  zahtevajo replike tudi po drugih poteh, če je ena zasedena... pa redundanca
@@ -1457,11 +1502,21 @@ division by zero itd.
 \TODO{vstavi sliko, da se bolje vidi drevesna struktura
 ... morda naredi kar vektorsko? - če bo čas}
 
+Ni realna struktura in routing, zelo dominira čas prenosa po mreži (na odzivni
+čas vpliva) in je latenca brezveze (?), mreža se zabaše ... prevleik vpliv
+teh ozkih grl?
 
-- povej, da je algoritem napisan v loopu, ne pa kot decentralizirana zadeva,
-ki bi tekla na vsakem vozlišču
+- morda lagoritem ne konvergira? vsaka replika od vozlišča zahtevana zgolj
+nekajkrat ...
 
-\end{itemize}
+- pa med čakanjem na repliko ... a jo spet zahtevamo? strogo po algoritmu da,
+čeprav je to neesmisel (morda tole pod kakšno drugo točko, ampak vseeno omeni)
+
+
+
+
+
+
 
 
 \chapter{Sklepne ugotovitve}
