@@ -1455,7 +1455,7 @@ Na podlagi opisa strategij v psevdokodi sem zato predpostavil, da je število
 zahtevkov za nove replike enako nič.
 
 
-\subsection{Pomanjkljivosti v opisih strategij (psevdokoda)}
+\subsection{Pomanjkljivosti v opisu strategij (psevdokoda)}
 
 \subsubsection{Deljenje z nič}
 
@@ -1468,28 +1468,49 @@ zahtevkov. V tem primeru je imenovalca enaka nič, rezultat operacije pa
 nedefiniran.
 
 Med izvajanjem simulacije je dejansko prišlo do omenjenega robnega primera,
-zato sem moral izračun vrednosti replike v strategiji EFS prilagoditi tako,
+zato sem moral izračun vrednosti replike v strategiji~EFS prilagoditi tako,
 da je v tem primeru ocenjena vrednost replike kar $\infty$ (neskončno).
 
 \subsubsection{Manjkajoči ``break''}
 
-(tukaj komentar, da to sicer ni "napaka", kaže pa na površnost.
-... oziroma ne, je napaka (ampak tega ne omenjaj), povej pač, da gre za
-površnost
-v opisu piše, da jo zahteva od starša, dokler je ne najde, tukaj pa gre vse
-do glavnega strežnika.
+V člankih je pri opisu strategij navedeno, da če vozlišče zahtevane replike
+nima lokalno shranjene, jo zahteva od svojega starša, slednji pa še naprej
+od svojega starša, če je to potrebno, vse dokler na neki točki zahtevana replika
+ni najdena v hierarhiji vozlišč. Iskanje se takrat ustavi in replika se po
+hierarhiji navzdol pošlje nazaj vozlišču, ki jo je zahtevalo.
 
-"3. Na koncu if-a v vrstici 6 manjka en "break"? Namreč če repliko na poti do
-strežnika že nekje najdemo in jo pripeljemo navzdol, nima več smisla, da
-nadaljujemo tisti "for i = 2 ..." iz vrstice 5.
-Skratka ne gledamo več po hierarhiji navzgor, ker smo vmes na poti že našli "bolj
-lokalno" kopijo replike in nas ne zanima, ali se replika morda nahaja še kje nad
-tem."
+Če pozorno pogledamo psevdokodi~\ref{alg:EFS}~in~\ref{alg:MFS}, vidimo, da temu
+ni tako in da se iskanje replike nadaljuje navzgor po hierarhiji tudi takrat, ko
+je replika že najdena (zunanja zanka \textit{for}). Očitno je, da na koncu
+pogojnega stavka, ki se izvede, če vozlišče ima kopijo replike, manjka ukaz
+\textit{break}, ki zaključi izvajanje najbolj notranje zanke, v kateri se nahaja.
+Slednjega ne moremo označiti drugače kot za površnost avtorjev.
 
 \subsubsection{Opis strategije na ne-porazdeljen način}
 
-- povej, da je algoritem napisan v loopu, ne pa kot decentralizirana zadeva,
-ki bi tekla na vsakem vozlišču... da sem v simulaciji napravil tako
+Podatkovno omrežje je po definiciji množica med seboj povezanih računalnikov
+(vozlišč), ki izvajajo dogovorjeno strategijo širjenja in zamenjave replik.
+Vsako vozlišče je avtonomno in zgolj izvaja predpisani algoritem, drugih
+vozlišč v mreži pa ne nadzoruje --- z njimi zgolj komunicira ob izmenjavanju
+replik. Kljub temu pa psevdokodi~\ref{alg:EFS}~in~\ref{alg:MFS}
+opisujeta strategiji zamenjave na način, da ju ni možno neposredno prevesti v
+algoritem, ki bi se izvajal na posameznem vozlišču.
+
+Iskanje zahtevane replike po hierarhiji navzgor je opisano kot zanka, ki obišče
+vsa vozlišča na najkrajši poti od trenutnega vozlišča do glavnega strežnika.
+Enako velja za pošiljanje replike nazaj do vozlišča, ki jo je prvotno zahtevalo.
+Tudi tu zanka obišče vsa vozlišča na poti, pri čemer se vsako obiskano vozlišče
+odloči, ali bo obdržalo kopijo replike ali ne.
+
+Opisanega algoritma na tak način seveda ne moremo implementirati. Vozlišča na
+obnašanje drugih vozlišč nimajo neposrednega vpliva in zato na njih ne moremo
+izvajati programske zanke, ki bi določala, kaj se naj v posameznem koraku zgodi
+na nekem drugem vozlišču. Vozlišča namreč vse odločitve sprejemajo samostojno.
+
+Pri implementaciji simulacije sem psevdokodo iz člankov moral prilagoditi tako,
+da se je opisana strategija lahko izvajala na porazdeljen način. Namesto
+programske zanke so si vozlišča med seboj pošiljala zahtevke (in odgovore nanje)
+na način, da so kot celota sledila opisani strategiji.
 
 
 \subsection{Vprašljiva zasnova simulacije}
