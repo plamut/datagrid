@@ -977,6 +977,8 @@ predpostavil sem, da je sekunda. - uporabi "tabu" okolje, ki zna
 delati s footnote-i v tabelah? Čeprav nj bi sicer to bila slaba praksa ...
 (footnotes v tabelah)}w
 
+\TODO{v prilogi graf omrežja? oz. uporabljene razdalje med vozlišči in
+izračunana najkrajša pot?}
 
 
 
@@ -1515,27 +1517,92 @@ na način, da so kot celota sledila opisani strategiji.
 
 \subsection{Vprašljiva zasnova simulacije}
 
-- pa a je topologija sploh realna? v praksi vozlišča načeloma lahko
- zahtevajo replike tudi po drugih poteh, če je ena zasedena... pa redundanca
- recimo zdaj, če eno vozlišče pade, celo vejo odreže, ker je najkrajša pot do
- strežnika statična, se ne spreminja glede na (ne)dosegljivost vozlišč in
- obremenitve posameznih vozlišč.
-\TODO{vstavi sliko, da se bolje vidi drevesna struktura
-... morda naredi kar vektorsko? - če bo čas}
+Poleg vseh do sedaj naštetih pomanjkljivosti se je potrebno vprašati tudi,
+kakšno uporabno vrednost ima simulacija, kot je zastavljena v člankih.
+Simulacija namreč ne sme biti sama sebi namen, temveč želimo z njo čim bolje
+modelirati procese iz realnega sveta in nato ugotovitve, ki izhajajo iz nje,
+uporabiti za morebitne izboljšave teh procesov.
 
-Ni realna struktura in routing, zelo dominira čas prenosa po mreži (na odzivni
+Menim, da so avtorji pri zasnovi simulacije sprejeli nekaj odločitev, ki
+postavljajo pod vprašaj uporabnost predstavljenega modela v praksi. Izpostavil
+bom nekaj najbolj očitnih.
+
+\subsubsection{Izbira topologije podatkovnega omrežja}
+
+Vozlišča na začetku sicer tvorijo polni graf, vendar pa se nad njem izračuna
+drevo najkrajših poti od glavnega strežnika, ki je v korenu, do vseh ostalih
+vozlišč. Vozlišča si nato v simulaciji pošiljajo zahtevke in replike samo po teh
+izračunanih najkrajših poteh.
+
+Slabost takšne drevesne strukture je očitna --- če eno izmed vozlišč
+preneha delovati, postanejo odrezana od omrežja tudi vsa vozlišča, ki so v
+hierarhiji pod njim. Takšna topologija ne omogoča doseganja enega izmed osnovnih
+ciljev podatkovnega omrežja, to je visoke razpoložljivosti in odpornosti na
+okvare posameznih računalnikov v mreži
+
+Še ena pomanjkljivost hierarhične strukture je njena občutljivost na ozka grla.
+Če je v nekem trenutku eno izmed vozlišč močno obremenjeno, to vpliva na vsa
+ostala vozlišča niže v hierarhiji, saj ne morejo doseči glavnega strežnika
+drugače, kot preko tega (pre)obremenjenega vozlišča, kar podaljša odzivne
+čase na zahtevke za replike.
+
+Zaradi omenjenih slabosti drevesne strukture, ki je bila uporabljena v
+simulaciji, v praksi ne srečamo pogosto.
+
+\TODO{vstavi sliko, da se bolje vidi drevesna struktura
+... morda naredi kar vektorsko? - če bo čas ... ali pa kar tisto iz člankov
+vstavi notri kot primer ... ali pa vstavi nekje na začetku pri opisu
+simulacije in tukaj le referenca na sliko}
+
+\subsubsection{Statičen usmerjevalni algoritem}
+
+V simulaciji omrežje uporablja statičen usmerjevalni algoritem. Vozlišča replike
+vedno zahtevajo le od svojih staršev, pri čemer ne upoštevajo trenutne
+obremenjenosti posameznih povezav in vozlišč. Zgodi se lahko, da
+najkrajša pot do strežnika ni nujno tudi najhitrejša in bi bilo repliko morda
+bolje zahtevati od kakšnega drugega, manj obremenjenega vozlišča.
+
+Zaradi statičnega usmerjanja omrežje tudi ni odporno na morebitne izpade
+posameznih vozlišč, saj podrejena vozlišča ne znajo preusmeriti prometa mimo
+nedelujočega starša in tako ostanejo odrezana od glavnega strežnika. Povsem
+jasno je, da se zato tak usmerjevalni algoritem v praksi ne uporablja.
+
+\subsubsection{Večkratno zahtevanje iste replike}
+
+V primeru, ko vozlišče že čaka na prejem določene replike in med tem prejme nove
+zahtevke za isto repliko, je seveda smiselno počakati, da replika prispe do
+vozlišča in nato odgovoriti na ustrezne zahtevke.
+
+Iz opisa strategij v člankih je razvidno, da se vozlišča v simulaciji obnašajo
+drugače. Ob prejemu zahtevka za repliko zgolj preverijo, ali jo imajo v tistem
+trenutku lokalno shranjeno. Če je nimajo, pošljejo nov zahtevek zanjo, pri čemer
+ne upoštevajo, da morda že čakajo na njen prejem. Posledično se lahko zgodi,
+da se ista replika po omrežju pošlje večkrat, ko bi bilo potrebno.
+
+\subsubsection{Nespremenljivo obnašanje vozlišč}
+
+Vozlišča v omrežju se statistično gledano obnašajo enako skozi celotno trajanje
+simulacije. Vsako vozlišče ima sicer določeno skupino replik, ki jih
+lahko zahteva bolj pogosto od ostalih, vendar se ta skupina skozi čas ne
+spreminja. Simulacija zato težko izmeri, kako se posamezne strategije
+prilagajajo na morebitne spremembe v obnašanju omrežja, kar naj bi sicer bil
+eden izmed njenih ciljev. Želimo namreč preveriti, ali se testirane dinamične
+strategije dejansko obnesejo bolje od navadne statične replikacije.
+
+
+\subsubsection{Razno TODO}
+-------
+
+odzivni čas whatever, ker dominira čas prenosa po mreži
+zelo dominira čas prenosa po mreži (na odzivni
 čas vpliva) in je latenca brezveze (?), mreža se zabaše ... prevleik vpliv
 teh ozkih grl?
 
+ne-konvergenca, ker vozlišča premalokrat zahtevajo ... tudi ni
+nobenega spreminjanja  vedenja vozlišč, da bi testirali adaptivnost
+strategij
 - morda lagoritem ne konvergira? vsaka replika od vozlišča zahtevana zgolj
 nekajkrat ...
-
-- pa med čakanjem na repliko ... a jo spet zahtevamo? strogo po algoritmu da,
-čeprav je to neesmisel (morda tole pod kakšno drugo točko, ampak vseeno omeni)
-
-
-
-
 
 
 
