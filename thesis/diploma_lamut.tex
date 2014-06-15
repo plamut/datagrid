@@ -1,7 +1,6 @@
 
 \documentclass[a4paper, 12pt]{book}
 
-% XXX: why utf8x and not utf8?
 \usepackage[utf8x]{inputenc}   % omogoča uporabo slovenskih črk v UTF-8
 
 \usepackage[slovene,english]{babel}  % slovenski delilni vzorci ipd.
@@ -23,13 +22,18 @@
 \usepackage[lined,plain,linesnumbered]{algorithm2e}
 \usepackage{setspace}
 
+% swap page margins (inner margins should be bigger - for binding purposes)
+\let\tmp\oddsidemargin
+\let\oddsidemargin\evensidemargin
+\let\evensidemargin\tmp
+\reversemarginpar
+
 % reduce line spacing for algorithms to save space
 \usepackage{etoolbox}
 \AtBeginEnvironment{algorithm}{\setstretch{1.05}\small}
 
 % change algorithm label name
 \renewcommand{\algorithmcfname}{Psevdokoda}
-
 
 
 \renewcommand*{\familydefault}{\rmdefault}  % default font family (roman)
@@ -93,7 +97,7 @@
     RAČUNALNIŠTVA IN INFORMATIKE}\par}%
     \vfill\null%
     {\large \textsc{Mentor}: doc.\ dr. Boštjan Slivnik\par}%
-    {\vskip 2em \large Ljubljana 2014 \par}%
+    {\vskip 2em \large Ljubljana, 2014 \par}%
 \end{center}
 
 % prazna stran
@@ -112,18 +116,9 @@ ra\-ču\-nal\-niš\-tvo in informatiko Univerze v Ljubljani.
 Za objavljanje ali izkoriščanje rezultatov di\-plom\-ske\-ga dela je potrebno
 pisno soglasje avtorja, Fakultete za ra\-ču\-nal\-niš\-tvo in
 informatiko ter mentorja.}%
-\footnote{V dogovoru z mentorjem lahko kandidat diplomsko delo s pripadajočo
-izvorno kodo izda tudi pod katero izmed alternativnih licenc, ki ponuja
-določen del pravic vsem: npr. Creative Commons, GNU GPL. V tem primeru na to
-mesto vstavite opis licence, na primer tekst \cite{licence}
-
- \TODO{Morda pa res raje izdaj pod katero izmed prostih licenc?}
-}
-
 
 \begin{center} 
 \mbox{}\vfill
-% TODO: a je to potrebno tukaj? kje drugje morda?
 \emph{Besedilo je oblikovano z urejevalnikom besedil \LaTeX.} 
 \end{center}
 
@@ -138,7 +133,7 @@ mesto vstavite opis licence, na primer tekst \cite{licence}
 \TODO{Namesto te strani {\bf vstavite} original izdane teme diplomskega 
 dela s podpisom mentorja in dekana ter žigom fakultete, ki ga diplomant
 dvigne v študent\-skem referatu,  preden odda izdelek v vezavo!
-Glej tudi sam konec Poglavja~\ref{ch2} na strani~\pageref{pp}.}
+}
 
 % prazna stran
 \clearemptydoublepage
@@ -198,9 +193,13 @@ prevedla v angleški jezik.
 Prav tako se zahvaljujem svoji dragi Janji za vso moralno podporo med pisanjem
 diplome.
 
-Na koncu pa bi se rad zahvalil tudi prijateljema Darku Mariču in Anžetu Šuštarju,
-ki pri izdelavi diplomskega dela sicer nista pomagala popolnoma nič, se jima je
-pa zdelo zabavno, da bi bila kljub temu omenjena. ;-)
+Na koncu pa bi se rad zahvalil tudi prijateljema Darku Mariču in Anžetu
+Šuštarju, ki pri izdelavi diplomskega dela sicer nista pomagala popolnoma nič,
+se jima je pa zdelo zabavno, da bi bila kljub temu omenjena. ;-)
+\\
+
+\noindent
+(Peter Lamut, junij 2014)
 
 \rm\normalfont
 
@@ -1610,14 +1609,13 @@ eden izmed njenih ciljev. Želimo namreč preveriti, ali se testirane dinamične
 strategije dejansko obnesejo bolje od navadne statične replikacije.
 
 
-\subsubsection{Razno TODO}
+\subsubsection{\TODO{Razno}}
 
-ne-konvergenca, ker vozlišča premalokrat zahtevajo ...
+\TODO{ne-konvergenca, ker vozlišča premalokrat zahtevajo ...
 - morda lagoritem ne konvergira? vsaka replika od vozlišča zahtevana zgolj
 nekajkrat ...
-
 Pač en hiter izračun ... da je to verjetno premalo
-(če bo potrebno... načeloma je že dosti vsebine)
+(če bo potrebno... načeloma je že dosti vsebine)}
 
 
 
@@ -1626,8 +1624,7 @@ Pač en hiter izračun ... da je to verjetno premalo
 \TODO{nek zaključek (kakšni šalabajzerji da so) - morda kot zanimivost, da
 so pošiljali plagiatorske članke še naprej v recenzijo?}
  
-
-
+\TODO{literatura mora biti v kazalu kot neoštevilčeno poglavje?}
 
 \begin{thebibliography}{99}
 \label{bibliografija}
