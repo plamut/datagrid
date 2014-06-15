@@ -348,8 +348,8 @@ metrike oceni, da je pravkar zahtevana replika zanj bolj pomembna od ene
 ali več obstoječih shranjenih replik, lahko slednje izbriše in namesto
 njih shrani novo repliko.
 
-Dinamična replikacija je boljša od statične, saj se lahko avtomatično
-prilagaja morebitnim spremembam v vzorcih uporabe podatkovnega omrežja
+Dinamična replikacija je v splošnem boljša od statične, saj se lahko
+omrežje samodejno prilagaja morebitnim spremembam v vzorcih uporabe omrežja.
 \TODO{citat Čibej}. Poznamo veliko različnih dinamičnih replikacijskih
 strategij, pri čemer je ena izmed najbolj učinkovitih algoritem
 \newterm{Fast Spread} (\TODO{vir --- Ranganathan and Foster, 2001b?}).
@@ -1629,23 +1629,72 @@ eden izmed njenih ciljev. Želimo namreč preveriti, ali se testirane dinamične
 strategije dejansko obnesejo bolje od navadne statične replikacije.
 
 
-\subsubsection{\TODO{Razno}}
-
-\TODO{ne-konvergenca, ker vozlišča premalokrat zahtevajo ...
-- morda lagoritem ne konvergira? vsaka replika od vozlišča zahtevana zgolj
-nekajkrat ...
-Pač en hiter izračun ... da je to verjetno premalo
-(če bo potrebno... načeloma je že dosti vsebine)}
-
-
-
 
 \chapter{Sklepne ugotovitve}
-\TODO{nek zaključek (kakšni šalabajzerji da so) - morda kot zanimivost, da
-so pošiljali plagiatorske članke še naprej v recenzijo?}
- 
-\TODO{literatura mora biti v kazalu kot neoštevilčeno poglavje?}
 
+V uvodu diplomskega dela je najprej predstavljen pojem podatkovnega omrežja.
+Ker je prostor na posameznih vozliščih omejen, na slednjih ne moremo hraniti
+vseh replik naenkrat. Vsako vozlišče posebej se mora zato odločiti, katere
+replike so zanj najbolj pomembne, in lokalno obdržati kopije zgolj teh replik.
+Končni cilj je, da je sta povprečni odzivni čas omrežja in porabljena pasovna
+širina čim manjša.
+
+Razporeditev replik po vozliščih je lahko vnaprej določena (statična), ali
+pa se dinamično oblikuje glede na število in vrsto zahtevkov, ki jih omrežje
+prejema. Dinamična replikacija je v splošnem boljša od statične, saj se
+z njo lahko omrežje sproti prilagaja morebitnim spremembam v strukturi
+zahtevkov, ki jih prejema.
+
+Ena izmed najbolj znanih strategij dinamične replikacije je algoritem
+Fast Spread, pri katerem zahtevano repliko shranimo na vseh vozliščih na
+poti od vozlišča, kjer je bila zahtevana replika najdena, do vozlišča, ki
+je repliko zahtevalo. Če določeno vozlišče nima dovolj prostora, da
+bi novo repliko shranilo, mora ob tem najprej izbrisati eno ali več
+izmed obstoječih replik.
+
+V okviru diplomskega dela sem preučil dva strokovna članka, v katerih avtorji
+predlagajo izboljšave algoritma Fast Spread, ki naj bi prinesle občutne
+izboljšave v smislu povprečnega odzivnega časa omrežja in porabljene
+pasovne širine za prenose replik med vozlišči. Na podlagi opisov predlaganih
+strategij in predstavljene psevdokode sem napisal simulacijo podatkovnega
+omrežja, s pomočjo katere sem predlagani strategiji neposredno primerjal s
+strategijo LRU (zamenjaj replike, ki najdlje niso bile uporabljena) in
+strategijo LFU (zamenjaj replike, ki so bile najmanjkrat uporabljane).
+
+Izkazalo se je, da so dobljeni rezultati močno odstopali od tistih v člankih.
+Na podlagi podrobne analize se je izkazalo, da imata oba članka celo vrsto
+pomanjkljivosti, poleg tega pa sta si med seboj tako zelo podobna, da
+obstaja tudi resen sum recikliranja člankov.
+
+Glavni očitki se nanašajo na nejasnosti in dvoumnosti v opisih strategij
+ter na pomanjkanje vseh potrebnih podatkov o izvedeni simulaciji (npr.
+topologija uporabljenega omrežja), kar je onemogočilo medsebojno primerjavo
+različnih replikacijskih strategij pod enakimi pogoji, pod katerimi so jih
+primerjali avtorji člankov.
+
+Tudi analiza predlaganih metrik za ocenjevanje vrednosti replik in skupin
+replik je pokazala na nekaj njihovih resnih slabosti, saj se zaradi njih
+obe strategiji izrodita v statično razporeditev replik v omrežju. Dvome
+vzbuja tudi sama zasnova simulacije, saj v njej uporabljeno podatkovno omrežje
+ne deluje na tak način, kot bi to pričakovali od podatkovnega omrežja v
+praksi.
+
+Na podlagi vsega napisanega tako ne morem zaključiti drugače, kot da
+obravnavana članka nimata nobene prave uporabne vrednosti in da je nivo
+strokovnosti v njiju podpovprečen --- še posebej v luči verjetnega
+avtoplagiatorstva.
+
+
+
+\addcontentsline{toc}{chapter}{A [naslov A]}
+\chapter*{Dodatek A}
+\section*{[naslov A]}
+
+\TODO{surovi podatki simulacije? uporabljena topologija? (razdalje
+med vozlišči) ... pa tabela z numeričnimi rezultati?}
+
+
+\addcontentsline{toc}{chapter}{Literatura}
 \begin{thebibliography}{99}
 \label{bibliografija}
 
@@ -1656,6 +1705,8 @@ so pošiljali plagiatorske članke še naprej v recenzijo?}
 \bibitem{bib} O.\ Patashnik (1998) \BibTeX{}ing. 
 Dostopno na:\\ http://ftp.univie.ac.at/packages/tex/biblio/bibtex/contrib/doc/btxdoc.pdf
 \bibitem{licence} licence-cc.pdf. Dostopno na: 
+
+\bibitem{source_code} \TODO{link na GitHub s kodo simulacije?}
 
 \end{thebibliography}
 
