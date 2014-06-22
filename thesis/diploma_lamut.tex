@@ -316,13 +316,9 @@ discrete event simulation
 Podatkovno omrežje (angl.~\textit{Data Grid}) je množica med seboj
 povezanih ra\-ču\-nal\-ni\-kov na različnih geografskih lokacijah, ki
 uporabnikom omogočajo nalaganje, hranjenje in medsebojno izmenjavanje datotek.
-\TODO{vir definicije / ustrezno prilagodi definicijo}
-
-\TODO{Omeni, da imaš različne topologije, da je cilj robustnost, redundanca,
-itd., sklicuj se pač na vire - odstavek ali dva max. (1 stran)}
-
-\TODO{Pa morda še kakšna slika kot primer (nariši npr. z LaTeXom - kar tako,
- za vajo)}
+Glavna cilja takšnega omrežja sta čim nižji odzivni čas na zahtevke za
+podatke in odpornost na morebitne motnje v delovanju posameznih vozlišč
+(visoka razpoložljivost). \TODO{vir definicije}
 
 \section{Replikacija podatkov}
 
@@ -404,10 +400,9 @@ lokalno shrani.
 V primeru, da določeno vozlišče nima dovolj prostora, da bi shranilo repliko,
 mora predhodno izbrisati eno ali več obstoječih replik. Katere izmed njih bodo
 zamenjane z novo repliko, je odvisno od tega, katero strategijo zamenjave
-uporablja vozlišče. Poznamo veliko različnih strategij, npr.
+uporablja vozlišče. Poznamo veliko različnih strategij, kot na primer
 \TODO{morda naštej nekaj?}. Izmed njih bom opisal dve, ki so jih avtorji
-člankov \TODO{referenca?} uporabili za primerjavo s strategijama, ki so ju
-predlagali sami.
+člankov uporabili za primerjavo s strategijama, ki so ju predlagali sami.
 
 \TODO{kakšna referenca na vir, ki Fast Spread opisuje?}
 
@@ -488,8 +483,9 @@ nadaljevanju.
 
 \subsection{Strategija EFS}
 
-Psevdokoda strategije EFS je prikazana na Sliki~\ref{alg:EFS}, pri čemer
-je pomen posameznih spremenljivk pojasnjen v Tabeli~\ref{tbl:EFS_vars}.
+Strategija EFS je opisana v članku \TODO{referenca na 2011}. Njena psevdokoda
+je prikazana na sliki psevdokoda~\ref{alg:EFS}, pri čemer
+je pomen posameznih spremenljivk pojasnjen v tabeli~\ref{tbl:EFS_vars}.
 
 \begin{algorithm}
   \label{alg:EFS}
@@ -611,15 +607,12 @@ iz skupine in njihove statistike ter jih nadomesti z novo repliko
 
 Strategija EFS pri ocenjevanju vrednosti replik upošteva naslednje štiri
 stvari:
-
 \begin{itemize}
   \item število zahtevkov za repliko,
   \item pogostost zahtevkov,
   \item velikost replike,
   \item čas od zadnjega zahtevka za repliko.
 \end{itemize}
-
-\TODO{item spacing too big}
 
 Število zahtevkov, njihova pogostost in čas od zadnjega zahtevka so pomembni
 dejavniki, saj z njihovo pomočjo lahko ocenimo verjetnost, da bo replika
@@ -636,8 +629,7 @@ formulo za izračun vrednosti posamezne replike:
                       \frac{1}{\mathit{CT} - \mathit{LRTRR}}
   \label{eq:EFS_RV}
 \end{equation}
-pri čemer je pomen posameznih spremenljivk pojasnjen v
-Tabeli~\ref{tbl:EFS_vars}.
+Pomen posameznih spremenljivk je pojasnjen v tabeli~\ref{tbl:EFS_vars}.
 \end{samepage}
 
 Iz prvega in drugega člena enačbe~\eqref{eq:EFS_RV} je razvidno, da imajo
@@ -662,9 +654,9 @@ replik, in sicer po formuli iz vrstice 18 \TODO{} v
                          \mathit{LRTList(y)}}{x-1}}
   \label{eq:EFS_GV}
 \end{equation}
-pri čemer je pomen posameznih spremenljivk pojasnjen v
-Tabeli~\ref{tbl:EFS_vars}.
+Pomen posameznih spremenljivk pojasnjen v tabeli~\ref{tbl:EFS_vars}.
 \end{samepage}
+\vspace{0.5em}
 
 Enačbi~\eqref{eq:EFS_RV}~in~\eqref{eq:EFS_GV} sta vsebinsko gledano
 pravzaprav enaki. Edina razlika je, da so posamezni členi iz
@@ -675,56 +667,53 @@ med skupnim številom zahtevkov in skupno velikostjo \textit{vseh replik} iz
 skupine, v tretjem členu pa je uporabljen \textit{povprečen čas} od zadnjega
 zahtevka za posamezno repliko v skupini.
 
-\TODO{a bi v GV morali deliti 2. člen še s številom replik v skupini?
-Konceptualno gledano verjetno da, ampak v članku to ni tako navedeno) ---
-na to opozori pri razpravi o članku}
-
 
 \subsection{Strategija MFS}
 
-Strategija MFS (psevdokoda na Sliki~\ref{alg:MFS})
-je konceptualno popolnoma enaka strategiji EFS. Od nje se razlikuje
+Strategija MFS je opisana v članku \TODO{referenca na 2012}. Njena
+psevdokoda je prikazana na sliki psevdokoda~\ref{alg:MFS} in razvidno je,
+da je v konceptu skoraj popolnoma enaka strategiji EFS. Od nje se razlikuje
 zgolj v formulah za izračun vrednosti replike in vrednosti skupine replik
-ter v načinu, na katerega so replike urejene v seznamu \textit{ReplicaList}.
+ter v vrstnem redu, po katerem so replike urejene v seznamu
+\textit{ReplicaList}.
 
 \begin{samepage}
 Vrednost replike se izračuna po naslednji formuli iz vrstice 11
-(\TODO{ref.}) v Psevdokodi~\ref{alg:MFS}:
+(\TODO{ref.}) v psevdokodi~\ref{alg:MFS}:
 \begin{equation}
   \mathit{PNOR} = \mathit{NOR} \times
                   \frac{\mathit{RR.Size} - \mathit{CNFSS}}{
                         \mathit{ RR.Size}}
   \label{eq:MFS_RV}
 \end{equation}
-pri čemer je pomen posameznih spremenljivk pojasnjen v
-Tabeli~\ref{tbl:MFS_vars}.
+Pomen posameznih spremenljivk je pojasnjen v tabeli~\ref{tbl:MFS_vars}.
 \end{samepage}
+\vspace{1em}
 
-Vrednost replike je PNOR oziroma ``delno število zahtevkov''. Izračuna
+Vrednost replike je PNOR (``delno število zahtevkov''). Izračuna
 se kot skupno število zahtevkov za repliko (NOR), prilagojeno za
 korekcijski faktor. Slednji je odvisen od razmerja med velikostjo replike
 in velikostjo nezasedenega prostora na vozlišču. V robnem primeru,
 ko je ves razpoložljiv prostor na vozlišču zaseden (CNFSS je enak 0), sta
-vrednosti PNOR in NOR enaki. PNOR ni nikoli negativno število.%
-\footnote{Ulomek v enačbi~\eqref{eq:MFS_RV} je vedno pozitiven, saj
-je njegov imenovalec pozitiven~---~velikost replike \textit{RR.Size} je
-namreč strogo večja od velikosti nezasedenega prostora \textit{CNFSS}. Če
-bi bilo obratno, bi namreč vozlišče repliko takoj shranilo in niti ne bi
-šlo računati njene vrednosti, kar je razvidno iz vrstic 8 in 9
- \TODO{(ref.)} v Psevdokodi~\ref{alg:MFS}.}
+vrednosti PNOR in NOR enaki.
 
-
+PNOR ni nikoli negativno število. Ulomek v enačbi~\eqref{eq:MFS_RV} je namreč
+vedno pozitiven, saj je tudi njegov imenovalec pozitiven~---~velikost replike
+\textit{RR.Size} je namreč strogo večja od velikosti nezasedenega prostora
+\textit{CNFSS}. Če bi bilo obratno, bi namreč vozlišče repliko takoj shranilo
+in niti ne bi šlo računati njene vrednosti, kar je razvidno iz vrstic 8 in 9
+\TODO{(ref.)} psevdokode~\ref{alg:MFS}.
 
 \begin{samepage}
 Vrednost skupine replik se izračuna po formuli, ki se nahaja na levi strani
-neenakosti v vrstici 18 (\TODO{ref.}) Psevdokode~\ref{alg:MFS}:
+neenakosti v vrstici 18 (\TODO{ref.}) psevdokode~\ref{alg:MFS}:
 \begin{equation}
 	\sum\limits_{y=1}^{x-1} \mathit{NORList(y)}
   \label{eq:MFS_GV}
 \end{equation}
-pri čemer je pomen posameznih spremenljivk pojasnjen v
-Tabeli~\ref{tbl:MFS_vars}.
+Pomen posameznih spremenljivk je pojasnjen v tabeli~\ref{tbl:MFS_vars}.
 \end{samepage}
+\vspace{1em}
 
 Formula~\eqref{eq:MFS_GV} je zelo enostavna, saj zgolj sešteje število
 zahtevkov (NOR) za vse replike, ki sestavljajo skupino.
@@ -736,7 +725,7 @@ zamenjane. Razlog za to je različna urejenost replik v seznamu
 njihovo vrednost (RV), jih strategija MFS uredi glede na
 število zahtevkov zanje, v primeru enakih vrednosti pa še dodatno
 glede na njihovo velikost. Urejenosti seznama \textit{ReplicaList} je
-sicer opisana tudi v Tabelah~\ref{tbl:EFS_vars}~oziroma~\ref{tbl:MFS_vars}.
+sicer opisana tudi v tabelah~\ref{tbl:EFS_vars}~oziroma~\ref{tbl:MFS_vars}.
 
 \vspace{2cm}
 \begin{algorithm}[H]
@@ -820,19 +809,14 @@ sicer opisana tudi v Tabelah~\ref{tbl:EFS_vars}~oziroma~\ref{tbl:MFS_vars}.
 \end{table}
 
 
-\TODO{strategija Fast Spread with EFS / MFS - kakšne reference na članke, kjer
-sta strategiji opisani? kot vir pač, od kod psevdokoda}
-
-
 \section{Implementacija diskretne simulacije}
 
 Za preizkus strategij, opisanih v člankih, sem v programskem jeziku Python
 (različica 3.3) napisal diskretno simulacijo. S poganjanjem slednje z
 raz\-ličnimi parametri sem lahko primerjal, kako se obnesejo posamezne
 strategije zamenjave. Glavni sestavni deli simulacije so vozlišča, replike,
-dogodki v simulaciji in sámo izvajalno okolje simulacije.
-
-\TODO{link na Github, kjer je koda? morda koda kot priloga diplome?}
+dogodki v simulaciji in sámo izvajalno okolje simulacije. \TODO{link na Github,
+kjer je koda? v referencah?}
 
 Topologija podatkovnega omrežja, ki sem jo uporabil, je polni graf, saj so
 takšno topologijo izbrali tudi avtorji člankov \TODO{referenca obeh čl.}.
@@ -843,9 +827,9 @@ replike naključnih velikosti.
 Ko so dolžine povezav med vozlišči določene, se na grafu, ki predstavlja
 podatkovno omrežje, izvede algoritem Dijkstra, ki poišče najkrajše poti med
 glavnim strežnikom in vsemi ostalimi vozlišči. Po izvedbi algoritma vsakemu
-vozlišču določimo, kdo je njegov starš na najkrajši poti do glavnega strežnika%
-\footnote{Sam glavni strežnik je pri tem seveda izjema, saj se nahaja povsem
-na vrhu hierarhije in starša nima.}.
+vozlišču določimo, kdo je njegov starš na najkrajši poti do glavnega strežnika.
+Slednji je pri tem seveda izjema, saj se nahaja povsem na vrhu hierarhije in
+zato starša nima.
 
 Med izvajanjem simulacije je vsako vozlišče avtonomno in se samo odloča, katere
 replike bo hranilo pri sebi, pri čemer sledi vnaprej določeni strategiji
@@ -910,7 +894,7 @@ dogodke tipa \textit{prejmi repliko}, na katere to vpliva.
 Simulacijo sem pripravil na enak način, kot je opisan v obeh člankih, in v
 njej med seboj primerjal štiri strategije zamenjave --- LRU, LFU, EFS in MFS.
 Za ocenjevanje strategij sem uporabil predlagani metriki, in sicer skupen
-odzivni čas in skupno porabo pasovne širine (Tabela~\ref{tbl:sim_metrics}).
+odzivni čas in skupno porabo pasovne širine (tabela~\ref{tbl:sim_metrics}).
 Dobra strategija obe metriki minimizira.
 
 Odzivni čas je definiran kot čas, ki preteče od trenutka, ko vozlišče pošlje
@@ -961,7 +945,7 @@ od verjetnosti, da zahteva določeno drugo repliko, ki pripada eni izmed
 ostalih skupin. To je namreč boljši približek situacijam v praksi,
 kjer se dostikrat zgodi, da se določena podmnožica podatkov (replik) v
 primerjavi z ostalimi podatki veliko bolj pogosto uporablja.
-\TODO{referenca na članek, kjer je to napisano oz. v obeh}
+\TODO{referenca, kjer je to napisano oba članka)}
 
 Strategije sem med seboj primerjal v treh različnih scenarijih:
 \begin{itemize}
@@ -1023,18 +1007,6 @@ celoštevilčno vrednost znotraj njihovega intervala možnih vrednosti.
     \TODO{vir oba članka}}
   \label{tbl:sim_params}
 \end{table}
-
-
-\TODO{mogoče tukajali v prilogi v prilogi topologija mreže? torej kakšno drevo
-dobimo, kakšne so razdalje med vozlišči}
-
-\TODO{Časovna enota za "inter-arrival times" v člankih ni navedena,
-predpostavil sem, da je sekunda. - uporabi "tabu" okolje, ki zna
-delati s footnote-i v tabelah? Čeprav nj bi sicer to bila slaba praksa ...
-(footnotes v tabelah)}w
-
-\TODO{v prilogi graf omrežja? oz. uporabljene razdalje med vozlišči in
-izračunana najkrajša pot?}
 
 
 
@@ -1406,12 +1378,8 @@ in sploh ne bi šlo ocenjevati njene vrednosti. Ulomek v
 formuli~\eqref{eq:MFS_RV_v2} je zato manjši od ena, s tem pa vrednost izraza v
 oklepaju zavzame vrednosti na intervalu (0,1].
 Ker je število zahtevkov NOR za novo repliko kvečjemu enako
-ena\footnote{Odvisno od tega, kako interpretiramo članek. V simulaciji sem
-sicer predpostavil, da je vrednost NOR za novo zahtevano repliko enaka nič.
-Več o tem je napisano v razdelku \TODO{referenca na tam, kjer opišeš
-probleme članka}},
-tudi največja možna vrednot replike po formuli~\eqref{eq:MFS_RV_v2} ni
-nikoli večja od te meje.
+ena (odvisno sicer od tega, kako interpretiramo članek), tudi največja možna
+vrednot replike po formuli~\eqref{eq:MFS_RV_v2} ni nikoli večja od te meje.
 
 \subsubsection{Vrednost skupine replik}
 
@@ -1607,11 +1575,6 @@ drugače, kot preko tega (pre)obremenjenega vozlišča, kar podaljša odzivne
 Zaradi omenjenih slabosti drevesne strukture, ki je bila uporabljena v
 simulaciji, v praksi ne srečamo pogosto.
 
-\TODO{vstavi sliko, da se bolje vidi drevesna struktura
-... morda naredi kar vektorsko? - če bo čas ... ali pa kar tisto iz člankov
-vstavi notri kot primer ... ali pa vstavi nekje na začetku pri opisu
-simulacije in tukaj le referenca na sliko}
-
 \subsubsection{Statičen usmerjevalni algoritem}
 
 V simulaciji omrežje uporablja statičen usmerjevalni algoritem. Vozlišča
@@ -1705,12 +1668,19 @@ avtoplagiatorstva.
 
 
 
-\addcontentsline{toc}{chapter}{A [naslov A]}
+\addcontentsline{toc}{chapter}{Dodatek A: Topologija omrežja, uporabljena v
+simulaciji}
 \chapter*{Dodatek A}
-\section*{[naslov A]}
+\section*{Topologija omrežja, uporabljena v simulaciji}
 
 \TODO{surovi podatki simulacije? uporabljena topologija? (razdalje
-med vozlišči) ... pa tabela z numeričnimi rezultati?}
+med vozlišči...pa izračunano drevo)}
+
+\addcontentsline{toc}{chapter}{Dodatek B: Tabela z rezultati simulacije}
+\chapter*{Dodatek B}
+\section*{Tabela z rezultati simulacije}
+
+\TODO{tabela z numeričnimi rezultati}
 
 
 \addcontentsline{toc}{chapter}{Literatura}
