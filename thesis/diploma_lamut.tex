@@ -1049,71 +1049,6 @@ izboljšanja v primerjavi s strategijo~LRU in celo zaostajata za
 strategijo~LFU. Možne razlage za vse navedene razlike so opisane v
 poglavju \TODO{referenca}.
 
-\TODO{zakaj je v scenariju 1 razlika $\sim$20\% med LRU in LFU? BW razlike
-so minimimalne ... izgleda, kot da se strežnik totalno zabaše, saj njegovo
-pošiljanje replik prispeva več kot 80\% k vsoti vseh zakasnitev\\
-pri bandwidthu 20 Mbit/s je razlika manj kot 3\%, torej je očitno vse skupaj
-zelo (preveč) odvisno od tega, kakšna vrsta se naredi na glavnem strežniku
---- če se enkrat zabaše in zato prepočasi pošilja replike, novi requesti
-verjetno prehitevajo dostavljanje replik, kar še poveča vrsto in upočasni
-pošiljanje replik (in posledično poveča število zahtevkov tudi od podrejenih
-vozlišč, ki replik ne prejmejo pravočasno in potem iste replike večkrat
-zahtevajo (ker jih v času prejema zahtevka še nimajo)}
-
-
-%Rezultati simulacij so zbrani v Tabeli~\ref{tbl:sim_results}.
-%\begin{table}
-%\small
-%  \begin{center}
-%    \begin{tabulary}{1.0\textwidth}{ | C | C | C | }
-%      \hline
-%      \multicolumn{3}{|>{\bf}c|}{
-%        Scenarij 1 (P(MWG) = 0.1)
-%      } \\
-%      \hline
-%      Strategija & Skupen odzivni čas [s] & Porabljena pasovna širina [Mbit] \\
-%      \hline
-%      LRU & \numprint{55268,55} & \numprint{111905,38} \\
-%      LFU & \numprint{41110,83} & \numprint{109987,49} \\
-%      EFS & \numprint{52726,21} & \numprint{111580,25} \\
-%      MFS & \numprint{52726,21} & \numprint{111580,25} \\
-%      \hline \hline
-%      
-%      \multicolumn{3}{|>{\bf}c|}{
-%        Scenarij 2 (P(MWG) = 0.3)
-%      } \\
-%      \hline
-%      Strategija & Skupen odzivni čas [s] & Porabljena pasovna širina [Mbit] \\
-%      \hline
-%      LRU & \numprint{40752,71} & \numprint{107773,46} \\
-%      LFU & \numprint{27399,93} & \numprint{101329,39} \\
-%      EFS & \numprint{38396,94} & \numprint{106975,95} \\
-%      MFS & \numprint{38396,94} & \numprint{106975,95} \\
-%      \hline \hline
-%
-%      \multicolumn{3}{|>{\bf}c|}{
-%        Scenarij 3 (P(MWG) = 0.5)
-%      } \\
-%      \hline
-%      Strategija & Skupen odzivni čas [s] & Porabljena pasovna širina [Mbit] \\
-%      \hline
-%      LRU & \numprint{24122,26} & \numprint{97338,32} \\
-%      LFU & \numprint{15091,31} & \numprint{81382,90} \\
-%      EFS & \numprint{23142,42} & \numprint{96241,67} \\
-%      MFS & \numprint{23142,42} & \numprint{96241,67} \\
-%      \hline
-%    \end{tabulary}
-%    
-%  \end{center}
-%
-%  \caption{Rezultati simulacije.%
-%    \TODO{vir: lastni?}}
-%  \label{tbl:sim_results}
-%\end{table}
-%
-%\TODO{namesto tabele daj raje graf? bo bolj pregledno}
-
-
 
 \begin{tikzpicture}[scale=1.2]
   \begin{axis}[
@@ -1158,7 +1093,6 @@ zahtevajo (ker jih v času prejema zahtevka še nimajo)}
 
   \end{axis}
 \end{tikzpicture}
-
 
 
 
@@ -1474,8 +1408,8 @@ vozlišči. Pri implementaciji simulacije sem predpostavil slednjo možnost.
 \subsubsection{Vrednosti statistik novih replik}
 
 Članka v razdelku~3 (\TODO{ref.?}) navajata, da vsako vozlišče vodi statistiko
-števila zahtevkov za vse replike, ki se nahajajo na njem. Po drugi strani nikjer
-ne omenjata, ali in kako vozlišča vodijo statistike za replike, ki jih
+števila zahtevkov za vse replike, ki se nahajajo na njem. Po drugi strani
+nikjer ne omenjata, ali in kako vozlišča vodijo statistike za replike, ki jih
 prejmejo in jih še nimajo lokalno shranjenih.
 Pri ocenjevanju vrednosti nove replike se pojavi vprašanje, katero vrednost
 uporabiti za število zahtevkov zanjo. Možne so vsaj tri interpretacije:
@@ -1555,8 +1489,8 @@ na nekem drugem vozlišču. Vozlišča namreč vse odločitve sprejemajo samosto
 
 Pri implementaciji simulacije sem psevdokodo iz člankov moral prilagoditi tako,
 da se je opisana strategija lahko izvajala na porazdeljen način. Namesto
-programske zanke so si vozlišča med seboj pošiljala zahtevke (in odgovore nanje)
-na način, da so kot celota sledila opisani strategiji.
+programske zanke so si vozlišča med seboj pošiljala zahtevke (in odgovore
+nanje) na način, da so kot celota sledila opisani strategiji.
 
 
 \subsection{Vprašljiva zasnova simulacije}
@@ -1575,14 +1509,14 @@ bom nekaj najbolj očitnih.
 
 Vozlišča na začetku sicer tvorijo polni graf, vendar pa se nad njem izračuna
 drevo najkrajših poti od glavnega strežnika, ki je v korenu, do vseh ostalih
-vozlišč. Vozlišča si nato v simulaciji pošiljajo zahtevke in replike samo po teh
-izračunanih najkrajših poteh.
+vozlišč. Vozlišča si nato v simulaciji pošiljajo zahtevke in replike samo po
+teh izračunanih najkrajših poteh.
 
 Slabost takšne drevesne strukture je očitna --- če eno izmed vozlišč
 preneha delovati, postanejo odrezana od omrežja tudi vsa vozlišča, ki so v
-hierarhiji pod njim. Takšna topologija ne omogoča doseganja enega izmed osnovnih
-ciljev podatkovnega omrežja, to je visoke razpoložljivosti in odpornosti na
-okvare posameznih računalnikov v mreži
+hierarhiji pod njim. Takšna topologija ne omogoča doseganja enega izmed
+osnovnih ciljev podatkovnega omrežja, to je visoke razpoložljivosti in
+odpornosti na okvare posameznih računalnikov v mreži
 
 Še ena pomanjkljivost hierarhične strukture je njena občutljivost na ozka grla.
 Če je v nekem trenutku eno izmed vozlišč močno obremenjeno, to vpliva na vsa
@@ -1694,11 +1628,61 @@ simulaciji}
 \TODO{surovi podatki simulacije? uporabljena topologija? (razdalje
 med vozlišči...pa izračunano drevo)}
 
+pa velikosti replik ...
+pa kako so razporejene v skupine
+pa katero MWG ima vsako vozlišče
+
 \addcontentsline{toc}{chapter}{Dodatek B: Tabela z rezultati simulacije}
 \chapter*{Dodatek B}
 \section*{Tabela z rezultati simulacije}
 
-\TODO{tabela z numeričnimi rezultati}
+\begin{table}[h]
+\small
+  \begin{center}
+    \begin{tabulary}{1.0\textwidth}{ | C | C | C | }
+      \hline
+      \multicolumn{3}{|>{\bf}c|}{
+        Scenarij 1 (P(MWG) = 0.1)
+      } \\
+      \hline
+      Strategija & Skupen odzivni čas [s] & Porabljena pasovna širina [Mbit] \\
+      \hline
+      LRU & \numprint{55268,55} & \numprint{111905,38} \\
+      LFU & \numprint{41110,83} & \numprint{109987,49} \\
+      EFS & \numprint{52726,21} & \numprint{111580,25} \\
+      MFS & \numprint{52726,21} & \numprint{111580,25} \\
+      \hline \hline
+
+      \multicolumn{3}{|>{\bf}c|}{
+        Scenarij 2 (P(MWG) = 0.3)
+      } \\
+      \hline
+      Strategija & Skupen odzivni čas [s] & Porabljena pasovna širina [Mbit] \\
+      \hline
+      LRU & \numprint{40752,71} & \numprint{107773,46} \\
+      LFU & \numprint{27399,93} & \numprint{101329,39} \\
+      EFS & \numprint{38396,94} & \numprint{106975,95} \\
+      MFS & \numprint{38396,94} & \numprint{106975,95} \\
+      \hline \hline
+
+      \multicolumn{3}{|>{\bf}c|}{
+        Scenarij 3 (P(MWG) = 0.5)
+      } \\
+      \hline
+      Strategija & Skupen odzivni čas [s] & Porabljena pasovna širina [Mbit] \\
+      \hline
+      LRU & \numprint{24122,26} & \numprint{97338,32} \\
+      LFU & \numprint{15091,31} & \numprint{81382,90} \\
+      EFS & \numprint{23142,42} & \numprint{96241,67} \\
+      MFS & \numprint{23142,42} & \numprint{96241,67} \\
+      \hline
+    \end{tabulary}
+
+  \end{center}
+
+  \caption{Rezultati simulacije. \TODO{vir: lastni?}}
+  \label{tbl:sim_results}
+\end{table}
 
 
 \addcontentsline{toc}{chapter}{Literatura}
