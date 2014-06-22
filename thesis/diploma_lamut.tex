@@ -424,22 +424,21 @@ posamezno repliko in ne zgolj zadnjega, kot je to pri strategiji LRU.
 
 Leta 2011 in 2012 sta bila v dveh različnih strokovnih revijah objavljena
 dva članka istih avtorjev, v katerih so slednji predstavili dve novi
-strategiji zamenjave, ki naj bi po njihovih trditvah dosegali dosti boljše
+strategiji zamenjave, ki naj bi po njihovih trditvah dosegali veliko boljše
 rezultate od strategij LRU in LFU. Strategiji
 so poimenovali \newterm{EFS} (\newterm{``Enhanced Fast Spread''}) in
 \newterm{MFS} (\newterm{``Modified Fast Spread''})
-\TODO{vir oz. referenca člankov}.
-
-\TODO{oštevilči članka? Da se kasneje v besedilu sklicuješ nanj? Kako se
-to ponavadi dela?}
+\TODO{vir oz. referenca člankov}. \TODO{oštevilči članka? Da se kasneje v besedilu sklicuješ nanju}
 
 Članka sta si med seboj že na prvi pogled zelo podobna. Oba imata identično
 strukturo (identične naslove posameznih delov članka), vsebujeta številne
 identične odseke besedila, identične diagrame in tudi opisa obeh strategij
 v psevdokodi sta v veliki meri enaka. Na podlagi naštetega se je pojavil
-resen sum na recikliranje člankov (avtoplagiatorstvo).
+resen sum na recikliranje člankov (avtoplagiatorstvo). Kot primer sta na
+slikah~\ref{pic2011}~in~\ref{pic2012} prikazana izseka iz obeh člankov,
+iz katerih je razvidno, da članka vsebujeta isti diagram strukture omrežja.
 
-\TODO{vstavi slike, dele besedila itd. za primerjavo pa to omeni v tekstu}
+\begin{minipage}{\textwidth}
 
 V okviru diplomskega dela sem z implementacijo strategij, opisanih v
 člankih, želel doseči predvsem naslednje cilje:
@@ -456,6 +455,25 @@ primerjave pa v novejšem članku (\TODO{2012}) niso naredili.
 \item Na podlagi primerjave obeh opisanih strategij ugotoviti, ali med
 član\-koma sploh obstaja kakšna bistvena vsebinska razlika.
 \end{enumerate}
+
+\end{minipage}
+
+\begin{figure}
+  \begin{center}
+    \fbox{\includegraphics[width=13.4cm]{article_2011_sample.png}}
+  \end{center}
+  \caption{Izsek iz članka \TODO{REFERENCA 2011}}
+  \label{pic2011}
+\end{figure}
+
+\begin{figure}
+  \begin{center}
+    \fbox{\includegraphics[width=13.4cm]{article_2012_sample.png}}
+  \end{center}
+  \caption{Izsek iz članka \TODO{REFERENCA 2012}}
+  \label{pic2012}
+\end{figure}
+
 
 
 \chapter{Primerjava strategij iz člankov}
