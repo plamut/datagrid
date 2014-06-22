@@ -22,6 +22,8 @@
 \usepackage[lined,plain,linesnumbered]{algorithm2e}
 \usepackage{setspace}
 
+\setlength{\headheight}{29.5pt}
+
 % swap page margins (inner margins should be bigger - for binding purposes)
 \let\tmp\oddsidemargin
 \let\oddsidemargin\evensidemargin
@@ -85,7 +87,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %platnica
-\label{naslovnica}
+\label{platnica}
 \thispagestyle{empty}%
 \begin{center}
     {\large\sc Univerza v Ljubljani\\%
@@ -196,8 +198,8 @@ z vpisno številko \textbf{63000200}, sem avtor diplomskega dela z naslovom:
 \noindent S svojim podpisom zagotavljam, da:
 
 \begin{itemize}
-	\item sem diplomsko delo izdelal samostojno pod mentorstvom 
-		doc.\ dr.\ Boštjana Slivnika,
+	\item sem diplomsko delo izdelal samostojno pod mentorstvom doc.\ dr.\ 
+	Boštjana Slivnika,
 
 	\item so elektronska oblika diplomskega dela, naslov (slov., angl.),
 	 povzetek (slov., angl.) ter ključne besede (slov., angl.) identični
@@ -233,7 +235,8 @@ diplome.
 Na koncu pa bi se rad zahvalil tudi prijateljema Darku Mariču in Anžetu
 Šuštarju, ki pri izdelavi diplomskega dela sicer nista pomagala popolnoma nič,
 se jima je pa zdelo zabavno, da bi bila kljub temu omenjena. ;-)
-\\
+
+\vskip 1.5em
 
 \noindent
 (Peter Lamut, junij 2014)
@@ -260,17 +263,19 @@ se jima je pa zdelo zabavno, da bi bila kljub temu omenjena. ;-)
 \addcontentsline{toc}{chapter}{Povzetek}
 \chapter*{Povzetek}
 
-Podatkovno omrežje je množica med seboj povezanih računalnikov na različnih
-geografskih lokacijah, katerega cilj je razpoložljivost podatkov in odpornost
+Podatkovno omrežje je množica med seboj povezanih računalnikov na raz\-ličnih
+geografskih lokacijah, katerega cilj je razpoložljivost podatkov in odpor\-nost
 na napake. Z izbiro ustrezne replikacijske strategije želimo doseči takšno
-razporeditev datotek v omrežju, da je njegovo delovanje čim boljše (z vidika
-odzivnih časov in porabljene pasovne širine). V diplomskem delu sta obravnavana
-dva strokovna članka, v katerih avtorji predlagajo izboljšave dinamične
-replikacijske strategije \textit{Fast Spread}, vendar pa njihovih rezultatov ni
-bilo možno ponoviti. Diplomsko delo v uvodu najprej predstavi podatkovna
-omrežja s teoretičnega vidika, nato opiše, kako je potekalo testiranje v
-člankih predlaganih strategij, v nadaljevanju pa potem podrobno obravnava vse
-ugotovljene pomanjkljivosti člankov.
+razporeditev datotek v omrežju, da je njegovo delovanje čim boljše (z
+\mbox{vidika} odzivnih časov in porabljene pasovne širine). V diplomskem delu
+sta obravnavana dva znanstvena članka istih avtorjev, v katerih slednji
+predlagajo izboljšave dinamične replikacijske strategije \textit{Fast Spread},
+vendar pa njihovih rezultatov ni bilo možno ponoviti. Poleg tega se je zaradi
+velike medsebojne podobnosti člankov pojavil tudi resen sum avtoplagiatorstva.\
+Diplomsko delo v uvodu najprej predstavi podatkovna omrežja s teoretičnega
+vidika, nato opiše, kako je potekalo testiranje v člankih predlaganih
+strategij, v nadaljevanju pa potem podrobno obravnava vse ugotovljene
+pomanjkljivosti člankov, vključno z njuno (pre)veliko podobnostjo.
 
 \section*{Ključne besede}
 podatkovno omrežje, dinamična replikacija, Fast Spread, odzivni čas,
@@ -308,12 +313,10 @@ discrete event simulation
 
 \section{Splošno o podatkovnih omrežjih}
 
-\TODO{slovenski términ za datagrid pravilen?}
-
-Podatkovno omrežje (angl. \textit{data grid}) je množica med seboj
-povezanih računalnikov na različnih geografskih lokacijah, ki uporabnikom
-omogočajo nalaganje, hranjenje in medsebojno izmenjavanje datotek.
-(TODO: vir definicije / ustrezno prilagodi definicijo)
+Podatkovno omrežje (angl.~\textit{Data Grid}) je množica med seboj
+povezanih ra\-ču\-nal\-ni\-kov na različnih geografskih lokacijah, ki
+uporabnikom omogočajo nalaganje, hranjenje in medsebojno izmenjavanje datotek.
+\TODO{vir definicije / ustrezno prilagodi definicijo}
 
 \TODO{Omeni, da imaš različne topologije, da je cilj robustnost, redundanca,
 itd., sklicuj se pač na vire - odstavek ali dva max. (1 stran)}
@@ -321,7 +324,7 @@ itd., sklicuj se pač na vire - odstavek ali dva max. (1 stran)}
 \TODO{Pa morda še kakšna slika kot primer (nariši npr. z LaTeXom - kar tako,
  za vajo)}
 
-\section{Replikacija podatkov v podatkovnih omrežjih}
+\section{Replikacija podatkov}
 
 Ko uporabnik podatkovnega omrežja pošlje zahtevek za prejem neke datoteke
 ali skupine datotek, se lahko pri prenašanju podatkov od glavnega strežnika
@@ -366,23 +369,22 @@ ali več obstoječih shranjenih replik, lahko slednje izbriše in namesto
 njih shrani novo repliko.
 
 Dinamična replikacija je v splošnem boljša od statične, saj se lahko
-omrežje samodejno prilagaja morebitnim spremembam v vzorcih uporabe omrežja.
+omre\-žje samodejno prilagaja morebitnim spremembam v vzorcih uporabe omrežja.
 \TODO{citat Čibej}. Poznamo veliko različnih dinamičnih replikacijskih
-strategij, pri čemer je ena izmed najbolj učinkovitih algoritem
+strategij, pri čemer je ena izmed najbolj učinkovitih strategija
 \newterm{Fast Spread} (\TODO{vir --- Ranganathan and Foster, 2001b?}).
 
-\TODO{Fast spread prevedemo v slovenščino? ``algoritem hitrega širjenja''?}
 
+\section{Strategija hitrega širjenja}
 
-\section{Algoritem Fast Spread}
-
-Algoritem Fast Spread se uporablja v hierarhično urejenih podatkovnih omrežjih.
-Na vrhu hierarhije je glavni strežnik, ki ima dovolj prostora, da vedno hrani
-vse replike, ki obstajajo v omrežju. V primerjavi z njim je prostor na vseh
-ostalih vozliščih relativno majhen, tako da lahko slednja naenkrat hranijo
-zgolj omejeno podmnožico replik. Vozlišča so lahko poljubno povezana med seboj
-in ni nujno, da ima vsako izmed njih neposredno povezavo z glavnim strežnikom
-- z njim so lahko povezana tudi zgolj posredno preko drugih vozlišč.
+Strategija hitrega širjenja (angl.~\textit{Fast Spread}) se uporablja v
+hierarhično urejenih podatkovnih omrežjih. Na vrhu hierarhije je glavni
+strežnik, ki ima dovolj prostora, da vedno hrani vse replike, ki obstajajo v
+omrežju. V primerjavi z njim je prostor na vseh ostalih vozliščih relativno
+majhen, tako da lahko slednja naenkrat hranijo zgolj omejeno podmnožico replik.
+Vozlišča so lahko poljubno povezana med seboj in ni nujno, da ima vsako izmed
+njih neposredno povezavo z glavnim strežnikom --- z njim so lahko povezana tudi
+zgolj posredno preko drugih vozlišč.
 
 Za vsako vozlišče v omrežju obstaja najkrajša pot do strežnika in vsako izmed
 njih ve, katero vozlišče je njihov starš na tej poti. Kadar vozlišče prejme
@@ -423,7 +425,7 @@ zamenja tisto repliko (ali skupino replik), ki je bila v preteklosti
 najmanjkrat zahtevana. Strategija torej upošteva vse pretekle zahtevke za
 posamezno repliko in ne zgolj zadnjega, kot je to pri strategiji LRU.
 
-\section{Trditev v člankih: izboljšava algoritma Fast Spread}
+\section{Trditev v člankih: izboljšava strategije Fast Spread}
 
 Leta 2011 in 2012 sta bila v dveh različnih strokovnih revijah objavljena
 dva članka istih avtorjev, v katerih so slednji predstavili dve novi
@@ -457,14 +459,14 @@ strategiji primerjajo zgolj s strategijama LRU in LFU, medsebojne
 primerjave pa v novejšem članku (\TODO{2012}) niso naredili.
 
 \item Na podlagi primerjave obeh opisanih strategij ugotoviti, ali med
-člankoma sploh obstaja kakšna bistvena vsebinska razlika.
+član\-koma sploh obstaja kakšna bistvena vsebinska razlika.
 \end{enumerate}
 
 
 \chapter{Primerjava strategij iz člankov}
 
 \section{Opis strategij zamenjave}
-Kot je že bilo omenjeno (\TODO{v poglacju XYZ?}), algoritem Fast Spread
+Kot je že bilo omenjeno (\TODO{v poglavju XYZ?}), strategija Fast Spread
 shrani zahtevano repliko na vsakem vozlišču na poti od vozlišča, kjer je
 bila zahtevana replika najdena, do vozlišča, ki je repliko prvotno
 zahtevalo. Če določeno vozlišče nima dovolj razpoložljivega prostora,
@@ -472,16 +474,16 @@ da bi zahtevano repliko shranilo, mora najprej izbrisati eno ali več
 obstoječih replik.
 
 Avtorji člankov (\TODO{št. oznaka člankov?}) opozarjajo, da je lahko
-skupina replik, ki jih je potrebno izbrisati, ``bolj pomembna" od
-nove replike. Izpostavljajo, da algoritem Fast Spread tega ne upošteva in
+skupina replik, ki jih je potrebno izbrisati, pomembnejša od
+nove replike. Izpostavljajo, da strategija Fast Spread tega ne upošteva in
 da zamenjavo skupine obstoječih replik z novo repliko vedno
 izvede ne glede na morebitno večjo vrednost skupine replik
 (\TODO{sklic na ustrezen del članka - oz. v obeh}).
 
-Avtorji v obeh člankih predlagajo nekoliko spremenjeni različici algoritma
-Fast Spread, ki izvedeta zamenjavo le v primerih, ko je vrednost skupine
-replik strogo manjša od vrednosti nove replike. Pri tem algoritma za
-ocenjevanje vrednosti (skupin) replik uporabljata metrike, opisane v
+Avtorji v obeh člankih predlagajo nekoliko spremenjeni različici strategije
+Fast Spread, pri katerih se zamenjava izvede le v primerih, ko je vrednost
+skupine replik strogo manjša od vrednosti nove replike. Strategiji pri tem
+za ocenjevanje vrednosti (skupin) replik uporabljata metrike, opisane v
 nadaljevanju.
 
 \subsection{Strategija EFS}
@@ -552,13 +554,16 @@ je pomen posameznih spremenljivk pojasnjen v Tabeli~\ref{tbl:EFS_vars}.
 \begin{table}
 \small
   \begin{center}
-    \begin{tabulary}{1.0\textwidth}{ >{\itshape}p{7em} J}
+    \begin{tabulary}{1.0\textwidth}{ >{\itshape}p{6.8em} p{26em}}
       \textnormal{Spremenljivka} & Pomen \\
       \hline
       RR & zahtevana replika \\
       RN &  vozlišče, ki zahteva repliko \\
-      CNFSS & nezaseden prostor na trenutno opazovanem vozlišču \\
-      FSTI & frekvenčno-specifičen časovni razpon \TODO{prevod???} \\
+      CNFSS & velikost nezasedenega prostora na trenutno opazovanem
+          \mbox{vozlišču} \\
+      FSTI & frekvenčno-specifičen časovni interval (največja starost
+         zahtevkov, do katere jih še štejemo kot zahtevke iz bližnje
+         preteklosti) \\
       NORRR & število zahtevkov za \textit{RR} \\
       SRR & velikost \textit{RR} \\
       NORRRFSTI & število zahtevkov za zahtevano repliko
@@ -579,14 +584,14 @@ je pomen posameznih spremenljivk pojasnjen v Tabeli~\ref{tbl:EFS_vars}.
       SizeList & seznam, ki vsebuje velikosti istoležnih replik s seznama
           \textit{ReplicaList} \\
       NORFSTIList & seznam, ki vsebuje vrednosti, kolikokrat so bile istoležne
-          replike s seznama \textit{ReplicaList} zahtevane v \textit{FSTI} s
-          strani trenutno opazovanega vozlišča \\
+          replike s seznama \textit{ReplicaList} zahtevane v intervalu
+          \textit{FSTI} s strani trenutno opazovanega vozlišča \\
       LRTList & seznam, ki vsebuje čase zadnjega zahtevka za istoležne
           replike s seznama \textit{ReplicaList}
     \end{tabulary}
  \end{center}
 
-  \caption{Pomen spremenljivk v psevdokodi algoritma EFS.}
+  \caption{Pomen spremenljivk v psevdokodi strategije EFS.}
   \label{tbl:EFS_vars}
 \end{table}
 
@@ -643,8 +648,6 @@ intervala. Iz prvega člena je tudi razvidno, da je vrednost replik obratno
 sorazmerna z njihovo velikostjo. Večje replike so vrednotene niže, saj
 zasedajo več prostora na vozlišču. Zadnji člen daje višjo vrednost replikam,
 katerih čas od njihovega zadnjega zahtevka je manjši.
-
-\TODO{zdaj pa še group value pojasni}
 
 \begin{samepage}
 Podobno kot vrednost posamezne replike se izračuna tudi vrednost skupine
@@ -735,12 +738,10 @@ njihovo vrednost (RV), jih strategija MFS uredi glede na
 glede na njihovo velikost. Urejenosti seznama \textit{ReplicaList} je
 sicer opisana tudi v Tabelah~\ref{tbl:EFS_vars}~oziroma~\ref{tbl:MFS_vars}.
 
-\TODO{pseudocode vertical spacing?}
-
+\vspace{2cm}
 \begin{algorithm}[H]
   \label{alg:MFS}
-  \caption{Strategija MFS (\TODO{preimenuj bold oznako + referenca
-  na članek})}
+  \caption{Strategija MFS (\TODO{referenca na članek})}
 
   \SetKwComment{blankln}{}{}
 
@@ -786,12 +787,13 @@ sicer opisana tudi v Tabelah~\ref{tbl:EFS_vars}~oziroma~\ref{tbl:MFS_vars}.
 \begin{table}
 \small
   \begin{center}
-    \begin{tabulary}{1.0\textwidth}{ >{\itshape}p{7em} J}
+    \begin{tabulary}{1.0\textwidth}{ >{\itshape}p{6.8em} p{26em}}
       \textnormal{Spremenljivka} & Pomen \\
       \hline
       RR & zahtevana replika \\
       RN &  vozlišče, ki zahteva repliko \\
-      CNFSS & nezaseden prostor na trenutno opazovanem vozlišču \\
+      CNFSS & velikost nezasedenega prostora na trenutno opazovanem
+          \mbox{vozlišču} \\
       NOR & število zahtevkov za \textit{RR} \\
       PNOR & delno število zahtevkov za \textit{RR} \\
       SOS & spremenljivka, ki predstavlja vsoto velikosti skupine replik na
@@ -813,24 +815,23 @@ sicer opisana tudi v Tabelah~\ref{tbl:EFS_vars}~oziroma~\ref{tbl:MFS_vars}.
     \end{tabulary}
   \end{center}
 
-  \caption{Pomen spremenljivk v psevdokodi algoritma MFS.}
+  \caption{Pomen spremenljivk v psevdokodi strategije MFS.}
   \label{tbl:MFS_vars}
 \end{table}
 
-\TODO{force table and to be under the Strategija MFS
-section?}
 
 \TODO{strategija Fast Spread with EFS / MFS - kakšne reference na članke, kjer
-sta strategiji opisani?}
+sta strategiji opisani? kot vir pač, od kod psevdokoda}
 
 
 \section{Implementacija diskretne simulacije}
 
 Za preizkus strategij, opisanih v člankih, sem v programskem jeziku Python
 (različica 3.3) napisal diskretno simulacijo. S poganjanjem slednje z
-različnimi parametri sem lahko primerjal, kako se obnesejo posamezne strategije
-zamenjave. Glavni sestavni deli simulacije so vozlišča, replike, dogodki v
-simulaciji in sámo izvajalno okolje simulacije.
+raz\-ličnimi parametri sem lahko primerjal, kako se obnesejo posamezne
+strategije zamenjave. Glavni sestavni deli simulacije so vozlišča, replike,
+dogodki v simulaciji in sámo izvajalno okolje simulacije.
+
 \TODO{link na Github, kjer je koda? morda koda kot priloga diplome?}
 
 Topologija podatkovnega omrežja, ki sem jo uporabil, je polni graf, saj so
@@ -906,11 +907,11 @@ dogodke tipa \textit{prejmi repliko}, na katere to vpliva.
 \section{Meritve}
 \subsection{Priprava simulacije}
 
-Simulacijo sem pripravil na enak način, kot je opisan v obeh člankih
-\TODO{referenca?}, in v njej med seboj primerjal štiri strategije zamenjave ---
-LRU, LFU, EFS in MFS. Za ocenjevanje strategij sem uporabil predlagani
-metriki, in sicer skupen odzivni čas in skupno porabo pasovne širine
-(Tabela~\ref{tbl:sim_metrics}). Dobra strategija obe metriki minimizira.
+Simulacijo sem pripravil na enak način, kot je opisan v obeh člankih, in v
+njej med seboj primerjal štiri strategije zamenjave --- LRU, LFU, EFS in MFS.
+Za ocenjevanje strategij sem uporabil predlagani metriki, in sicer skupen
+odzivni čas in skupno porabo pasovne širine (Tabela~\ref{tbl:sim_metrics}).
+Dobra strategija obe metriki minimizira.
 
 Odzivni čas je definiran kot čas, ki preteče od trenutka, ko vozlišče pošlje
 zahtevek za repliko, do trenutka, ko zahtevano repliko prejme. Pri tem
@@ -926,8 +927,7 @@ Ker sta pričakovani vsoti vseh odzivnih časov in velikosti vseh prenešenih
 replik zelo veliki, sta obe metriki pomnoženi s konstantama $C_1$ in $C_2$,
 ki zmanjšata njuni vrednosti. Vrednost obeh konstant je nastavljena na
 $0,001$.
-\TODO{dopovej LaTeX-u, da vejica (in ne pika) pomeni decimalno mesto, da bo
-pravilno renderiral}
+
 
 \begin{table}
 \small
@@ -946,7 +946,6 @@ pravilno renderiral}
     \TODO{vir oba članka}}
   \label{tbl:sim_metrics}
 \end{table}
-\TODO{črta zgoraj nad tabelo? da se bolje ločijo od besedila?}
 
 
 Replike so kategorizirane v skupine, in sicer tako, da je v vsaki skupini
@@ -994,7 +993,7 @@ celoštevilčno vrednost znotraj njihovega intervala možnih vrednosti.
 \begin{table}
 \small
   \begin{center}
-    \begin{tabulary}{1.0\textwidth}{ >{}p{20em} J}
+    \begin{tabulary}{1.0\textwidth}{ p{16.7em} @{\extracolsep{2em}} p{15.8em}}
       \textnormal{Parameter} & Vrednost \\
       \hline
       Število vozlišč & 20 \\
@@ -1006,14 +1005,15 @@ celoštevilčno vrednost znotraj njihovega intervala možnih vrednosti.
       Diskovni prostor na vozliščih (razen glavnega strežnika) &
           \numprint{50000} Mbit \\
       Diskovni prostor na glavnem strežniku & dovolj velik, da lahko naenkrat
-          hrani vse replike podatkovnega omrežja
-          \TODO{multiline}\\
+          hrani vse replike podatkovnega omrežja \\
       Število replik v vsaki skupini & 100 \\
       Pasovna širina omrežja & 10 Mbit/s \\
       Razdalja med vsakim parom neposredno povezanih vozlišč &
         med 1 in 1000 km \\
       Hitrost širjenja signala po mrežnih povezavah & $6 \times 10^3$ km/s \\
-      Frequency specific time interval \TODO{prevod?} & \numprint{10000} \\
+      Frekvenčno-specifičen časovni interval (največja starost
+         zahtevkov, do katere jih še štejemo kot zahtevke iz bližnje
+         preteklosti) & \numprint{10000} \\
       C1 & 0,001 \\
       C2 & 0,001
     \end{tabulary}
@@ -1470,7 +1470,8 @@ Slednja seveda vpliva na rezultate simulacije, saj ni vseeno, ali je veliko
 vozlišč neposredno povezanih z glavnim strežnikom ali pa morajo replike
 zahtevati posredno preko drugih vozlišč v omrežju.
 
-\subsubsection{Dvoumen opis časa med prihodi zahtevkov in pasovne širine omrežja}
+\subsubsection{Dvoumen opis časa med prihodi zahtevkov in pasovne širine
+omrežja}
 
 Avtorji pri opisu parametrov simulacije navajajo, da znaša čas med prihodi
 zahtevkov vozlišč med 0 in 99 sekund, vendar pa ni jasno, ali se to nanaša
@@ -1533,34 +1534,35 @@ da je v tem primeru ocenjena vrednost replike kar $\infty$ (neskončno).
 
 V člankih je pri opisu strategij navedeno, da če vozlišče zahtevane replike
 nima lokalno shranjene, jo zahteva od svojega starša, slednji pa še naprej
-od svojega starša, če je to potrebno, vse dokler na neki točki zahtevana replika
-ni najdena v hierarhiji vozlišč. Iskanje se takrat ustavi in replika se po
-hierarhiji navzdol pošlje nazaj vozlišču, ki jo je zahtevalo.
+od svojega starša, če je to potrebno, vse dokler na neki točki zahtevana
+replika ni najdena v hierarhiji vozlišč. Iskanje se takrat ustavi in replika
+se po hierarhiji navzdol pošlje nazaj vozlišču, ki jo je zahtevalo.
 
 Če pozorno pogledamo psevdokodi~\ref{alg:EFS}~in~\ref{alg:MFS}, vidimo, da temu
-ni tako in da se iskanje replike nadaljuje navzgor po hierarhiji tudi takrat, ko
-je replika že najdena (zunanja zanka \textit{for}). Očitno je, da na koncu
+ni tako in da se iskanje replike nadaljuje navzgor po hierarhiji tudi takrat,
+ko je replika že najdena (zunanja zanka \textit{for}). Očitno je, da na koncu
 pogojnega stavka, ki se izvede, če vozlišče ima kopijo replike, manjka ukaz
-\textit{break}, ki zaključi izvajanje najbolj notranje zanke, v kateri se nahaja.
-Slednjega ne moremo označiti drugače kot za površnost avtorjev.
+\textit{break}, ki zaključi izvajanje najbolj notranje zanke, v kateri se
+nahaja. Slednjega ne moremo označiti drugače kot za površnost avtorjev.
 
 \subsubsection{Opis strategije na ne-porazdeljen način}
 
-Podatkovno omrežje je po definiciji množica med seboj povezanih računalnikov
-(vozlišč), ki izvajajo dogovorjeno strategijo širjenja in zamenjave replik.
-Vsako vozlišče je avtonomno in zgolj izvaja predpisani algoritem, drugih
-vozlišč v mreži pa ne nadzoruje --- z njimi zgolj komunicira ob izmenjavanju
+Podatkovno omrežje je po definiciji množica med seboj povezanih računal\-nikov
+(vozlišč), ki uporabljajo dogovorjeno strategijo širjenja in zamenjave replik.
+Vsako vozlišče je avtonomno in zgolj izvaja svoj program, drugih vozlišč v
+mreži pa ne nadzoruje --- z njimi zgolj komunicira ob izmenjevanju
 replik. Kljub temu pa psevdokodi~\ref{alg:EFS}~in~\ref{alg:MFS}
 opisujeta strategiji zamenjave na način, da ju ni možno neposredno prevesti v
-algoritem, ki bi se izvajal na posameznem vozlišču.
+program, ki bi se izvajal na posameznem vozlišču.
 
 Iskanje zahtevane replike po hierarhiji navzgor je opisano kot zanka, ki obišče
 vsa vozlišča na najkrajši poti od trenutnega vozlišča do glavnega strežnika.
-Enako velja za pošiljanje replike nazaj do vozlišča, ki jo je prvotno zahtevalo.
+Enako velja za pošiljanje replike nazaj do vozlišča, ki jo je prvotno
+zahtevalo.
 Tudi tu zanka obišče vsa vozlišča na poti, pri čemer se vsako obiskano vozlišče
 odloči, ali bo obdržalo kopijo replike ali ne.
 
-Opisanega algoritma na tak način seveda ne moremo implementirati. Vozlišča na
+Opisane strategije na tak način seveda ne moremo implementirati. Vozlišča na
 obnašanje drugih vozlišč nimajo neposrednega vpliva in zato na njih ne moremo
 izvajati programske zanke, ki bi določala, kaj se naj v posameznem koraku zgodi
 na nekem drugem vozlišču. Vozlišča namreč vse odločitve sprejemajo samostojno.
@@ -1612,8 +1614,8 @@ simulacije in tukaj le referenca na sliko}
 
 \subsubsection{Statičen usmerjevalni algoritem}
 
-V simulaciji omrežje uporablja statičen usmerjevalni algoritem. Vozlišča replike
-vedno zahtevajo le od svojih staršev, pri čemer ne upoštevajo trenutne
+V simulaciji omrežje uporablja statičen usmerjevalni algoritem. Vozlišča
+replike vedno zahtevajo le od svojih staršev, pri čemer ne upoštevajo trenutne
 obremenjenosti posameznih povezav in vozlišč. Zgodi se lahko, da
 najkrajša pot do strežnika ni nujno tudi najhitrejša in bi bilo repliko morda
 bolje zahtevati od kakšnega drugega, manj obremenjenega vozlišča.
@@ -1649,7 +1651,7 @@ strategije dejansko obnesejo bolje od navadne statične replikacije.
 
 \chapter{Sklepne ugotovitve}
 
-V uvodu diplomskega dela je najprej predstavljen pojem podatkovnega omrežja.
+V uvodu diplomskega dela je najprej predstavljen pojem podatkovnega omre\-žja.
 Ker je prostor na posameznih vozliščih omejen, na slednjih ne moremo hraniti
 vseh replik naenkrat. Vsako vozlišče posebej se mora zato odločiti, katere
 replike so zanj najbolj pomembne, in lokalno obdržati kopije zgolj teh replik.
@@ -1662,15 +1664,15 @@ prejema. Dinamična replikacija je v splošnem boljša od statične, saj se
 z njo lahko omrežje sproti prilagaja morebitnim spremembam v strukturi
 zahtevkov, ki jih prejema.
 
-Ena izmed najbolj znanih strategij dinamične replikacije je algoritem
+Ena izmed najbolj znanih strategij dinamične replikacije je strategija
 Fast Spread, pri katerem zahtevano repliko shranimo na vseh vozliščih na
 poti od vozlišča, kjer je bila zahtevana replika najdena, do vozlišča, ki
 je repliko zahtevalo. Če določeno vozlišče nima dovolj prostora, da
 bi novo repliko shranilo, mora ob tem najprej izbrisati eno ali več
 izmed obstoječih replik.
 
-V okviru diplomskega dela sem preučil dva strokovna članka, v katerih avtorji
-predlagajo izboljšave algoritma Fast Spread, ki naj bi prinesle občutne
+V okviru diplomskega dela sem preučil dva znanstvena članka, v katerih avtorji
+predlagajo izboljšave strategije Fast Spread, ki naj bi prinesle občutne
 izboljšave v smislu povprečnega odzivnega časa omrežja in porabljene
 pasovne širine za prenose replik med vozlišči. Na podlagi opisov predlaganih
 strategij in predstavljene psevdokode sem napisal simulacijo podatkovnega
