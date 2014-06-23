@@ -150,35 +150,6 @@ informatiko ter mentorja.}%
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% stran 3 med uvodnimi listi
-\noindent
-
-\begin{center}
-\textbf{\large{Primerjava dveh strategij dinamične replikacije}}
-\end{center}
-Primerjajte strategiji EFS (Enhanced Fast Spread) in MFS (Modified Fast Spread)
-za dinamično replikacijo v podatkovnih omrežjih.  Opisani sta v dveh izredno
-podobnih znanstvenih člankih, ki zaradi istih avtorjev in podobnosti besedila
-že mejita na avtoplagiatorstvo.  Poskusite ponoviti njihove meritve in
-ugotovite, v kolikšni meri se ti dve strategiji razlikujeta med seboj.
-
-\vskip 10em%
-
-\begin{center}
-\textbf{\large{Comparison of two dynamic data replication strategies}}
-\end{center}
-Compare EFS (Enhanced Fast Spread) and MFS (Modified Fast Spread), two dynamic
-data replication strategies. These two strategies have been described in two
-scientific papers that exhibit a strong indication of autoplagiarism as they
-are written by the same authors and share a significant portion of the content.
-Repeat the experiments described in both papers and find out how much these two
-strategies actually differ.
-
-% prazna stran
-\clearemptydoublepage
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % izjava o avtorstvu
 \label{izjava_avtorstvo}
 
@@ -271,7 +242,7 @@ razporeditev datotek v omrežju, da je njegovo delovanje čim boljše (z
 sta obravnavana dva znanstvena članka istih avtorjev, v katerih slednji
 predlagajo izboljšave dinamične replikacijske strategije \textit{Fast Spread},
 vendar pa njihovih rezultatov ni bilo možno ponoviti. Poleg tega se je zaradi
-velike medsebojne podobnosti člankov pojavil tudi resen sum avtoplagiatorstva.\
+velike medsebojne podobnosti člankov pojavil tudi resen sum recikliranja.\
 Diplomsko delo v uvodu najprej predstavi podatkovna omrežja s teoretičnega
 vidika, nato opiše, kako je potekalo testiranje v člankih predlaganih
 strategij, v nadaljevanju pa potem podrobno obravnava vse ugotovljene
@@ -434,7 +405,7 @@ so poimenovali \newterm{EFS} (\newterm{``Enhanced Fast Spread''}) in
 strukturo (identične naslove posameznih delov članka), vsebujeta številne
 identične odseke besedila, identične diagrame in tudi opisa obeh strategij
 v psevdokodi sta v veliki meri enaka. Na podlagi naštetega se je pojavil
-resen sum na recikliranje člankov (avtoplagiatorstvo). Kot primer sta na
+resen sum na recikliranje člankov. Kot primer sta na
 slikah~\ref{pic2011}~in~\ref{pic2012} prikazana izseka iz obeh člankov,
 iz katerih je razvidno, da članka vsebujeta isti diagram strukture omrežja.
 
@@ -1030,7 +1001,8 @@ celoštevilčno vrednost znotraj njihovega intervala možnih vrednosti.
 
 \subsection{Rezultati simulacij}
 
-Rezultati simulacij so prikazani na slikah \TODO{označi}. Po pričakovanjih
+Rezultati simulacij so prikazani na
+slikah~\ref{hist_rsp_t}~in~\ref{hist_bw_used}. Po pričakovanjih
 sta bila odzivni čas in porabljena pasovna širina manjša v scenarijih~2~in~3,
 saj tam vozlišča določene skupine replik bolj pogosto zahtevajo, zato so
 koristi od njihovega lokalnega hranjenja večje.
@@ -1049,7 +1021,7 @@ izboljšanja v primerjavi s strategijo~LRU in celo zaostajata za
 strategijo~LFU. Možne razlage za vse navedene razlike so opisane v
 poglavju \TODO{referenca}.
 
-
+\begin{figure}
 \begin{tikzpicture}[scale=1.2]
   \begin{axis}[
     ybar,
@@ -1068,7 +1040,7 @@ poglavju \TODO{referenca}.
     xtick style={white},  % efectively remove the tick marks
     xtick=data,
     xticklabels={Scenarij 1, Scenarij 2, Scenarij 3},
-    xtick align=inside,  % TODO: how to remove ticks?
+    xtick align=inside,
     bar width=10pt,
     area legend,
     legend style={
@@ -1094,8 +1066,13 @@ poglavju \TODO{referenca}.
   \end{axis}
 \end{tikzpicture}
 
+\caption{Skupen odzivni čas posameznih strategij}
+\label{hist_rsp_t}
+\end{figure}
 
 
+
+\begin{figure}
 \begin{tikzpicture}[scale=1.2]
   \begin{axis}[
     ybar,
@@ -1140,6 +1117,10 @@ poglavju \TODO{referenca}.
 
   \end{axis}
 \end{tikzpicture}
+
+\caption{Skupna porabljena pasovna širina posameznih strategij}
+\label{hist_bw_used}
+\end{figure}
 
 
 \chapter{Kritična presoja člankov}
@@ -1458,7 +1439,7 @@ od svojega starša, če je to potrebno, vse dokler na neki točki zahtevana
 replika ni najdena v hierarhiji vozlišč. Iskanje se takrat ustavi in replika
 se po hierarhiji navzdol pošlje nazaj vozlišču, ki jo je zahtevalo.
 
-Če pozorno pogledamo psevdokodi~\ref{alg:EFS}~in~\ref{alg:MFS}, vidimo, da temu
+Če pozorno pogledamo psevdokodi~\ref{alg:EFS}~in~\ref{alg:MFS}, vidimo, da to
 ni tako in da se iskanje replike nadaljuje navzgor po hierarhiji tudi takrat,
 ko je replika že najdena (zunanja zanka \textit{for}). Očitno je, da na koncu
 pogojnega stavka, ki se izvede, če vozlišče ima kopijo replike, manjka ukaz
@@ -1616,7 +1597,7 @@ praksi.
 Na podlagi vsega napisanega tako ne morem zaključiti drugače, kot da
 obravnavana članka nimata nobene prave uporabne vrednosti in da je nivo
 strokovnosti v njiju podpovprečen --- še posebej v luči verjetnega
-avtoplagiatorstva.
+recikliranja.
 
 
 
