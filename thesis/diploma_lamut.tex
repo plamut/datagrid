@@ -239,8 +239,8 @@ geografskih lokacijah, katerega cilj je razpoložljivost podatkov in odpor\-nost
 na napake. Z izbiro ustrezne replikacijske strategije želimo doseči takšno
 razporeditev datotek v omrežju, da je njegovo delovanje čim boljše (z
 \mbox{vidika} odzivnih časov in porabljene pasovne širine). V diplomskem delu
-sta obravnavana dva znanstvena članka istih avtorjev, v katerih slednji
-predlagajo izboljšave dinamične replikacijske strategije \textit{Fast Spread},
+sta obravnavana dva znanstvena članka istih avtorjev, v katerih predlagajo
+izboljšave dinamične replikacijske strategije \textit{Fast Spread},
 vendar pa njihovih rezultatov ni bilo možno ponoviti. Poleg tega se je zaradi
 velike medsebojne podobnosti člankov pojavil tudi resen sum recikliranja
 le-teh.\ Diplomsko delo v uvodu najprej predstavi podatkovna omrežja s
@@ -345,7 +345,7 @@ Pri dinamični replikaciji se vsako vozlišče avtonomno odloča, katere
 replike bo hranilo, pri čemer se lahko množica shranjenih replik na
 posameznem vozlišču skozi čas spreminja. Če vozlišče na podlagi neke
 metrike oceni, da je pravkar zahtevana replika zanj bolj pomembna od ene
-ali več obstoječih shranjenih replik, lahko slednje izbriše in namesto
+ali več obstoječih shranjenih replik, lahko te izbriše in namesto
 njih shrani novo repliko.
 
 Dinamična replikacija je v splošnem boljša od statične, saj se lahko
@@ -367,8 +367,8 @@ njih neposredno povezavo z glavnim strežnikom --- z njim so lahko povezana tudi
 zgolj posredno preko drugih vozlišč.
 
 Za vsako vozlišče v omrežju obstaja najkrajša pot do strežnika in vsako izmed
-njih ve, katero vozlišče je njihov starš na tej poti. Kadar vozlišče prejme
-zahtevek za določeno repliko in slednje nima shranjene lokalno, zahtevek
+njih ve, katero vozlišče je njegov starš na tej poti. Kadar vozlišče prejme
+zahtevek za določeno repliko in te nima shranjene lokalno, zahtevek
 posreduje svojemu staršu, ta pa lahko isti zahtevek posreduje še naprej
 navzgor po hierarhiji, dokler ga ne prejme vozlišče, ki repliko ima. Če ne
 prej, se to zgodi takrat, ko zahtevek prispe do glavnega strežnika.
@@ -381,7 +381,7 @@ navzdol po hierarhiji, dokler replika ne prispe do vozlišča, ki je poslalo
 prvotni zahtevek zanjo. Pri tem vsako izmed vozlišč na poti repliko tudi
 lokalno shrani.
 
-V primeru, da določeno vozlišče nima dovolj prostora, da bi shranilo repliko,
+Če določeno vozlišče nima dovolj prostora, da bi shranilo repliko,
 mora predhodno izbrisati eno ali več obstoječih replik. Katere izmed njih bodo
 zamenjane z novo repliko, je odvisno od tega, katero strategijo zamenjave
 uporablja vozlišče. Poznamo veliko različnih strategij, kot na primer
@@ -407,7 +407,7 @@ posamezno repliko in ne zgolj zadnjega, kot je to pri strategiji LRU.
 \section{Trditev v člankih: izboljšava strategije Fast Spread}
 
 Leta 2011 in 2012 sta bila v dveh različnih strokovnih revijah objavljena
-dva članka istih avtorjev, v katerih so slednji predstavili dve novi
+dva članka istih avtorjev, v katerih so predstavili dve novi
 strategiji zamenjave, ki naj bi po njihovih trditvah dosegali veliko boljše
 rezultate od strategij LRU in LFU. Strategiji
 so poimenovali \newterm{EFS} (\newterm{``Enhanced Fast Spread''}) in
@@ -446,7 +446,7 @@ primerjave pa v novejšem članku (\TODO{2012}) niso naredili.
   \begin{center}
     \fbox{\includegraphics[width=13.4cm]{article_2011_sample.png}}
   \end{center}
-  \caption{Izsek iz članka \TODO{REFERENCA 2011}}
+  \caption{Izsek iz članka \TODO{REFERENCA 2011}.}
   \label{pic2011}
 \end{figure}
 
@@ -454,7 +454,7 @@ primerjave pa v novejšem članku (\TODO{2012}) niso naredili.
   \begin{center}
     \fbox{\includegraphics[width=13.4cm]{article_2012_sample.png}}
   \end{center}
-  \caption{Izsek iz članka \TODO{REFERENCA 2012}}
+  \caption{Izsek iz članka \TODO{REFERENCA 2012}.}
   \label{pic2012}
 \end{figure}
 
@@ -492,7 +492,7 @@ je pomen posameznih spremenljivk pojasnjen v tabeli~\ref{tbl:EFS_vars}.
 \begin{algorithm}
   \label{alg:EFS}
   \caption{Strategija EFS (\TODO{preimenuj bold oznako + referenca
-  na članek})}
+  na članek}).}
 
   \SetKwComment{blankln}{}{}
 
@@ -559,7 +559,7 @@ je pomen posameznih spremenljivk pojasnjen v tabeli~\ref{tbl:EFS_vars}.
       RN &  vozlišče, ki zahteva repliko \\
       CNFSS & velikost nezasedenega prostora na trenutno opazovanem
           \mbox{vozlišču} \\
-      FSTI & frekvenčno-specifičen časovni interval (največja starost
+      FSTI & frekvenčnospecifičen časovni interval (največja starost
          zahtevkov, do katere jih še štejemo kot zahtevke iz bližnje
          preteklosti) \\
       NORRR & število zahtevkov za \textit{RR} \\
@@ -576,14 +576,14 @@ je pomen posameznih spremenljivk pojasnjen v tabeli~\ref{tbl:EFS_vars}.
           urejenih po naraščajočem vrstnem redu glede na njihovo vrednost
           \textit{RV}. Če ima več replik enako vrednost \textit{RV}, so med
           seboj urejene naključno. \\
-      NORList & seznam, ki vsebuje vrednosti, kolikokrat so bile istoležne
-          replike s seznama \textit{ReplicaList} zahtevane s strani
-          trenutno opazovanega vozlišča. \\
+      NORList & seznam, ki vsebuje vrednosti, kolikokrat je istoležne
+          replike s seznama \textit{ReplicaList} zahtevalo
+          trenutno opazovano vozlišče. \\
       SizeList & seznam, ki vsebuje velikosti istoležnih replik s seznama
           \textit{ReplicaList} \\
-      NORFSTIList & seznam, ki vsebuje vrednosti, kolikokrat so bile istoležne
-          replike s seznama \textit{ReplicaList} zahtevane v intervalu
-          \textit{FSTI} s strani trenutno opazovanega vozlišča \\
+      NORFSTIList & seznam, ki vsebuje vrednosti, kolikokrat je istoležne
+          replike s seznama \textit{ReplicaList} v intervalu \textit{FSTI}
+          zahtevalo trenutno opazovano vozlišče  \\
       LRTList & seznam, ki vsebuje čase zadnjega zahtevka za istoležne
           replike s seznama \textit{ReplicaList}
     \end{tabulary}
@@ -602,7 +602,7 @@ velikosti nezasedenega prostora ne doseže (ali preseže) velikosti nove replike
 tvorijo skupino replik, ki bodo potencialno izbrisane.
 
 Vozlišče v nadaljevanju izračuna vrednosti nove replike in skupine replik
-(vrstici 18 in 19 \TODO{ref.}) ter ju med seboj primerja. V primeru, da je
+(vrstici 18 in 19 \TODO{ref.}) ter ju med seboj primerja. Če je
 vrednost skupine manjša (vrstica 20 \TODO{}), vozlišče izbriše vse replike
 iz skupine in njihove statistike ter jih nadomesti z novo repliko
 (vrstice 21--24 \TODO{ref.}).
@@ -619,7 +619,7 @@ stvari:
 Število zahtevkov, njihova pogostost in čas od zadnjega zahtevka so pomembni
 dejavniki, saj z njihovo pomočjo lahko ocenimo verjetnost, da bo replika
 v prihodnosti ponovno zahtevana. Ker imajo vozlišča omejen prostor za
-shranjevanje replik, je pomembna tudi velikost slednjih
+shranjevanje, je pomembna tudi velikost replik
 \TODO{referenca na članek 2011}.
 
 \begin{samepage}
@@ -720,19 +720,19 @@ Pomen posameznih spremenljivk je pojasnjen v tabeli~\ref{tbl:MFS_vars}.
 Formula~\eqref{eq:MFS_GV} je zelo enostavna, saj zgolj sešteje število
 zahtevkov (NOR) za vse replike, ki sestavljajo skupino.
 
-Kot že omenjeno se strategija MFS od strategije EFS nekoliko razlikuje
+Kot že omenjeno, se strategija MFS od strategije EFS nekoliko razlikuje
 tudi v tem, iz katerih replik vozlišče sestavi skupino replik, ki bodo morda
 zamenjane. Razlog za to je različna urejenost replik v seznamu
 \textit{ReplicaList}. Medtem ko strategija EFS replike uredi glede na
 njihovo vrednost (RV), jih strategija MFS uredi glede na
 število zahtevkov zanje, v primeru enakih vrednosti pa še dodatno
-glede na njihovo velikost. Urejenosti seznama \textit{ReplicaList} je
+glede na njihovo velikost. Urejenost seznama \textit{ReplicaList} je
 sicer opisana tudi v tabelah~\ref{tbl:EFS_vars}~oziroma~\ref{tbl:MFS_vars}.
 
 \vspace{2cm}
 \begin{algorithm}[H]
   \label{alg:MFS}
-  \caption{Strategija MFS (\TODO{referenca na članek})}
+  \caption{Strategija MFS (\TODO{referenca na članek}).}
 
   \SetKwComment{blankln}{}{}
 
@@ -794,15 +794,15 @@ sicer opisana tudi v tabelah~\ref{tbl:EFS_vars}~oziroma~\ref{tbl:MFS_vars}.
       ReplicaList & seznam obstoječih replik na trenutno opazovanem vozlišču,
           urejenih po naraščajočem vrstnem redu glede na njihovo vrednost
           \textit{NOR}.
-          Če ima več replik enako vrednost \textit{NOR}, so slednje med seboj
+          Če ima več replik enako vrednost \textit{NOR}, so med seboj
           urejene v padajočem vrstnem redu glede na njihovo velikost. Če so
           tudi velikosti enake, je medsebojni vrstni red teh replik
           naključen. \\
       SizeList & seznam, ki vsebuje velikosti istoležnih replik s seznama
           \textit{ReplicaList} \\
-      NORList & seznam, ki vsebuje vrednosti, kolikokrat so bile istoležne
-          replike s seznama \textit{ReplicaList} zahtevane s strani
-          trenutno opazovanega vozlišča. \\
+      NORList & seznam, ki vsebuje vrednosti, kolikokrat je istoležne
+          replike s seznama \textit{ReplicaList} zahtevalo trenutno opazovano
+          vozlišče. \\
     \end{tabulary}
   \end{center}
 
@@ -907,9 +907,9 @@ pri sebi, je odzivni čas enak nič.
 
 Porabljena pasovna širina je količina podatkov, ki jih je potrebno prenesti
 takrat, kadar vozlišče zahteva repliko, ki je nima shranjene lokalno. Pri
-tem se smatra, da je ta količina kar enaka velikosti zahtevane replike.
+tem se šteje, da je ta količina kar enaka velikosti zahtevane replike.
 
-Ker sta pričakovani vsoti vseh odzivnih časov in velikosti vseh prenešenih
+Ker sta pričakovani vsoti vseh odzivnih časov in velikosti vseh prenesenih
 replik zelo veliki, sta obe metriki pomnoženi s konstantama $C_1$ in $C_2$,
 ki zmanjšata njuni vrednosti. Vrednost obeh konstant je nastavljena na
 $0,001$.
@@ -941,10 +941,10 @@ replik, ki jo določeno vozlišče tvori vsakokrat, ko se med izvajanjem
 simulacije odloča, katere replike bo morda zamenjalo.}
 Število vseh skupin je deset, tako da vsaka izmed njih vsebuje 10~\% replik.
 
-Vsako vozlišče ima svojo ti.~\textit{najbolj želeno skupino} (MWG). Verjetnost,
-da vozlišče zahteva določeno repliko, ki pripada njegovi skupini MWG, je višja
-od verjetnosti, da zahteva določeno drugo repliko, ki pripada eni izmed
-ostalih skupin. To je namreč boljši približek situacijam v praksi,
+Vsako vozlišče ima svojo t.~i.~\textit{najbolj želeno skupino} (MWG).
+Verjetnost, da vozlišče zahteva določeno repliko, ki pripada njegovi skupini
+MWG, je višja od verjetnosti, da zahteva določeno drugo repliko, ki pripada
+eni izmed ostalih skupin. To je namreč boljši približek situacijam v praksi,
 kjer se dostikrat zgodi, da se določena podmnožica podatkov (replik) v
 primerjavi z ostalimi podatki veliko bolj pogosto uporablja.
 \TODO{referenca, kjer je to napisano oba članka)}
@@ -954,7 +954,7 @@ Strategije sem med seboj primerjal v treh različnih scenarijih:
   \item \textbf{Scenarij 1:} Vozlišče zahteva vse replike z
     enako verjetnostjo. To pomeni, da je verjetnost, da zahteva repliko iz
     svoje skupine MWG, zgolj 10~\% --- torej enaka, kot verjetnost za
-    katerekoli drugo skupino replik.
+    katerokoli drugo skupino replik.
 
   \item \textbf{Scenarij 2:} Vozlišče zahteva eno izmed replik iz svoje
     skupine MWG z verjetnostjo 30~\%. To pomeni, da je verjetnost, da
@@ -997,7 +997,7 @@ celoštevilčno vrednost znotraj njihovega intervala možnih vrednosti.
       Razdalja med vsakim parom neposredno povezanih vozlišč &
         med 1 in 1000 km \\
       Hitrost širjenja signala po mrežnih povezavah & $6 \times 10^3$ km/s \\
-      Frekvenčno-specifičen časovni interval (največja starost
+      Frekvenčnospecifičen časovni interval (največja starost
          zahtevkov, do katere jih še štejemo kot zahtevke iz bližnje
          preteklosti) & \numprint{10000} \\
       C1 & 0,001 \\
@@ -1079,7 +1079,7 @@ poglavju \TODO{referenca}.
   \end{axis}
 \end{tikzpicture}
 
-\caption{Skupen odzivni čas posameznih strategij}
+\caption{Skupen odzivni čas glede na uporabljeno strategijo.}
 \label{hist_rsp_t}
 \end{figure}
 
@@ -1131,7 +1131,7 @@ poglavju \TODO{referenca}.
   \end{axis}
 \end{tikzpicture}
 
-\caption{Skupna porabljena pasovna širina posameznih strategij}
+\caption{Skupno porabljena pasovna širina glede na uporabljeno strategijo.}
 \label{hist_bw_used}
 \end{figure}
 
@@ -1140,11 +1140,11 @@ poglavju \TODO{referenca}.
 
 \section{Sum recikliranja}
 
-Članka sta si že na prvi pogled zelo podobna med seboj. Oba imata
-\textit{identično} strukturo, naslovi razdelkov in podrazdelkov so, razen
-imena opisane strategije, popolnoma enaki. V obeh člankih je uporabljena ista
-slika shema podatkovnega omrežja in tudi velik del besedila v člankih je
-skorajda popolnoma enak. Kot primer si poglejmo prvi odstavek drugega razdelka
+Članka sta si že na prvi pogled zelo podobna. Oba imata \textit{identično}
+strukturo, naslovi razdelkov in podrazdelkov so, razen imena opisane
+strategije, popolnoma enaki. V obeh člankih je uporabljena ista slika sheme
+podatkovnega omrežja in tudi velik del besedila v člankih je skorajda
+popolnoma enak. Kot primer si poglejmo prvi odstavek drugega razdelka
 v članku \TODO{referenca na 2011}:
 
 \begin{itquote}
@@ -1224,7 +1224,7 @@ formule~\eqref{eq:EFS_RV} enaka nič.
 Vrednost tretjega člena je odvisna od tega, koliko časa je minilo
 od zadnjega zahtevka za repliko. Manjši kot je ta čas, večja je vrednost člena.
 Ker pa vozlišče ne vodi statistik za tiste replike, katerih kopij nima
-shranjenih pri sebi, je ta čast enostavno najmanjši možen, torej nič (začetek
+shranjenih pri sebi, je ta čas enostavno najmanjši možen, torej nič (začetek
 simulacije). Iz tabele~\ref{tbl:sim_params} je razvidno, da so replike v
 povprečju velike približno 550 megabitov. Ker je kapaciteta vsakega vozlišča
 \numprint{50000}~Mb, lahko eno vozlišče v povprečju shrani približno 90
@@ -1300,9 +1300,6 @@ vrstnega reda pojavljanja zahtevkov za replike in ne sledi nobeni vnaprej
 določeni hevristiki.
 
 
-\TODO{neadaptivnost ... ko enkrat NOR postane prevelik, ga NOR/FSTI in LRT
-ne dosežeta več in se stare replike "usidrajo"}
-
 \subsection{Slabosti metrik v strategiji MFS}
 
 \subsubsection{Vrednost replike}
@@ -1325,19 +1322,19 @@ formuli~\eqref{eq:MFS_RV_v2} je zato manjši od ena, s tem pa vrednost izraza v
 oklepaju zavzame vrednosti na intervalu (0,1].
 Ker je število zahtevkov NOR za novo repliko kvečjemu enako
 ena (odvisno sicer od tega, kako interpretiramo članek), tudi največja možna
-vrednot replike po formuli~\eqref{eq:MFS_RV_v2} ni nikoli večja od te meje.
+vrednost replike po formuli~\eqref{eq:MFS_RV_v2} ni nikoli večja od te meje.
 
 \subsubsection{Vrednost skupine replik}
 
 Strategija MFS ocenjuje vrednosti skupin replik tako, da sešteje število
 zahtevkov za vse replike v skupini (formula~\eqref{eq:MFS_GV}). Ker je
-vsaka replika v skupini bila zahtevana vsaj enkrat (najmanj takrat, ko jo
+bila vsaka replika v skupini zahtevana vsaj enkrat (najmanj takrat, ko jo
 je vozlišče zahtevalo in potem shranilo pri sebi), je vrednost skupine replik
 vedno večja ali enaka ena.
 
 Na podlagi povedanega je očitno, da vrednost skupine replik ni nikoli manjša
 od vrednosti nove replike, s tem pa tudi pogoj za zamenjavo ni nikoli
-izpolnjen. Ko se na vozliščih zapolni ves razpoložljivi prostor, slednja
+izpolnjen. Ko se na vozliščih zapolni ves razpoložljivi prostor, le-ta
 prenehajo shranjevati nove replike. Strategija MFS se po določenem času
 izrodi v različico statične replikacije na enak način, kot se izrodi
 tudi strategija EFS. Zdaj je tudi razumljivo, zakaj sta obe strategiji v
@@ -1353,7 +1350,7 @@ potrebno zanašati na določene predpostavke, ki pa so seveda lahko bile
 drugačne od predpostavk avtorjev člankov.
 
 Dvomljiva je tudi sama zasnova simulacije, kar velja tako za izbrane
-vrednosti njenih parametrov, kot tudi za izbiro topologije podatkovnega
+vrednosti njenih parametrov kot tudi za izbiro topologije podatkovnega
 omrežja, ki ne odraža nujno strukture tovrstnih omrežij v praksi.
 
 Vse omenjene in še nekatere druge pomanjkljivosti so opisane v naslednjih
@@ -1366,7 +1363,7 @@ razdelkih.
 V tabeli, ki v člankih navaja vrednosti parametrov simulacije, ni podana
 niti enota za čas med prihodi zahtevkov vozlišč niti enota za dolžino
 časovnega intervala FTSI. Predpostavil sem, da gre v obeh primerih za sekunde,
-saj je pasovna širina omrežja podana v količini prenešenih podatkov
+saj je pasovna širina omrežja podana v količini prenesenih podatkov
 \textit{na sekundo} (enota~\textit{Mbit/s}).
 
 \subsubsection{Nepopoln opis uporabljene topologije omrežja}
@@ -1380,7 +1377,7 @@ shranjenih.
 Po drugi strani pa nič ne povedo o tem, kakšne so bile dejanske
 razdalje med vozlišči. Zaradi tega ni možno izračunati omenjenih
 najkrajših poti in posledično tudi ne določiti dejanske strukture omrežja.
-Slednja seveda vpliva na rezultate simulacije, saj ni vseeno, ali je veliko
+Ta seveda vpliva na rezultate simulacije, saj ni vseeno, ali je veliko
 vozlišč neposredno povezanih z glavnim strežnikom ali pa morajo replike
 zahtevati posredno preko drugih vozlišč v omrežju.
 
@@ -1397,7 +1394,7 @@ Tudi pri navedeni pasovni širini omrežja sta možni dve interpretaciji. Ena je
 da ima vsaka povezava med dvema vozliščema pasovno širino 10~\textit{Mbit/s},
 druga pa, da je to celotna pasovna širina, ki jo ima posamezno vozlišče na
 voljo in se enakomerno deli med vsemi njegovimi povezavami s soležnimi
-vozlišči. Pri implementaciji simulacije sem predpostavil slednjo možnost.
+vozlišči. Pri implementaciji simulacije sem predpostavil to drugo možnost.
 
 \subsubsection{Vrednosti statistik novih replik}
 
@@ -1437,8 +1434,8 @@ Vrednost imenovalca tretjega člena je razlika med trenutnim časom in časom
 zadnjega zahtevka za repliko. V robnem primeru se lahko zgodi, da sta oba časa
 enaka~---~na primer takrat, ko vozlišče istočasno prejme zahtevek za repliko,
 obenem pa to isto repliko tudi prejme kot odziv na enega izmed prejšnjih
-zahtevkov. V tem primeru je imenovalca enaka nič, rezultat operacije pa
-nedefiniran.
+zahtevkov. V tem primeru je vrednost imenovalca enaka nič, rezultat operacije
+pa je nedefiniran.
 
 Med izvajanjem simulacije je dejansko prišlo do omenjenega robnega primera,
 zato sem moral izračun vrednosti replike v strategiji~EFS prilagoditi tako,
@@ -1457,7 +1454,7 @@ ni tako in da se iskanje replike nadaljuje navzgor po hierarhiji tudi takrat,
 ko je replika že najdena (zunanja zanka \textit{for}). Očitno je, da na koncu
 pogojnega stavka, ki se izvede, če vozlišče ima kopijo replike, manjka ukaz
 \textit{break}, ki zaključi izvajanje najbolj notranje zanke, v kateri se
-nahaja. Slednjega ne moremo označiti drugače kot za površnost avtorjev.
+nahaja. Tega ne moremo označiti drugače kot za površnost avtorjev.
 
 \subsubsection{Opis strategije na ne-porazdeljen način}
 
@@ -1477,7 +1474,7 @@ Tudi tu zanka obišče vsa vozlišča na poti, pri čemer se vsako obiskano vozl
 odloči, ali bo obdržalo kopijo replike ali ne.
 
 Opisane strategije na tak način seveda ne moremo implementirati. Vozlišča na
-obnašanje drugih vozlišč nimajo neposrednega vpliva in zato na njih ne moremo
+ravnanje drugih vozlišč nimajo neposrednega vpliva in zato na njih ne moremo
 izvajati programske zanke, ki bi določala, kaj se naj v posameznem koraku zgodi
 na nekem drugem vozlišču. Vozlišča namreč vse odločitve sprejemajo samostojno.
 
@@ -1496,12 +1493,12 @@ modelirati procese iz realnega sveta in nato ugotovitve, ki izhajajo iz nje,
 uporabiti za morebitne izboljšave teh procesov.
 
 Menim, da so avtorji pri zasnovi simulacije sprejeli nekaj odločitev, ki
-postavljajo pod vprašaj uporabnost predstavljenega modela v praksi. Izpostavil
+povzročajo dvom o uporabnosti predstavljenega modela v praksi. Poudaril
 bom nekaj najbolj očitnih.
 
 \subsubsection{Izbira topologije podatkovnega omrežja}
 
-Vozlišča na začetku sicer tvorijo polni graf, vendar pa se nad njem izračuna
+Vozlišča na začetku sicer tvorijo polni graf, vendar pa se nad njim izračuna
 drevo najkrajših poti od glavnega strežnika, ki je v korenu, do vseh ostalih
 vozlišč. Vozlišča si nato v simulaciji pošiljajo zahtevke in replike samo po
 teh izračunanih najkrajših poteh.
@@ -1536,19 +1533,19 @@ jasno je, da se zato tak usmerjevalni algoritem v praksi ne uporablja.
 
 \subsubsection{Večkratno zahtevanje iste replike}
 
-V primeru, ko vozlišče že čaka na prejem določene replike in med tem prejme nove
-zahtevke za isto repliko, je seveda smiselno počakati, da replika prispe do
-vozlišča in nato odgovoriti na ustrezne zahtevke.
+V primeru, ko vozlišče že čaka na prejem določene replike in med tem prejme
+nove zahtevke za isto repliko, je seveda smiselno počakati, da replika prispe
+do vozlišča in nato odgovoriti na ustrezne zahtevke.
 
-Iz opisa strategij v člankih je razvidno, da se vozlišča v simulaciji obnašajo
+Iz opisa strategij v člankih je razvidno, da vozlišča v simulaciji ravnajo
 drugače. Ob prejemu zahtevka za repliko zgolj preverijo, ali jo imajo v tistem
-trenutku lokalno shranjeno. Če je nimajo, pošljejo nov zahtevek zanjo, pri čemer
-ne upoštevajo, da morda že čakajo na njen prejem. Posledično se lahko zgodi,
-da se ista replika po omrežju pošlje večkrat, ko bi bilo potrebno.
+trenutku lokalno shranjeno. Če je nimajo, pošljejo nov zahtevek zanjo, pri
+čemer ne upoštevajo, da morda že čakajo na njen prejem. Posledično se lahko
+zgodi, da se ista replika po omrežju pošlje večkrat, ko bi bilo potrebno.
 
 \subsubsection{Nespremenljivo obnašanje vozlišč}
 
-Vozlišča v omrežju se statistično gledano obnašajo enako skozi celotno trajanje
+Vozlišča v omrežju statistično gledano ravnajo enako skozi celotno trajanje
 simulacije. Vsako vozlišče ima sicer določeno skupino replik, ki jih
 lahko zahteva bolj pogosto od ostalih, vendar se ta skupina skozi čas ne
 spreminja. Simulacija zato težko izmeri, kako se posamezne strategije
@@ -1561,8 +1558,8 @@ strategije dejansko obnesejo bolje od navadne statične replikacije.
 \chapter{Sklepne ugotovitve}
 
 V uvodu diplomskega dela je najprej predstavljen pojem podatkovnega omre\-žja.
-Ker je prostor na posameznih vozliščih omejen, na slednjih ne moremo hraniti
-vseh replik naenkrat. Vsako vozlišče posebej se mora zato odločiti, katere
+Ker je prostor na posameznih vozliščih omejen, na njih ne moremo hraniti
+vseh replik hkrati. Vsako vozlišče posebej se mora zato odločiti, katere
 replike so zanj najbolj pomembne, in lokalno obdržati kopije zgolj teh replik.
 Končni cilj je, da je sta povprečni odzivni čas omrežja in porabljena pasovna
 širina čim manjša.
@@ -1574,7 +1571,7 @@ z njo lahko omrežje sproti prilagaja morebitnim spremembam v strukturi
 zahtevkov, ki jih prejema.
 
 Ena izmed najbolj znanih strategij dinamične replikacije je strategija
-Fast Spread, pri katerem zahtevano repliko shranimo na vseh vozliščih na
+Fast Spread, pri kateri zahtevano repliko shranimo na vseh vozliščih na
 poti od vozlišča, kjer je bila zahtevana replika najdena, do vozlišča, ki
 je repliko zahtevalo. Če določeno vozlišče nima dovolj prostora, da
 bi novo repliko shranilo, mora ob tem najprej izbrisati eno ali več
@@ -1608,8 +1605,8 @@ ne deluje na tak način, kot bi to pričakovali od podatkovnega omrežja v
 praksi.
 
 Na podlagi vsega napisanega tako ne morem zaključiti drugače, kot da
-obravnavana članka nimata nobene prave uporabne vrednosti in da je nivo
-strokovnosti v njiju podpovprečen --- še posebej v luči verjetnega
+obravnavana članka nimata nobene prave uporabne vrednosti in da je raven
+strokovnosti v njiju podpovprečna --- še posebno v luči verjetnega
 recikliranja.
 
 
