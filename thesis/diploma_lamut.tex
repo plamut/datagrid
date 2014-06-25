@@ -3,8 +3,10 @@
 
 \usepackage[utf8x]{inputenc}   % omogoča uporabo slovenskih črk v UTF-8
 
+\usepackage[titletoc,page]{appendix}
+
 \usepackage[slovene,english]{babel}  % slovenski delilni vzorci ipd.
-\usepackage[pdftex]{graphicx}  % omogoča vlaganje slik različnih formatov 
+\usepackage[pdftex]{graphicx}  % omogoča vlaganje slik različnih formatov
 \usepackage{fancyhdr}          % poskrbi, na primer, za glave strani
 \usepackage{amssymb}           % dodatni simboli
 \usepackage{amsmath}
@@ -23,6 +25,22 @@
 \usepackage{setspace}
 
 \setlength{\headheight}{29.5pt}
+
+% translate appendices' titles
+\addto\captionsslovene{%
+  \renewcommand\appendixpagename{Priloge}
+  \renewcommand\appendixname{Priloga}
+}
+
+% remove page number from appendices title page
+\let\plainappendixpage\appendixpage
+\makeatletter
+\renewcommand{\appendixpage}{%
+  \begingroup
+  \let\ps@plain\ps@empty
+  \plainappendixpage
+  \endgroup}
+\makeatother
 
 % swap page margins (inner margins should be bigger - for binding purposes)
 \let\tmp\oddsidemargin
@@ -1611,9 +1629,8 @@ recikliranja.
 
 
 
-\addcontentsline{toc}{chapter}{Dodatek A: Podatki o izvedeni simulaciji}
-\chapter*{Dodatek A}
-\section*{Podatki o izvedeni simulaciji}
+\begin{appendices}
+\chapter{Podatki o izvedeni simulaciji}
 
 \begin{table}[h]
 \tiny
@@ -1751,9 +1768,8 @@ GS & 0 & 277 & 365 & 625 & 758 & 238 & 402 & 575 & 410 & 177 & 496 & 809 & 266 &
   \label{tbl:sim_nodes_mwg}
 \end{table}
 
-\addcontentsline{toc}{chapter}{Dodatek B: Tabela z rezultati simulacije}
-\chapter*{Dodatek B}
-\section*{Tabela z rezultati simulacije}
+
+\chapter{Tabela z rezultati simulacije}
 
 \begin{table}[h]
 \small
@@ -1803,6 +1819,10 @@ GS & 0 & 277 & 365 & 625 & 758 & 238 & 402 & 575 & 410 & 177 & 496 & 809 & 266 &
   \label{tbl:sim_results}
 \end{table}
 
+\end{appendices}
+
+
+\cleardoublepage  % fixes page numbering in TOC
 
 \addcontentsline{toc}{chapter}{Literatura}
 \begin{thebibliography}{99}
