@@ -78,7 +78,6 @@
 \newcommand{\titfont}{\LARGE\bf}
 \newcommand{\newterm}{\textit}
 
-%\newcommand{\TODO}{\textcolor{red}}
 \newcommand{\TODO}[1]{\textcolor{red}{(TODO: #1)}}
 \newcommand{\sub}{\textsubscript}
 
@@ -317,10 +316,10 @@ discrete event simulation
 
 Podatkovno omrežje (angl.~\textit{Data Grid}) je množica med seboj
 povezanih ra\-ču\-nal\-ni\-kov na različnih geografskih lokacijah, ki
-uporabnikom omogočajo nalaganje, hranjenje in medsebojno izmenjavanje datotek.
-Glavna cilja takšnega omrežja sta čim nižji odzivni čas na zahtevke za
-podatke in odpornost na morebitne motnje v delovanju posameznih vozlišč
-(visoka razpoložljivost). \TODO{vir definicije, vir cilja}
+uporabnikom omogočajo nalaganje, hranjenje in medsebojno izmenjavanje datotek
+\cite{dgrid_def}. Glavna cilja takšnega omrežja sta čim nižji odzivni čas na
+zahtevke za podatke in odpornost na morebitne motnje v delovanju posameznih
+vozlišč (visoka razpoložljivost) \cite{dgrid_goals}.
 
 \section{Replikacija podatkov}
 
@@ -332,20 +331,18 @@ datoteko ustvariti več njenih kopij na različnih lokacijah v omrežju.
 Tovrstne kopije datotek imenujemo \newterm{replike}.
 
 Cilj ustvarjanja replik je zmanjšati porabo pasovne širine in izboljšati
-odzivne čase podatkovnega omrežja (\TODO{vir, kjer sta omenjena ta dva
-cilja}). Če je neka replika na voljo tudi lokalno (bliže
-uporabniku, ki jo zahteva), je namreč ni potrebno vsakič znova prenašati s
-strežnika, temveč se preprosto uporabi lokalna kopija.
+odzivne čase podatkovnega omrežja \cite{dgrid_goals_perf}. Če je neka replika na
+voljo tudi lokalno (bliže uporabniku, ki jo zahteva), je namreč ni potrebno
+vsakič znova prenašati s strežnika, temveč se preprosto uporabi lokalna kopija.
 
 Posamezna vozlišča (računalniki) v omrežju praviloma nimajo dovolj prostora,
 da bi hranila vse replike naenkrat. Zaradi te omejitve je potrebna
 strategija, na podlagi katere se odločimo, katere replike bomo hranili
-na katerih vozliščih --- seveda tako, da bo zadani cilj (\TODO{številčna
-referenca prej opisanega cilja?}) čim bolje izpolnjen.
+na katerih vozliščih --- seveda tako, da bodo zadani cilji podatkovnega
+omrežja čim bolje izpolnjeni.
 
 Replikacijske strategije ločimo v dve skupini, in sicer poznamo
-\newterm{statično replikacijo} in \newterm{dinamično replikacijo}
-(\TODO{viri, kjer je to navedeno}).
+\newterm{statično replikacijo} in \newterm{dinamično replikacijo}.
 
 \subsection{Statična replikacija}
 
@@ -353,9 +350,7 @@ Pri statični replikaciji za vsako posamezno vozlišče že vnaprej določimo,
 katere replike bodo shranjene na njem. Problem, kako replike čim bolje
 razporediti po omrežju, lahko obravnavamo kot statičen optimizacijski
 problem. Zanj se sicer izkaže, da je tako NP-težek kot tudi
-neaproksimativen.
-
-\TODO{referenca kakšnega članka, ki o tem govori, npr. Čibej}
+neaproksimativen \cite{cibej2005}.
 
 \subsection{Dinamična replikacija}
 
@@ -368,12 +363,13 @@ njih shrani novo repliko.
 
 Dinamična replikacija je v splošnem boljša od statične, saj se lahko
 omre\-žje samodejno prilagaja morebitnim spremembam v vzorcih uporabe omrežja.
-\TODO{citat Čibej}. Poznamo veliko različnih dinamičnih replikacijskih
+Poznamo veliko različnih dinamičnih replikacijskih
 strategij, pri čemer je ena izmed najbolj učinkovitih strategija
-\newterm{Fast Spread} (\TODO{vir --- Ranganathan and Foster, 2001b?}).
+\newterm{Fast Spread} \cite{dgrid_goals_perf}.
 
 
 \section{Strategija hitrega širjenja}
+\label{sec:fspread}
 
 Strategija hitrega širjenja (angl.~\textit{Fast Spread}) se uporablja v
 hierarhično urejenih podatkovnih omrežjih. Na vrhu hierarhije je glavni
@@ -391,8 +387,6 @@ posreduje svojemu staršu, ta pa lahko isti zahtevek posreduje še naprej
 navzgor po hierarhiji, dokler ga ne prejme vozlišče, ki repliko ima. Če ne
 prej, se to zgodi takrat, ko zahtevek prispe do glavnega strežnika.
 
-\TODO{kakšna lepa slikica?}
-
 Prvo vozlišče v verigi, ki najde zahtevano repliko pri sebi, le-to pošlje
 vozlišču, ki jo je od njega zahtevalo. Slednje jo nato posreduje še naprej
 navzdol po hierarhiji, dokler replika ne prispe do vozlišča, ki je poslalo
@@ -402,11 +396,9 @@ lokalno shrani.
 Če določeno vozlišče nima dovolj prostora, da bi shranilo repliko,
 mora predhodno izbrisati eno ali več obstoječih replik. Katere izmed njih bodo
 zamenjane z novo repliko, je odvisno od tega, katero strategijo zamenjave
-uporablja vozlišče. Poznamo veliko različnih strategij, kot na primer
-\TODO{morda naštej nekaj?}. Izmed njih bom opisal dve, ki so jih avtorji
-člankov uporabili za primerjavo s strategijama, ki so ju predlagali sami.
-
-\TODO{kakšna referenca na vir, ki Fast Spread opisuje?}
+uporablja vozlišče. Poznamo veliko različnih strategij, izmed njih pa bom
+opisal dve, ki so jih avtorji člankov uporabili za primerjavo s strategijama,
+ki so ju predlagali sami.
 
 \subsection{Strategija zamenjave LRU}
 
@@ -425,12 +417,13 @@ posamezno repliko in ne zgolj zadnjega, kot je to pri strategiji LRU.
 \section{Trditev v člankih: izboljšava strategije Fast Spread}
 
 Leta 2011 in 2012 sta bila v dveh različnih strokovnih revijah objavljena
-dva članka istih avtorjev, v katerih so predstavili dve novi
-strategiji zamenjave, ki naj bi po njihovih trditvah dosegali veliko boljše
-rezultate od strategij LRU in LFU. Strategiji
-so poimenovali \newterm{EFS} (\newterm{``Enhanced Fast Spread''}) in
-\newterm{MFS} (\newterm{``Modified Fast Spread''})
-\TODO{vir oz. referenca člankov}. \TODO{oštevilči članka? Da se kasneje v besedilu sklicuješ nanju}
+dva članka istih avtorjev \cite{efs2011, mfs2012}, v katerih so predstavili dve
+novi strategiji zamenjave, ki naj bi po njihovih trditvah dosegali veliko boljše
+rezultate od strategij LRU in LFU. Strategiji so poimenovali \newterm{EFS}
+(\newterm{``Enhanced Fast Spread''}) \cite{efs2011} in \newterm{MFS}
+(\newterm{``Modified Fast Spread''}) \cite{mfs2012}.
+
+
 
 Članka sta si med seboj že na prvi pogled zelo podobna. Oba imata identično
 strukturo (identične naslove posameznih delov članka), vsebujeta številne
@@ -449,10 +442,10 @@ V okviru diplomskega dela sem z implementacijo strategij, opisanih v
 \begin{enumerate}
 \item Preveriti rezultate, ki so jih dosegli avtorji člankov.
 
-\item Neposredno primerjati strategiji iz člankov \TODO{2011} in
-\TODO{2012} med seboj. V obeh člankih namreč avtorji v njih opisani
+\item Neposredno primerjati strategiji iz člankov \cite{efs2011} in
+\cite{mfs2012} med seboj. V obeh člankih namreč avtorji v njih opisani
 strategiji primerjajo zgolj s strategijama LRU in LFU, medsebojne
-primerjave pa v novejšem članku (\TODO{2012}) niso naredili.
+primerjave pa v novejšem izmed njiju (\cite{mfs2012}) niso naredili.
 
 \item Na podlagi primerjave obeh opisanih strategij ugotoviti, ali med
 član\-koma sploh obstaja kakšna bistvena vsebinska razlika.
@@ -464,7 +457,7 @@ primerjave pa v novejšem članku (\TODO{2012}) niso naredili.
   \begin{center}
     \fbox{\includegraphics[width=13.4cm]{article_2011_sample.png}}
   \end{center}
-  \caption{Izsek iz članka \TODO{REFERENCA 2011}.}
+  \caption{Izsek iz članka \cite{efs2011}.}
   \label{pic2011}
 \end{figure}
 
@@ -472,7 +465,7 @@ primerjave pa v novejšem članku (\TODO{2012}) niso naredili.
   \begin{center}
     \fbox{\includegraphics[width=13.4cm]{article_2012_sample.png}}
   \end{center}
-  \caption{Izsek iz članka \TODO{REFERENCA 2012}.}
+  \caption{Izsek iz članka \cite{mfs2012}.}
   \label{pic2012}
 \end{figure}
 
@@ -481,19 +474,18 @@ primerjave pa v novejšem članku (\TODO{2012}) niso naredili.
 \chapter{Primerjava strategij iz člankov}
 
 \section{Opis strategij zamenjave}
-Kot je že bilo omenjeno (\TODO{v poglavju XYZ?}), strategija Fast Spread
+Kot je že bilo omenjeno v razdelku~\ref{sec:fspread}, strategija Fast Spread
 shrani zahtevano repliko na vsakem vozlišču na poti od vozlišča, kjer je
 bila zahtevana replika najdena, do vozlišča, ki je repliko prvotno
 zahtevalo. Če določeno vozlišče nima dovolj razpoložljivega prostora,
 da bi zahtevano repliko shranilo, mora najprej izbrisati eno ali več
 obstoječih replik.
 
-Avtorji člankov (\TODO{št. oznaka člankov?}) opozarjajo, da je lahko
-skupina replik, ki jih je potrebno izbrisati, pomembnejša od
-nove replike. Izpostavljajo, da strategija Fast Spread tega ne upošteva in
-da zamenjavo skupine obstoječih replik z novo repliko vedno
-izvede ne glede na morebitno večjo vrednost skupine replik
-(\TODO{sklic na ustrezen del članka - oz. v obeh}).
+Avtorji člankov opozarjajo, da je lahko skupina replik, ki jih je potrebno
+izbrisati, pomembnejša od nove replike. Izpostavljajo,
+da strategija Fast Spread tega ne upošteva in da zamenjavo skupine obstoječih
+replik z novo repliko vedno izvede ne glede na morebitno večjo vrednost skupine
+replik \cite{efs2011, mfs2012}.
 
 Avtorji v obeh člankih predlagajo nekoliko spremenjeni različici strategije
 Fast Spread, pri katerih se zamenjava izvede le v primerih, ko je vrednost
@@ -503,14 +495,13 @@ nadaljevanju.
 
 \subsection{Strategija EFS}
 
-Strategija EFS je opisana v članku \TODO{referenca na 2011}. Njena psevdokoda
+Strategija EFS je opisana v članku \cite{efs2011}. Njena psevdokoda
 je prikazana na sliki psevdokoda~\ref{alg:EFS}, pri čemer
 je pomen posameznih spremenljivk pojasnjen v tabeli~\ref{tbl:EFS_vars}.
 
 \begin{algorithm}
   \label{alg:EFS}
-  \caption{Strategija EFS (\TODO{preimenuj bold oznako + referenca
-  na članek}).}
+  \caption{Strategija EFS. Vir: \cite{efs2011}.}
 
   \SetKwComment{blankln}{}{}
 
@@ -607,23 +598,23 @@ je pomen posameznih spremenljivk pojasnjen v tabeli~\ref{tbl:EFS_vars}.
     \end{tabulary}
  \end{center}
 
-  \caption{Pomen spremenljivk v psevdokodi strategije EFS.}
+  \caption{Pomen spremenljivk v psevdokodi strategije EFS. Vir: \cite{efs2011}.}
   \label{tbl:EFS_vars}
 \end{table}
 
 Kadar neko vozlišče prejme zahtevano repliko, za shranitev katere nima dovolj
-nezasedenega prostora (\TODO{ref. vrstica 10}), pogleda, koliko
+nezasedenega prostora (vrstica~10), pogleda, koliko
 obstoječih replik bi zaradi tega moralo predhodno izbrisati. Sprehodi se skozi
 seznam~\textit{\mbox{ReplicaList}}, dokler vsota velikosti obiskanih replik in
 velikosti nezasedenega prostora ne doseže (ali preseže) velikosti nove replike
-(\TODO{referenca vrstice 11--17}). Vse obiskane replike nato implicitno
+(vrstice 11--17). Vse obiskane replike nato implicitno
 tvorijo skupino replik, ki bodo potencialno izbrisane.
 
 Vozlišče v nadaljevanju izračuna vrednosti nove replike in skupine replik
-(vrstici 18 in 19 \TODO{ref.}) ter ju med seboj primerja. Če je
-vrednost skupine manjša (vrstica 20 \TODO{}), vozlišče izbriše vse replike
+(vrstici~18~in~19) ter ju med seboj primerja. Če je
+vrednost skupine manjša (vrstica~20), vozlišče izbriše vse replike
 iz skupine in njihove statistike ter jih nadomesti z novo repliko
-(vrstice 21--24 \TODO{ref.}).
+(vrstice~21--24).
 
 Strategija EFS pri ocenjevanju vrednosti replik upošteva naslednje štiri
 stvari:
@@ -637,11 +628,10 @@ stvari:
 Število zahtevkov, njihova pogostost in čas od zadnjega zahtevka so pomembni
 dejavniki, saj z njihovo pomočjo lahko ocenimo verjetnost, da bo replika
 v prihodnosti ponovno zahtevana. Ker imajo vozlišča omejen prostor za
-shranjevanje, je pomembna tudi velikost replik
-\TODO{referenca na članek 2011}.
+shranjevanje, je pomembna tudi velikost replik.
 
 \begin{samepage}
-Iz vrstice 19 (\TODO{referenca}) psevdokode \TODO{sklic} lahko razberemo
+Iz vrstice~19 psevdokode~\ref{alg:EFS} lahko razberemo
 formulo za izračun vrednosti posamezne replike:
 \begin{equation}
   \mathit{RV} = \frac{\mathit{NORRR}}{\mathit{SRR}} +
@@ -663,8 +653,7 @@ katerih čas od njihovega zadnjega zahtevka je manjši.
 
 \begin{samepage}
 Podobno kot vrednost posamezne replike se izračuna tudi vrednost skupine
-replik, in sicer po formuli iz vrstice 18 \TODO{} v
-\TODO{EFS psevdokoda referenca}:
+replik, in sicer po formuli iz vrstice~18 v psevdokodi~\ref{alg:EFS}:
 \begin{equation}
   \mathit{GV} = \frac{\sum\limits_{y=1}^{x-1} \mathit{NORList(y)}}{
                       \sum\limits_{y=1}^{x-1} \mathit{SizeList(y)}} +
@@ -690,16 +679,16 @@ zahtevka za posamezno repliko v skupini.
 
 \subsection{Strategija MFS}
 
-Strategija MFS je opisana v članku \TODO{referenca na 2012}. Njena
+Strategija MFS je opisana v članku~\cite{mfs2012}. Njena
 psevdokoda je prikazana na sliki psevdokoda~\ref{alg:MFS} in razvidno je,
-da je v konceptu skoraj popolnoma enaka strategiji EFS. Od nje se razlikuje
+da je v konceptu skoraj popolnoma enaka strategiji~EFS. Od nje se razlikuje
 zgolj v formulah za izračun vrednosti replike in vrednosti skupine replik
 ter v vrstnem redu, po katerem so replike urejene v seznamu
 \textit{ReplicaList}.
 
 \begin{samepage}
-Vrednost replike se izračuna po naslednji formuli iz vrstice 11
-(\TODO{ref.}) v psevdokodi~\ref{alg:MFS}:
+Vrednost replike se izračuna po naslednji formuli iz vrstice~11
+v psevdokodi~\ref{alg:MFS}:
 \begin{equation}
   \mathit{PNOR} = \mathit{NOR} \times
                   \frac{\mathit{RR.Size} - \mathit{CNFSS}}{
@@ -721,12 +710,12 @@ PNOR ni nikoli negativno število. Ulomek v enačbi~\eqref{eq:MFS_RV} je namreč
 vedno pozitiven, saj je tudi njegov imenovalec pozitiven~---~velikost replike
 \textit{RR.Size} je namreč strogo večja od velikosti nezasedenega prostora
 \textit{CNFSS}. Če bi bilo obratno, bi namreč vozlišče repliko takoj shranilo
-in niti ne bi šlo računati njene vrednosti, kar je razvidno iz vrstic 8 in 9
-\TODO{(ref.)} psevdokode~\ref{alg:MFS}.
+in niti ne bi šlo računati njene vrednosti, kar je razvidno iz vrstic~8~in~9
+psevdokode~\ref{alg:MFS}.
 
 \begin{samepage}
 Vrednost skupine replik se izračuna po formuli, ki se nahaja na levi strani
-neenakosti v vrstici 18 (\TODO{ref.}) psevdokode~\ref{alg:MFS}:
+neenakosti v vrstici~19:
 \begin{equation}
 	\sum\limits_{y=1}^{x-1} \mathit{NORList(y)}
   \label{eq:MFS_GV}
@@ -750,7 +739,7 @@ sicer opisana tudi v tabelah~\ref{tbl:EFS_vars}~oziroma~\ref{tbl:MFS_vars}.
 \vspace{2cm}
 \begin{algorithm}[H]
   \label{alg:MFS}
-  \caption{Strategija MFS (\TODO{referenca na članek}).}
+  \caption{Strategija MFS. Vir: \cite{mfs2012}.}
 
   \SetKwComment{blankln}{}{}
 
@@ -824,7 +813,7 @@ sicer opisana tudi v tabelah~\ref{tbl:EFS_vars}~oziroma~\ref{tbl:MFS_vars}.
     \end{tabulary}
   \end{center}
 
-  \caption{Pomen spremenljivk v psevdokodi strategije MFS.}
+  \caption{Pomen spremenljivk v psevdokodi strategije MFS. Vir: \cite{mfs2012}.}
   \label{tbl:MFS_vars}
 \end{table}
 
@@ -835,11 +824,10 @@ Za preizkus strategij, opisanih v člankih, sem v programskem jeziku Python
 (različica 3.3) napisal diskretno simulacijo. S poganjanjem slednje z
 raz\-ličnimi parametri sem lahko primerjal, kako se obnesejo posamezne
 strategije zamenjave. Glavni sestavni deli simulacije so vozlišča, replike,
-dogodki v simulaciji in sámo izvajalno okolje simulacije. \TODO{link na Github,
-kjer je koda? v referencah?}
+dogodki v simulaciji in sámo izvajalno okolje simulacije \cite{plamut_github}.
 
 Topologija podatkovnega omrežja, ki sem jo uporabil, je polni graf, saj so
-takšno topologijo izbrali tudi avtorji člankov \TODO{referenca obeh čl.}.
+takšno topologijo izbrali tudi avtorji člankov \cite{efs2011, mfs2012}.
 Povezave med vsakim parom vozlišč so simetrične, njihove dolžine pa se v fazi
 inicializacije simulacije naključno določijo. V isti fazi se generirajo tudi
 replike naključnih velikosti.
@@ -946,8 +934,8 @@ $0,001$.
     \end{tabulary}
   \end{center}
 
-  \caption{Metriki za ocenjevanje uspešnosti strategij.%
-    \TODO{vir oba članka}}
+  \caption{Metriki za ocenjevanje uspešnosti strategij.
+    Vir: \cite{efs2011,mfs2012}.}
   \label{tbl:sim_metrics}
 \end{table}
 
@@ -964,8 +952,8 @@ Verjetnost, da vozlišče zahteva določeno repliko, ki pripada njegovi skupini
 MWG, je višja od verjetnosti, da zahteva določeno drugo repliko, ki pripada
 eni izmed ostalih skupin. To je namreč boljši približek situacijam v praksi,
 kjer se dostikrat zgodi, da se določena podmnožica podatkov (replik) v
-primerjavi z ostalimi podatki veliko bolj pogosto uporablja.
-\TODO{referenca, kjer je to napisano oba članka)}
+primerjavi z ostalimi podatki veliko bolj pogosto uporablja
+\cite{efs2011, mfs2012}.
 
 Strategije sem med seboj primerjal v treh različnih scenarijih:
 \begin{itemize}
@@ -1023,8 +1011,8 @@ celoštevilčno vrednost znotraj njihovega intervala možnih vrednosti.
     \end{tabulary}
   \end{center}
 
-  \caption{Parametri simulacije in njihove vrednosti.%
-    \TODO{vir oba članka}}
+  \caption{Parametri simulacije in njihove vrednosti.
+    Vir: \cite{efs2011,mfs2012}.}
   \label{tbl:sim_params}
 \end{table}
 
@@ -1040,17 +1028,17 @@ koristi od njihovega lokalnega hranjenja večje.
 
 Presenetljivo je dejstvo, da sta strategiji EFS in MFS dosegli
 \textit{identične} rezultate. Prva misel je seveda bila, da je šlo za napako v
-implementaciji, vendar pa se je z analizo, opisano v razdelku \TODO{ref.},
+implementaciji, vendar pa se je z analizo, opisano v
+razdelkih~\ref{ss:EFS_bad}~in~\ref{ss:MFS_bad},
 izkazalo, da je vzrok že v sami zasnovi omenjenih strategij.
 
 Dobljeni rezultati tudi močno odstopajo od tistih, ki jih v člankih
-navajajo avtorji \TODO{kakšen link do slike? ali pa samo referenca?}.
-Trend razlik med rezultati posameznih scenarijev je sicer podoben, vendar so
-izmerjene vrednosti občutno drugačne. Razvidno je tudi, da predlagani
-strategiji v nasprotju s trditvami avtorjev ne dosežeta praktično nobenega
-izboljšanja v primerjavi s strategijo~LRU in celo zaostajata za
-strategijo~LFU. Možne razlage za vse navedene razlike so opisane v
-poglavju \TODO{referenca}.
+navajajo avtorji \cite{efs2011,mfs2012}. Trend razlik med rezultati posameznih
+scenarijev je sicer podoben, vendar so izmerjene vrednosti občutno drugačne.
+Razvidno je tudi, da predlagani strategiji v nasprotju s trditvami avtorjev ne
+dosežeta praktično nobenega izboljšanja v primerjavi s strategijo~LRU in celo
+zaostajata za strategijo~LFU. Možne razlage za vse navedene razlike so opisane v
+razdelku~\ref{s:results_mismatch}.
 
 \begin{figure}
 \begin{tikzpicture}[scale=1.2]
@@ -1122,7 +1110,7 @@ poglavju \TODO{referenca}.
     xtick style={white},  % efectively remove the tick marks
     xtick=data,
     xticklabels={Scenarij 1, Scenarij 2, Scenarij 3},
-    xtick align=inside,  % TODO: how to remove ticks?
+    xtick align=inside,
     bar width=10pt,
     area legend,
     legend style={
@@ -1166,7 +1154,7 @@ strukturo, naslovi razdelkov in podrazdelkov so, razen imena opisane
 strategije, popolnoma enaki. V obeh člankih je uporabljena ista slika sheme
 podatkovnega omrežja in tudi velik del besedila v člankih je skorajda
 popolnoma enak. Kot primer si poglejmo prvi odstavek drugega razdelka
-v članku \TODO{referenca na 2011}:
+v članku~\cite{efs2011}:
 
 \begin{itquote}
 The network structure consists of a Server node and a number of
@@ -1178,8 +1166,7 @@ node and thus cannot accommodate all the requested replicas.
 Therefore, some of the replica requests are served non-locally.
 \end{itquote}
 
-Primerjajmo ga s prvim odstavkom drugega razdelka v članku
-\TODO{referenca na 2012}:
+Primerjajmo ga s prvim odstavkom drugega razdelka v članku~\cite{mfs2012}:
 
 \begin{itquote}
 The employed network structure consists of a Server node and a number of
@@ -1204,6 +1191,7 @@ novejšega izmed člankov zgolj zato, da bi se izognili morebitni samodejni
 zaznavi podvojenih člankov s strani temu namenjenih programov.
 
 \section{Neujemanje rezultatov}
+\label{s:results_mismatch}
 
 Rezultati, pridobljeni s simulacijo, se močno razlikujejo od tistih,
 predstavljenih v člankih. Po trditvah avtorjev se strategiji EFS in MFS
@@ -1227,14 +1215,15 @@ podrobni analizi teh metrik.
 
 
 \subsection{Slabosti metrik v strategiji EFS}
+\label{ss:EFS_bad}
 
 \subsubsection{Vrednost replike}
 
 Vrednost replike v strategiji EFS se izračuna po formuli~\eqref{eq:EFS_RV}.
 Prvi člen predstavlja razmerje med številom zahtevkov za repliko in velikostjo
 replike. Ker je število zahtevkov za vsako novo repliko enako nič\footnote{%
-Pojasnilo, zakaj vzamemo ravno vrednost nič, je v razdelku \TODO{sklic na
-št. razdelka}}, je tudi vrednost tega člena nič.
+Pojasnilo, zakaj vzamemo ravno vrednost nič, je v
+razdelku~\ref{ss:sim_bad_desc}}, je tudi vrednost tega člena nič.
 
 Drugi člen predstavlja razmerje med številom zahtevkov za repliko v zadnjem
 časovnem intervalu FSTI in velikostjo tega intervala. Ker število zahtevkov
@@ -1322,6 +1311,7 @@ določeni hevristiki.
 
 
 \subsection{Slabosti metrik v strategiji MFS}
+\label{ss:MFS_bad}
 
 \subsubsection{Vrednost replike}
 
@@ -1378,6 +1368,7 @@ Vse omenjene in še nekatere druge pomanjkljivosti so opisane v naslednjih
 razdelkih.
 
 \subsection{Pomanjkljiv opis posameznih delov simulacije}
+\label{ss:sim_bad_desc}
 
 \subsubsection{Manjkajoče enote nekaterih parametrov}
 
@@ -1419,7 +1410,7 @@ vozlišči. Pri implementaciji simulacije sem predpostavil to drugo možnost.
 
 \subsubsection{Vrednosti statistik novih replik}
 
-Članka v razdelku~3 (\TODO{ref.?}) navajata, da vsako vozlišče vodi statistiko
+Članka v razdelku~3 navajata, da vsako vozlišče vodi statistiko
 števila zahtevkov za vse replike, ki se nahajajo na njem. Po drugi strani
 nikjer ne omenjata, ali in kako vozlišča vodijo statistike za replike, ki jih
 prejmejo in jih še nimajo lokalno shranjenih.
@@ -1441,9 +1432,8 @@ lahko sicer razberemo, da vozlišče ob brisanju skupine replik izbriše tudi vs
 pripadajoče statistike izbrisanih replik, po drugi strani pa ni nikjer razvidno,
 da bi vozlišče že ob zahtevku za novo repliko osvežilo tudi statistike zanjo.
 Statistike verjetno ustvari takrat, ko repliko dejansko lokalno shrani
-(funkcija \textit{Copy RR}). \TODO{referenca direktno na vrstico v psevdokodi?}
-Na podlagi opisa strategij v psevdokodi sem zato predpostavil, da je število
-zahtevkov za nove replike enako nič.
+(funkcija \textit{Copy RR}). Na podlagi opisa strategij v psevdokodi sem zato
+predpostavil, da je število zahtevkov za nove replike enako nič.
 
 
 \subsection{Pomanjkljivosti v opisu strategij (psevdokoda)}
@@ -1462,7 +1452,7 @@ Med izvajanjem simulacije je dejansko prišlo do omenjenega robnega primera,
 zato sem moral izračun vrednosti replike v strategiji~EFS prilagoditi tako,
 da je v tem primeru ocenjena vrednost replike kar $\infty$ (neskončno).
 
-\subsubsection{Manjkajoči ``break''}
+\subsubsection{Manjkajoči ukaz ``break''}
 
 V člankih je pri opisu strategij navedeno, da če vozlišče zahtevane replike
 nima lokalno shranjene, jo zahteva od svojega starša, slednji pa še naprej
@@ -1882,7 +1872,7 @@ avg. 2008.
 P.\ Lamut (2014), repozitorij z izvorno kodo simulacije. Dostopno na:
 https://github.com/plamut/datagrid
 
-\bibitem{dgrid_goals}
+\bibitem{dgrid_goals_perf}
 K.\ Ranganathan, I.\ Foster,
 {\it GRID ’01: Identifying Dynamic Replication Strategies for a High-Performance
 Data Grid},
