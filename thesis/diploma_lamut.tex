@@ -1126,8 +1126,11 @@ poglavju \TODO{referenca}.
     bar width=10pt,
     area legend,
     legend style={
-        pos=outer north east,
-        draw=none    % remove the box around the legend
+        at={(-0.15, -0.15)},
+        anchor=north west,
+        legend columns=-1,
+        column sep=0.1cm,
+        /tikz/every even column/.append style={column sep=0.3cm}
     }
   ]
 
