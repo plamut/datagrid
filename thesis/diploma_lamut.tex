@@ -52,6 +52,8 @@
 \usepackage{etoolbox}
 \AtBeginEnvironment{algorithm}{\setstretch{1.05}\small}
 
+\raggedbottom  % fixes some unwanted vertical gaps
+
 % change algorithm label name
 \renewcommand{\algorithmcfname}{Psevdokoda}
 
@@ -319,7 +321,7 @@ povezanih ra\-ču\-nal\-ni\-kov na različnih geografskih lokacijah, ki
 uporabnikom omogočajo nalaganje, hranjenje in medsebojno izmenjavanje datotek
 \cite{dgrid_def}. Glavna cilja takšnega omrežja sta čim nižji odzivni čas na
 zahtevke za podatke in odpornost na morebitne motnje v delovanju posameznih
-vozlišč (visoka razpoložljivost) \cite{dgrid_goals}.
+vozlišč (visoka razpoložljivost) \cite{dgrid_def}.
 
 \section{Replikacija podatkov}
 
@@ -423,8 +425,6 @@ rezultate od strategij LRU in LFU. Strategiji so poimenovali \newterm{EFS}
 (\newterm{``Enhanced Fast Spread''}) \cite{efs2011} in \newterm{MFS}
 (\newterm{``Modified Fast Spread''}) \cite{mfs2012}.
 
-
-
 Članka sta si med seboj že na prvi pogled zelo podobna. Oba imata identično
 strukturo (identične naslove posameznih delov članka), vsebujeta številne
 identične odseke besedila, identične diagrame in tudi opisa obeh strategij
@@ -432,8 +432,6 @@ v psevdokodi sta v veliki meri enaka. Na podlagi naštetega se je pojavil
 resen sum na recikliranje člankov. Kot primer sta na
 slikah~\ref{pic2011}~in~\ref{pic2012} prikazana izseka iz obeh člankov,
 iz katerih je razvidno, da članka vsebujeta isti diagram strukture omrežja.
-
-\begin{minipage}{\textwidth}
 
 V okviru diplomskega dela sem z implementacijo strategij, opisanih v
 člankih, želel doseči predvsem naslednje cilje:
@@ -445,13 +443,12 @@ V okviru diplomskega dela sem z implementacijo strategij, opisanih v
 \item Neposredno primerjati strategiji iz člankov \cite{efs2011} in
 \cite{mfs2012} med seboj. V obeh člankih namreč avtorji v njih opisani
 strategiji primerjajo zgolj s strategijama LRU in LFU, medsebojne
-primerjave pa v novejšem izmed njiju (\cite{mfs2012}) niso naredili.
+primerjave pa v novejšem izmed njiju \cite{mfs2012} niso naredili.
 
 \item Na podlagi primerjave obeh opisanih strategij ugotoviti, ali med
 član\-koma sploh obstaja kakšna bistvena vsebinska razlika.
 \end{enumerate}
 
-\end{minipage}
 
 \begin{figure}
   \begin{center}
@@ -847,6 +844,7 @@ strategijo in je med izvajanjem ne spreminjajo.
 \subsection{Vrste dogodkov v simulaciji}
 V okviru simulacije so definirane naslednje štiri vrste dogodkov, ki se lahko
 pojavijo v njej:
+
 \begin{itemize}
   \item \textbf{Pošlji zahtevek za repliko:} Vozlišče svojemu staršu pošlje
   zahtevek za repliko, ki je sámo nima. Posledično se za starša po določeni
@@ -920,7 +918,6 @@ replik zelo veliki, sta obe metriki pomnoženi s konstantama $C_1$ in $C_2$,
 ki zmanjšata njuni vrednosti. Vrednost obeh konstant je nastavljena na
 $0,001$.
 
-
 \begin{table}
 \small
   \begin{center}
@@ -932,19 +929,18 @@ $0,001$.
       $M_2 = \mathit{TBC} \times C_2$ &
         \textit{TBC}: skupna porabljena pasovna širina, $C_2$: konstanta
     \end{tabulary}
-  \end{center}
-
   \caption{Metriki za ocenjevanje uspešnosti strategij.
     Vir: \cite{efs2011,mfs2012}.}
+  \end{center}
+
   \label{tbl:sim_metrics}
 \end{table}
-
 
 Replike so kategorizirane v skupine, in sicer tako, da je v vsaki skupini
 enako število replik in da vsaka replika pripada zgolj eni skupini.%
 \footnote{Kategorizacija replik v skupine ni v nobeni povezavi s tisto skupino
 replik, ki jo določeno vozlišče tvori vsakokrat, ko se med izvajanjem
-simulacije odloča, katere replike bo morda zamenjalo.}
+simulacije odloča, katere replike bo morda zamenjalo z novo repliko.}
 Število vseh skupin je deset, tako da vsaka izmed njih vsebuje 10~\% replik.
 
 Vsako vozlišče ima svojo t.~i.~\textit{najbolj želeno skupino} (MWG).
@@ -959,15 +955,15 @@ Strategije sem med seboj primerjal v treh različnih scenarijih:
 \begin{itemize}
   \item \textbf{Scenarij 1:} Vozlišče zahteva vse replike z
     enako verjetnostjo. To pomeni, da je verjetnost, da zahteva repliko iz
-    svoje skupine MWG, zgolj 10~\% --- torej enaka, kot verjetnost za
+    svoje skupine MWG, zgolj 0,10 --- torej enaka, kot verjetnost za
     katerokoli drugo skupino replik.
 
   \item \textbf{Scenarij 2:} Vozlišče zahteva eno izmed replik iz svoje
-    skupine MWG z verjetnostjo 30~\%. To pomeni, da je verjetnost, da
-    zahteva repliko iz ene izmed ostalih skupin, enaka 70~\%.
+    skupine MWG z verjetnostjo 0,30. To pomeni, da je verjetnost, da
+    zahteva repliko iz ene izmed ostalih skupin, enaka 0,70.
 
   \item \textbf{Scenarij 3:} Vozlišče zahteva eno izmed replik iz svoje
-    skupine MWG z verjetnostjo 50~\%, z enako verjetnostjo pa tudi repliko
+    skupine MWG z verjetnostjo 0,50, z enako verjetnostjo pa tudi repliko
     iz ene izmed ostalih skupin.
 \end{itemize}
 V vsakem izmed naštetih scenarijev simulacijo poženemo enkrat za vsako
@@ -1274,8 +1270,8 @@ majhen vpliv.
 Vrednost tretjega člena je odvisna od tega, koliko časa je v povprečju minilo
 od zadnjega zahtevka za vsako izmed replik v skupini. V simulaciji je v
 scenariju~3 verjetnost, da vozlišče zahteva repliko iz svoje
-skupine MWG, enaka 50~\%. Ker je v vsaki skupini 100 replik, je za vsako
-izmed njih verjetnost, da jo vozlišče zahteva, enaka 0,50~\%, kar je v
+skupine MWG, enaka 0,50. Ker je v vsaki skupini 100 replik, je za vsako
+izmed njih verjetnost, da jo vozlišče zahteva, enaka 0,005, kar je v
 povprečju enkrat na vsakih 200 zahtevkov.
 
 Čas med dvema zahtevkoma je enakomerno porazdeljen na intervalu [0, 99] sekund,
