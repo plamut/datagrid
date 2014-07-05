@@ -1,3 +1,5 @@
 *.aux
 *.pdf
 *.toc
+*.out
+*.xmpi
