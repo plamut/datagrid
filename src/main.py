@@ -17,7 +17,7 @@ settings_EFS_1 = dict(
     replica_max_size=1000,  # megabits
     network_bw_mbps=10,  # network bandwidth (megabits)
     pspeed_kmps=6000,  # signal propagation speed
-    total_reqs=100000,
+    total_reqs=1000,
     fsti=10000,  # frequency specific time interval
     rnd_seed=1,
 )
